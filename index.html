@@ -911,7 +911,12 @@ const I=[
  {z:'lobby',x:-10,y:-398,l:'🎟 Book tickets',when:()=>!mine.size,f:booking},
  {z:'lobby',x:10,y:-398,l:'🍿 Snacks counter',f:snacks},
  {z:'lobby',x:-3,y:-386,l:'👮 Talk to guard',f:()=>toast('Guard: "Welcome! Tickets on the left, snacks on the right, Screen 1 is straight ahead."')},
- {z:'lobby',x:0,y:-418,r:4.5,get l(){return mine.size?'🎬 Enter Screen 1 · Seat '+[...mine][0]:'🎟 Go to the box counter and buy a ticket'},f:()=>enterScreen()},
+ {z:'lobby',x:0,y:-418,r:4.5,get l(){
+  const st=window.getTheaterScheduleState?window.getTheaterScheduleState():{isDoorUnlocked:true};
+  if(!mine.size)return '🎟 Go to the box counter and buy a ticket';
+  if(!st.isDoorUnlocked)return '🔒 Screen 1 Door Locked · Next show '+st.nextShow.time;
+  return '🎬 Enter Screen 1 · Seat '+[...mine][0];
+ },f:()=>enterScreen()},
  {z:'lobby',x:8,y:-418,l:'📅 Upcoming movies',f:()=>toast('Upcoming: '+UP.join('  |  '),6000)},
  {z:'aud',x:0,y:-596.5,r:3.4,l:'🚪 Exit to lobby',f:()=>{goto('lobby');P.set(0,1.6,-415)}},
  {z:'aud',x:0,y:-625,l:'💺 Sit & watch',f:sit}
@@ -1025,17 +1030,65 @@ function booking(){
   toast('🎁 Guest Bonus: +100 points credited! Choose your seat 🎬',3500);
  }else if(window.CY_GUEST){toast('🎟 Guest Mode: Points use panni ticket book pannunga!',2800)}
  clearInterval(bkTimer);
- const SHOWS=['10:30 AM','1:00 PM','4:15 PM','7:30 PM','10:15 PM'],RL='ABCDEFGHIJKL',price=id=>30;
+ const SHOWS=['10:30 AM','02:00 PM','06:30 PM','09:45 PM'],RL='ABCDEFGHIJKL',price=id=>30;
+ const THEATER_SHOWS=[
+  {id:'s1',time:'10:30 AM',startMin:10*60+30,endMin:13*60},
+  {id:'s2',time:'02:00 PM',startMin:14*60,endMin:16*60+30},
+  {id:'s3',time:'06:30 PM',startMin:18*60+30,endMin:21*60},
+  {id:'s4',time:'09:45 PM',startMin:21*60+45,endMin:24*60+15}
+ ];
+ window.THEATER_SHOWS=THEATER_SHOWS;
+ function getTheaterScheduleState(){
+  const nowSec=typeof clockS==='function'?clockS():(new Date().getHours()*3600+new Date().getMinutes()*60+new Date().getSeconds());
+  const curMin=nowSec/60;
+  let activeShow=null;
+  for(const s of THEATER_SHOWS){if(curMin>=s.startMin&&curMin<s.endMin){activeShow=s;break}}
+  let nextShow=null;
+  for(const s of THEATER_SHOWS){if(s.startMin>curMin){nextShow=s;break}}
+  let diffMin=0,isTomorrow=false;
+  if(nextShow){diffMin=Math.round(nextShow.startMin-curMin)}
+  else{nextShow=THEATER_SHOWS[0];diffMin=Math.round((1440-curMin)+nextShow.startMin);isTomorrow=true}
+  const h=Math.floor(diffMin/60),m=Math.round(diffMin%60);
+  const countdownTa=h>0?(h+' மணி '+(m?m+' நிமிடம்':'')):(m+' நிமிடம்');
+  const countdownEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
+  const availableShows=THEATER_SHOWS.filter(s=>curMin<s.startMin);
+  return{curMin,activeShow,nextShow,diffMin,countdownTa,countdownEn,isTomorrow,isDoorUnlocked:!!activeShow,availableShows};
+ }
+ window.getTheaterScheduleState=getTheaterScheduleState;
  const MV={};CY_NOW.forEach(n=>MV[n]=['Action · Drama','Tamil · U/A','Starring Thalapathy Vijay']);
  const showDate=t=>{const m=t.match(/(\d+):(\d+) (AM|PM)/),d=new Date();d.setHours(+m[1]%12+(m[3]=='PM'?12:0),+m[2],0,0);if(d<new Date())d.setDate(d.getDate()+1);return d};
  const fmt=ms=>{let x=Math.max(0,ms/1000|0);const h=x/3600|0,m=(x%3600)/60|0;x%=60;return(h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')};
  const poster=(t,i)=>{if(window.CY_IMG&&CY_IMG['p'+i])return CY_IMG['p'+i];const c=document.createElement('canvas');c.width=184;c.height=256;const g=c.getContext('2d'),cl=[['#7a1c1c','#e0a030'],['#1c3b6b','#d96a8f'],['#1c5b3b','#e8d27a']][i%3],gr=g.createLinearGradient(0,0,0,256);gr.addColorStop(0,cl[0]);gr.addColorStop(1,cl[1]);g.fillStyle=gr;g.fillRect(0,0,184,256);g.fillStyle='rgba(255,255,255,.14)';g.beginPath();g.arc(92,105,62,0,7);g.fill();g.fillStyle='#fff';g.textAlign='center';g.font='bold 24px sans-serif';const w=t.split(' ');let y=200;w.forEach((x,k)=>g.fillText(x,92,y+k*26));g.font='11px sans-serif';g.fillText('NOW SHOWING · CHEYYAR I-MAX',92,20);return c.toDataURL()};
- let mi=0,tm=SHOWS.map(t=>[showDate(t)-new Date(),t]).sort((a,b)=>a[0]-b[0])[0][1];const sel=new Set();
+ const schedInit=getTheaterScheduleState();
+ const firstAvail=schedInit.availableShows[0];
+ let mi=0,tm=firstAvail?firstAvail.time:SHOWS[0];const sel=new Set();
  const head=()=>{const n=NOW[mi],m=MV[n]||['Drama','Tamil','Now showing'];
   $('bkHead').innerHTML='<div class="bk-top"><img src="'+poster(n,mi)+'"><div class="bk-ti"><h2>'+n+'</h2><div class="g">'+m[0]+'</div><small>'+m[1]+'<br>'+m[2]+'</small></div><button class="bk-x" onclick="closeModal()" aria-label="Close">✕</button></div>'
   +'<div class="bk-ch">'+NOW.map((x,i)=>'<button class="'+(i==mi?'on':'')+'" onclick="bkSet(0,'+i+')">'+x+'</button>').join('')+'</div>'
-  +'<div class="bk-ch">'+SHOWS.map(t=>'<button class="'+(t==tm?'on':'')+'" onclick="bkSet(1,\''+t+'\')">'+t+'</button>').join('')+'</div>'
-  +'<div class="bk-in">🎬 Next show '+tm+' · in <b id="bkCd">'+fmt(showDate(tm)-new Date())+'</b> · 👥 '+hallCount()+' in the hall</div>'};
+  +'<div class="bk-ch">'+THEATER_SHOWS.map(s=>{
+    const curState=getTheaterScheduleState();
+    const isPast=curState.curMin>=s.startMin;
+    const isSelected=s.time===tm;
+    if(isPast){
+     return '<button class="bk-time-off" disabled style="opacity:0.35;cursor:not-allowed;text-decoration:line-through;background:#2a1818;border-color:#553333;color:#999" title="Show Finished / Closed">'+s.time+' (Closed)</button>';
+    }
+    return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')">'+s.time+'</button>';
+   }).join('')+'</div>'
+   +(function(){
+    const curState=getTheaterScheduleState();
+    const curS=THEATER_SHOWS.find(x=>x.time===tm)||THEATER_SHOWS[0];
+    const diff=Math.round(curS.startMin-curState.curMin);
+    let timeInfo='';
+    if(diff>0){
+     const h=Math.floor(diff/60),m=diff%60;
+     const durTa=h>0?(h+' மணி '+(m?m+' நிமிடம்':'')):(m+' நிமிடம்');
+     const durEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
+     timeInfo=' · <span style="color:#ffd34d">Starts in '+durEn+' ('+durTa+'ல் தொடங்கும்)</span>';
+    } else {
+     timeInfo=' · <span style="color:#ff7777">காட்சி முடிந்தது (Closed)</span>';
+    }
+    return '<div class="bk-in">🎬 Show <b>'+tm+'</b>'+timeInfo+' · 👥 '+hallCount()+' in the hall</div>';
+   })()};
  window.bkSet=(k,v)=>{if(k)tm=v;else mi=v;head()};
  let g='';for(let r=11;r>=0;r--){g+='<div class="bk-r"><b>'+RL[r]+'</b>';for(let c=1;c<=20;c++){const id=RL[r]+c,isM=mine.has(id),isT=taken.has(id),cl=isM?'m':isT?'t':'';const hld=isM?'Your seat':isT?((RS.get(id)&&RS.get(id).n)?('Booked by '+RS.get(id).n):'Booked'):(price(id)+' pts');g+=(c==5||c==17?'<i></i>':'')+'<button data-id="'+id+'" class="'+cl+'"'+(cl?' disabled':'')+' title="'+id+' · '+hld+'"></button>'}g+='<b>'+RL[r]+'</b></div>'}
  modal('<style>.bk-top{display:flex;gap:14px;align-items:flex-start}.bk-top img{width:92px;height:128px;border-radius:8px;flex:none}.bk-ti h2{margin:0;font-size:24px;color:#fff}.bk-ti .g{color:var(--ac);font-weight:700;margin:2px 0 4px}.bk-ti small{opacity:.75;line-height:1.5}.bk-x{margin-left:auto;background:#fff2;color:#fff;border:0;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;flex:none}.bk-ch{display:flex;gap:6px;overflow-x:auto;padding:8px 0 0}.bk-ch button{white-space:nowrap;border:1px solid #fff3;background:#fff1;color:#fff;border-radius:18px;padding:6px 12px;cursor:pointer;font-weight:600}.bk-ch button.on{background:var(--ac);color:#000;border-color:var(--ac)}.bk-in{color:#7dffa0;margin:10px 0 2px;font-size:13px}.bk-h{font-weight:800;color:var(--ac);margin:12px 0 6px}.bk-map{background:#1a0d0d;border-radius:12px;padding:12px 8px;overflow-x:auto}.bk-r{display:flex;align-items:center;justify-content:center;gap:3px;margin:3px 0;min-width:max-content}.bk-r b{width:14px;font-size:10px;text-align:center;opacity:.8}.bk-r i{width:16px}.bk-r button{width:22px;height:22px;border:0;border-radius:5px;background:#a52a2a;cursor:pointer;padding:0}.bk-r button:hover:not(:disabled){filter:brightness(1.3)}.bk-r button.s{background:#ffc94d}.bk-r button.t{background:#4a4a4a;cursor:not-allowed}.bk-r button.m{background:#22cc66;cursor:not-allowed}.bk-scr{height:16px;border-top:3px solid #b9c3e8;border-radius:50% 50% 0 0/100% 100% 0 0;margin:10px 40px 0;text-align:center;font-size:10px;letter-spacing:4px;padding-top:6px;opacity:.9}.bk-lg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;margin-top:10px;opacity:.9}.bk-lg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}.bk-f{position:sticky;bottom:-16px;margin:12px -16px -16px;padding:12px 16px;background:var(--pn);border-top:1px solid #fff2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bk-f .tt{flex:1;min-width:140px;font-size:13px}</style><div id="bkHead"></div><div class="bk-h">Pick your seat</div><div class="bk-map"><div id="sg">'+g+'</div><div class="bk-scr">SCREEN</div></div>'
@@ -1085,7 +1138,16 @@ function snacks(){
  draw();
 }
 let curSeat=null;
-function enterScreen(){if(!mine.size){toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket!"',4000);return}goto('aud');usherGuide([...mine][0])}
+function enterScreen(){
+ if(!mine.size){toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket!"',4000);return}
+ const st=window.getTheaterScheduleState?window.getTheaterScheduleState():{isDoorUnlocked:true};
+ if(!st.isDoorUnlocked){
+  try{sTone(120,80,.22,.28,'sawtooth');sNoise(.08,.2,180)}catch(e){}
+  toast('🔒 திரையரங்கு கதவு பூட்டப்பட்டுள்ளது! அடுத்த காட்சி '+st.nextShow.time+' மணிக்கு தொடங்கும் ('+st.countdownTa+'ல் தொடங்கும் / Next show in '+st.countdownEn+')',5000);
+  return;
+ }
+ goto('aud');usherGuide([...mine][0]);
+}
 async function usherGuide(id){if(lock)return;const st=seats[id];if(!st){sit();return}lock=true;moving=0;pose={};const ax=st.x<0?-7.5:7.5,fz=st.z-1.05;
  try{toast('🎟 Usher: "Ticket check ✔ — Seat '+id+'. Pinnadi vaanga!"',4500);await sleep(700);await walkTo(ax,-598.5,4);await walkTo(ax,fz,4.5);await walkTo(st.x,fz,3);await face(0,350)}catch(e){console.error(e)}finally{lock=false;pose=null}
  sit();toast('🍿 Seat '+id+' — enjoy the show!',4000)}
