@@ -900,6 +900,71 @@ const RR=new THREE.Group();S.add(RR);RR.visible=false;const rrW={st:[],tap:{},uf
  box(.5,.7,.05,0xffd21f,3,.35,-699,RR).rotation.y=.4;sign('WET FLOOR',.5,.2,3,.5,-698.95,Math.PI,RR,'#ffd21f','#000');
  rrW.manM=person(4.95,-706,0x1565c0,-Math.PI/2,RR);rrW.manF=person(4.95,-706,0x8e1b4c,-Math.PI/2,RR,0,0x9a6a48,0x2b3190,0x100a06,true);rrW.manF.visible=false;rrW.man=rrW.manM;
 }
+// ===== THEATER 4-SHOW SCHEDULE & REAL-TIME VIDEO SYNC =====
+const THEATER_SHOWS=[
+ {id:'s1', name:'Morning Show', time:'10:30 AM', startMin:10*60+30, endMin:13*60},
+ {id:'s2', name:'Matinee Show', time:'02:00 PM', startMin:14*60, endMin:16*60+30},
+ {id:'s3', name:'First Show', time:'06:30 PM', startMin:18*60+30, endMin:21*60},
+ {id:'s4', name:'Second Show', time:'09:45 PM', startMin:21*60+45, endMin:24*60+15}
+];
+window.THEATER_SHOWS=THEATER_SHOWS;
+
+function getCurDaySec(){
+ if(typeof clockS==='function')return clockS();
+ const d=new Date();
+ return(d.getHours()*3600+d.getMinutes()*60+d.getSeconds()+d.getMilliseconds()/1e3);
+}
+
+function getTheaterScheduleState(){
+ const nowSec=getCurDaySec();
+ const curMin=nowSec/60;
+ let activeShow=null;
+ for(const s of THEATER_SHOWS){
+  if(s.id==='s4'){
+   if(curMin>=s.startMin||curMin<(s.endMin-1440)){activeShow=s;break}
+  }else{
+   if(curMin>=s.startMin&&curMin<s.endMin){activeShow=s;break}
+  }
+ }
+ let nextShow=null;
+ for(const s of THEATER_SHOWS){
+  if(s.startMin>curMin){nextShow=s;break}
+ }
+ let diffMin=0,isTomorrow=false;
+ if(nextShow){
+  diffMin=Math.round(nextShow.startMin-curMin);
+ }else{
+  nextShow=THEATER_SHOWS[0];
+  diffMin=Math.round((1440-curMin)+nextShow.startMin);
+  isTomorrow=true;
+ }
+ const h=Math.floor(diffMin/60),m=Math.round(diffMin%60);
+ const countdownTa=h>0?(h+' மணி '+(m?m+' நிமிடம்':'')):(m+' நிமிடம்');
+ const countdownEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
+ const doorOpenEarly=nextShow&&(diffMin<=15&&diffMin>=0);
+ const isDoorUnlocked=!!activeShow||doorOpenEarly;
+ const availableShows=THEATER_SHOWS.filter(s=>{
+  if(s.id==='s4'&&curMin<(s.endMin-1440))return false;
+  return curMin<s.startMin;
+ });
+ return{curMin,nowSec,activeShow,nextShow,diffMin,countdownTa,countdownEn,isTomorrow,isDoorUnlocked,availableShows};
+}
+window.getTheaterScheduleState=getTheaterScheduleState;
+
+function getShowPlaybackOffset(){
+ const st=getTheaterScheduleState();
+ if(!st||!st.activeShow)return 0;
+ const s=st.activeShow;
+ let elapsedMin=0;
+ if(s.id==='s4'&&st.curMin<60){
+  elapsedMin=(1440-s.startMin)+st.curMin;
+ }else{
+  elapsedMin=Math.max(0,st.curMin-s.startMin);
+ }
+ return Math.max(0,Math.floor(elapsedMin*60));
+}
+window.getShowPlaybackOffset=getShowPlaybackOffset;
+
 const Z={out:{g:OUT,b:[-90,40.3,-75,60],sp:[0,34],y:0},lobby:{g:LB,b:[-14,14,-419,-381],sp:[0,-384],y:Math.PI*0},aud:{g:AU,b:[-13,13,-644,-597],sp:[0,-599],y:0},rest:{g:RR,b:[-6.2,6.2,-709.3,-691.5],sp:[0,-693.5],y:0}};
 function goto(z){if(started&&zone!==z)doorSnd();zone=z;sun.visible=z=='out';OUT.visible=z=='out';LB.visible=z=='lobby';AU.visible=z=='aud';RR.visible=z=='rest';rrAmb(z=='rest');S.background=new THREE.Color(z=='out'?0x10142a:0x08080c);S.fog.color=S.background;S.fog.near=z=='out'?60:20;S.fog.far=z=='out'?220:90;P.set(Z[z].sp[0],1.6,Z[z].sp[1]);yaw=0;pitch=0;$('zone').innerHTML='<b>'+{out:'📍 Cheyyar Bus Stand',lobby:'🎬 Cheyyar I-MAX Lobby',aud:'🍿 Screen 1',rest:'🚻 Restroom'}[z]+'</b>';$('lobbybar').style.display=z=='lobby'?'flex':'none';Gs=gh()}
 function toast(t,ms=3500){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ms)}
@@ -1031,30 +1096,7 @@ function booking(){
  }else if(window.CY_GUEST){toast('🎟 Guest Mode: Points use panni ticket book pannunga!',2800)}
  clearInterval(bkTimer);
  const SHOWS=['10:30 AM','02:00 PM','06:30 PM','09:45 PM'],RL='ABCDEFGHIJKL',price=id=>30;
- const THEATER_SHOWS=[
-  {id:'s1',time:'10:30 AM',startMin:10*60+30,endMin:13*60},
-  {id:'s2',time:'02:00 PM',startMin:14*60,endMin:16*60+30},
-  {id:'s3',time:'06:30 PM',startMin:18*60+30,endMin:21*60},
-  {id:'s4',time:'09:45 PM',startMin:21*60+45,endMin:24*60+15}
- ];
- window.THEATER_SHOWS=THEATER_SHOWS;
- function getTheaterScheduleState(){
-  const nowSec=typeof clockS==='function'?clockS():(new Date().getHours()*3600+new Date().getMinutes()*60+new Date().getSeconds());
-  const curMin=nowSec/60;
-  let activeShow=null;
-  for(const s of THEATER_SHOWS){if(curMin>=s.startMin&&curMin<s.endMin){activeShow=s;break}}
-  let nextShow=null;
-  for(const s of THEATER_SHOWS){if(s.startMin>curMin){nextShow=s;break}}
-  let diffMin=0,isTomorrow=false;
-  if(nextShow){diffMin=Math.round(nextShow.startMin-curMin)}
-  else{nextShow=THEATER_SHOWS[0];diffMin=Math.round((1440-curMin)+nextShow.startMin);isTomorrow=true}
-  const h=Math.floor(diffMin/60),m=Math.round(diffMin%60);
-  const countdownTa=h>0?(h+' மணி '+(m?m+' நிமிடம்':'')):(m+' நிமிடம்');
-  const countdownEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
-  const availableShows=THEATER_SHOWS.filter(s=>curMin<s.startMin);
-  return{curMin,activeShow,nextShow,diffMin,countdownTa,countdownEn,isTomorrow,isDoorUnlocked:!!activeShow,availableShows};
- }
- window.getTheaterScheduleState=getTheaterScheduleState;
+ 
  const MV={};CY_NOW.forEach(n=>MV[n]=['Action · Drama','Tamil · U/A','Starring Thalapathy Vijay']);
  const showDate=t=>{const m=t.match(/(\d+):(\d+) (AM|PM)/),d=new Date();d.setHours(+m[1]%12+(m[3]=='PM'?12:0),+m[2],0,0);if(d<new Date())d.setDate(d.getDate()+1);return d};
  const fmt=ms=>{let x=Math.max(0,ms/1000|0);const h=x/3600|0,m=(x%3600)/60|0;x%=60;return(h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')};
@@ -1147,6 +1189,10 @@ function enterScreen(){
   return;
  }
  goto('aud');usherGuide([...mine][0]);
+ if(st.activeShow){
+  const elMin=Math.floor((typeof getShowPlaybackOffset==='function'?getShowPlaybackOffset():0)/60);
+  toast('🎬 Leo (Screen 1) · '+st.activeShow.time+' காட்சி ('+elMin+'-வது நிமிடம் இயங்குகிறது / Playing at '+elMin+' mins)',5000);
+ }
 }
 async function usherGuide(id){if(lock)return;const st=seats[id];if(!st){sit();return}lock=true;moving=0;pose={};const ax=st.x<0?-7.5:7.5,fz=st.z-1.05;
  try{toast('🎟 Usher: "Ticket check ✔ — Seat '+id+'. Pinnadi vaanga!"',4500);await sleep(700);await walkTo(ax,-598.5,4);await walkTo(ax,fz,4.5);await walkTo(st.x,fz,3);await face(0,350)}catch(e){console.error(e)}finally{lock=false;pose=null}
@@ -3518,24 +3564,14 @@ function pauseAll(){
  window.__audVideoActive=false;
 }
 
-// 24/7 Virtual Cinema Master Broadcast Clock
+// Real-Time Theater Show Schedule Synchronized Clock
 function getTimeline(nowMs){
- const now = nowMs || SN();
- const elapsed = Math.max(0, (now - broadcastEpoch) / 1000);
- const cycle = elapsed % TOTAL_DUR;
- let acc = 0;
- for(let i = 0; i < ITEMS.length; i++){
-  const d = DURS[i] || 40;
-  if(cycle < acc + d - 0.05 || i === ITEMS.length - 1){
-   return {
-    idx: i,
-    offset: Math.max(0, Math.min(cycle - acc, d - 0.2)),
-    duration: d
-   };
-  }
-  acc += d;
- }
- return { idx: 0, offset: 0, duration: DURS[0] };
+ const off = typeof getShowPlaybackOffset === 'function' ? getShowPlaybackOffset() : 0;
+ return {
+  idx: 0,
+  offset: off,
+  duration: 9000
+ };
 }
 
 function updateScreenTexture(){
@@ -3561,24 +3597,26 @@ function updateScreenTexture(){
 function playCur(){
  const it=ITEMS[idx];if(!it||!wrap)return;
  sought = false;
+ const off = (pendingOff !== null && pendingOff !== undefined) ? pendingOff : (typeof getShowPlaybackOffset === 'function' ? getShowPlaybackOffset() : 0);
+ pendingOff = null;
  if(it.t=='v'){
   try{ready&&yt&&yt.pauseVideo()}catch(e){}
   if(ytEl())ytEl().style.visibility='hidden';
   vid.style.display='block';
   updateScreenTexture();
-  const off = pendingOff; pendingOff = 0;
-  const dur = DURS[idx] || 40;
+  const dur = vid.duration || DURS[idx] || 9000;
 
   const seek=()=>{
    if(sought) return;
-   if(vid.duration && !isNaN(vid.duration) && isFinite(vid.duration) && vid.duration > 1){
-    DURS[idx] = vid.duration;
+   let target = off;
+   if(vid.duration && !isNaN(vid.duration) && isFinite(vid.duration) && vid.duration > 10){
+    if(target >= vid.duration) target = target % vid.duration;
    }
-   if(off > 0.1){
+   if(target > 0.1){
     sought = true;
     try{
      const maxSeek = Math.max(0, (vid.duration || dur) - 0.3);
-     vid.currentTime = Math.min(off, maxSeek);
+     vid.currentTime = Math.min(target, maxSeek);
     }catch(e){}
    }
   };
@@ -3589,7 +3627,7 @@ function playCur(){
    vid.onloadedmetadata = seek;
    vid.oncanplay = seek;
   } else {
-   if(off > 0.1 && Math.abs(vid.currentTime - off) > 4.0){
+   if(off > 0.1 && Math.abs(vid.currentTime - off) > 5.0){
     seek();
    }
   }
@@ -3599,9 +3637,23 @@ function playCur(){
   vid.pause();vid.style.display='none';if(ytEl())ytEl().style.visibility='visible';
   if(!ready)return;
   const cu = yt.getVideoData && yt.getVideoData().video_id;
-  const off = pendingOff; pendingOff = 0;
-  if(cu !== it.id) yt.loadVideoById(off > 0.1 ? {videoId:it.id, startSeconds:off} : it.id);
-  else { if(off > 0.1) yt.seekTo(off, true); yt.playVideo(); }
+  const targetOff = Math.max(0, off);
+  if(cu !== it.id){
+   yt.loadVideoById({videoId:it.id, startSeconds:targetOff});
+   sought = true;
+  } else {
+   if(targetOff > 0.1){
+    const dur = (yt.getDuration ? yt.getDuration() : 0);
+    let safe = targetOff;
+    if(dur > 10 && safe >= dur) safe = safe % Math.floor(dur);
+    const curT = (yt.getCurrentTime ? yt.getCurrentTime() : 0);
+    if(Math.abs(curT - safe) > 5.0){
+     yt.seekTo(safe, true);
+    }
+    sought = true;
+   }
+   yt.playVideo();
+  }
   watch();
  }
 }
@@ -3649,22 +3701,24 @@ function onVideoEnd(){
 function gentleResync(){
  if(!on) return;
  const it = ITEMS[idx]; if(!it) return;
- const pos = getTimeline();
- if(pos.idx !== idx){
-  idx = pos.idx;
-  pendingOff = pos.offset;
-  hideMsg();
-  playCur();
-  return;
- }
+ const targetOff = typeof getShowPlaybackOffset === 'function' ? getShowPlaybackOffset() : 0;
  if(it.t == 'v' && vid && !vid.paused && !vid.seeking){
   const cur = vid.currentTime;
-  const diff = pos.offset - cur;
-  if(Math.abs(diff) > 12.0){
+  let target = targetOff;
+  if(vid.duration && vid.duration > 10 && target >= vid.duration) target = target % vid.duration;
+  if(Math.abs(target - cur) > 15.0){
    try{
-    const safeSeek = Math.max(0, Math.min(pos.offset, (vid.duration || DURS[idx]) - 0.4));
+    const safeSeek = Math.max(0, Math.min(target, (vid.duration || 9000) - 0.4));
     vid.currentTime = safeSeek;
    }catch(e){}
+  }
+ } else if(it.t == 'yt' && yt && ready && typeof yt.getPlayerState === 'function' && yt.getPlayerState() === 1){
+  const cur = yt.getCurrentTime ? yt.getCurrentTime() : 0;
+  const dur = yt.getDuration ? yt.getDuration() : 0;
+  let target = targetOff;
+  if(dur > 10 && target >= dur) target = target % Math.floor(dur);
+  if(Math.abs(target - cur) > 20.0){
+   try{ yt.seekTo(target, true); }catch(e){}
   }
  }
 }
@@ -3683,12 +3737,36 @@ function fail(c,src){
 function watch(){if(tried)return;setTimeout(()=>{if(tried||!yt||!on||ITEMS[idx].t!='yt')return;const s=yt.getPlayerState();if(s!==1&&s!==3&&s!==-1){tried=true;yt.mute();yt.playVideo();toast('🔇 Autoplay block aachu — muted. U key = unmute',4500)}},2500)}
 
 function makePlayer(){
- const pv={autoplay:0,controls:0,disablekb:1,rel:0,modestbranding:1,playsinline:1,fs:0,iv_load_policy:3};
+ const pv={autoplay:1,controls:0,disablekb:1,rel:0,modestbranding:1,playsinline:1,fs:0,iv_load_policy:3};
  if(/^https?:/.test(location.protocol))pv.origin=location.origin;
  const first=ITEMS.find(i=>i.t=='yt');
+ const initOff = typeof getShowPlaybackOffset === 'function' ? getShowPlaybackOffset() : 0;
+ if(initOff > 0) pv.start = initOff;
  yt=new YT.Player('cyYT',{width:PW,height:YH,videoId:first?first.id:undefined,playerVars:pv,events:{
-  onReady:e=>{ready=true;if(on)playCur()},
-  onStateChange:e=>{if(e.data===0&&ITEMS[idx].t=='yt')onVideoEnd();if(e.data===1){fails=0;hideMsg()}},
+  onReady:e=>{
+   ready=true;
+   if(on)playCur();
+  },
+  onStateChange:e=>{
+   if(e.data===0&&ITEMS[idx].t=='yt')onVideoEnd();
+   if(e.data===1){
+    fails=0;hideMsg();
+    if(!sought){
+     const curOff = typeof getShowPlaybackOffset === 'function' ? getShowPlaybackOffset() : 0;
+     if(curOff > 0.5){
+      const dur = yt.getDuration ? yt.getDuration() : 0;
+      let target = curOff;
+      if(dur > 10 && target >= dur) target = target % Math.floor(dur);
+      const curT = yt.getCurrentTime ? yt.getCurrentTime() : 0;
+      if(Math.abs(curT - target) > 6){
+       try{ yt.seekTo(target, true); sought = true; }catch(ex){}
+      } else {
+       sought = true;
+      }
+     }
+    }
+   }
+  },
   onError:e=>fail(e.data)}});
 }
 
