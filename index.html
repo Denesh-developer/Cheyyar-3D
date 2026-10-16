@@ -274,7 +274,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
  if(!bdr)bdr=fem?0xffd54f:(leg>0xaaaaaa||leg===0x3e2723?0xffd54f:0x1b7a3a);
  const g=new THREE.Group();
  const isDhoti=!fem&&(leg>0xaaaaaa||leg===0x3e2723||leg===0xeee6d2||leg===0xfff8e1||leg===0xfffde7);
- const GOLD=0xffd54f,ZARI=bdr||GOLD;
+ const GOLD=0xffd54f,ZARI=bdr||GOLD,SILVER=0xd0d8e0;
 
  /* 1. TORSO & WAIST */
  const torso=new THREE.Group();g.add(torso);g.torso=torso;
@@ -298,6 +298,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   }else{
    cyl(.225,.235,.065,10,0x1b1b1b,0,.92,0,torso,.76);
    box(.055,.042,.02,0xd8d8d8,0,.92,-.155,torso);
+   box(.025,.032,.025,0x1b1b1b,0,.92,-.158,torso);
    cyl(.235,.255,.18,10,leg,0,.82,0,torso,.77);
   }
  }else{
@@ -310,6 +311,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   box(.18,.52,.028,leg,-.18,1.16,.145,torso);
   box(.18,.06,.032,ZARI,-.18,.92,.147,torso);
   box(.18,.015,.035,0xffffff,-.18,.88,.147,torso);
+  for(let ti=0;ti<5;ti++)cyl(.008,.006,.04,6,GOLD,-.25+ti*.035,.85,.148,torso);
   cyl(.22,.26,.24,10,leg,0,.88,0,torso,.76);
   cyl(.225,.235,.03,10,ZARI,0,.96,0,torso,.77);
   box(.09,.30,.04,leg,0,.84,-.155,torso);
@@ -323,6 +325,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   sph(.032,GOLD,0,1.51,-.105,g);
  }else{
   sph(.024,skin,0,1.58,-.092,g);
+  cyl(.105,.105,.015,10,GOLD,0,1.54,0,g);
  }
  const head=new THREE.Group();head.position.set(0,1.78,0);g.add(head);g.head=head;
  sph(.22,skin,0,.04,-.01,head,.95,1.05,1.02);
@@ -333,14 +336,22 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   cyl(.165,.11,.16,10,skin,0,-.095,-.02,head,.88);
   sph(.052,skin,0,-.165,-.095,head,.95,.8,.95);
  }
+
+ /* Dynamic Blinking Eyelids */
+ const eyelids=[];
  [-.082,.082].forEach(ex=>{
   sph(.036,0xfafafa,ex,.01,-.192,head,1.25,.75,.8);
   sph(.022,0x111111,ex,.01,-.215,head,.9,.9,.5);
   sph(.007,0xffffff,ex+(ex>0?-.007:.007),.015,-.225,head);
-  box(.085,fem?.016:.018,.025,fem?0x080808:skin,ex,.034,-.202,head);
+  const lid=box(.086,.022,.032,fem?0x1a1a1a:skin,ex,.034,-.204,head);
+  eyelids.push(lid);
   box(.052,fem?.014:.022,.02,hair,ex*.78,.062,-.205,head);
   box(.046,fem?.012:.018,.02,hair,ex*1.28,.055,-.196,head);
  });
+ head.userData.lids=eyelids;
+ head.userData.nextBlink=(typeof performance!=='undefined'?performance.now():Date.now())+2000+Math.random()*3000;
+ head.userData.blinkEnd=0;
+
  box(.032,.07,.038,skin,0,-.01,-.208,head);
  sph(.034,skin,0,-.045,-.222,head,1.1,.9,1.1);
  sph(.018,skin,-.025,-.05,-.21,head);
@@ -349,11 +360,20 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
  const lipCol=fem?0xc23b5a:0x8e5042;
  box(.068,.015,.022,lipCol,0,-.102,-.205,head);
  sph(.028,lipCol,0,-.116,-.202,head,1.2,.55,.75);
- if(fem){sph(.016,0xb71c1c,0,.062,-.218,head);sph(.006,GOLD,0,.084,-.215,head)}
+ if(fem){
+  sph(.016,0xb71c1c,0,.062,-.218,head);
+  sph(.006,GOLD,0,.084,-.215,head);
+  box(.008,.055,.015,GOLD,0,.11,-.04,head);
+  sph(.014,GOLD,0,.088,-.21,head);
+ }
  [-.21,.21].forEach(ex=>{
   sph(.044,skin,ex,0,-.02,head,.35,1.2,.75);
   sph(.022,skin,ex,-.048,-.02,head);
-  if(fem){sph(.02,GOLD,ex,-.062,-.02,head);cyl(.025,.035,.038,8,GOLD,ex,-.098,-.02,head)}
+  if(fem){
+   sph(.02,GOLD,ex,-.062,-.02,head);
+   cyl(.025,.035,.038,8,GOLD,ex,-.098,-.02,head);
+   sph(.01,0xc2185b,ex,-.122,-.02,head);
+  }
  });
  if(!fem){
   sph(.235,hair,0,.08,-.01,head,.98,.92,1.05);
@@ -369,12 +389,27 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   sph(.23,hair,.08,.09,-.03,head,.7,.6,.8);
   sph(.155,hair,0,-.04,.20,head,1.15,1.05,.95);
   sph(.036,GOLD,0,-.04,.285,head);
-  for(let mi=0;mi<10;mi++){
-   const ma=mi/10*Math.PI*2;
+  for(let mi=0;mi<12;mi++){
+   const ma=mi/12*Math.PI*2;
    sph(.032,0xffffff,Math.cos(ma)*.165,-.04+Math.sin(ma)*.155,.21,head);
    sph(.013,0x4caf50,Math.cos(ma)*.165,-.04+Math.sin(ma)*.155,.23,head);
+   sph(.026,0xffffff,Math.cos(ma)*.145,-.04+Math.sin(ma)*.135,.235,head);
   }
  }
+
+ head.onBeforeRender=()=>{
+  const now=typeof performance!=='undefined'?performance.now():Date.now();
+  if(now>head.userData.nextBlink){
+   head.userData.blinkEnd=now+140;
+   head.userData.nextBlink=now+2800+Math.random()*3200;
+  }
+  const isB=now<head.userData.blinkEnd;
+  const targetS=isB?2.5:1.0,targetY=isB?.016:.034;
+  head.userData.lids.forEach(lid=>{
+   lid.scale.y+=(targetS-lid.scale.y)*.4;
+   lid.position.y+=(targetY-lid.position.y)*.4;
+  });
+ };
 
  /* 3. LEGS & FEET */
  const makeLeg=(px,isLeft)=>{
@@ -387,6 +422,10 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
    cyl(.136,.136,.042,8,ZARI,0,-.27,0,knee);
    cyl(.13,.13,.014,8,0xffffff,0,-.295,0,knee);
    cyl(.062,.055,.06,8,skin,0,-.32,0,knee);
+   if(fem){
+    cyl(.066,.066,.016,10,SILVER,0,-.33,0,knee);
+    sph(.012,SILVER,.066,-.335,0,knee);
+   }
    box(.11,.024,.24,0x3e2723,0,-.37,-.04,knee);
    sph(.058,skin,0,-.348,-.04,knee,.9,.55,1.35);
    box(.085,.016,.05,0x24140c,0,-.335,-.03,knee);
@@ -411,7 +450,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
   g.add(l);return l;
  };
 
- /* 4. ARMS & HANDS */
+ /* 4. ARMS & HANDS WITH ARTICULATED FINGERS */
  const makeArm=(px,isLeft)=>{
   const a=new THREE.Group();a.position.set(px,1.48,0);
   sph(.115,col,0,0,0,a,.95,1.05,.95);
@@ -432,12 +471,19 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
    cyl(.068,.068,.014,8,col,0,-.268,0,forearm);
    cyl(.068,.068,.014,8,GOLD,0,-.286,0,forearm);
   }else if(isLeft){
-   cyl(.07,.07,.024,8,0x222222,0,-.26,0,forearm);
-   box(.032,.022,.018,0xd0d0d0,0,-.26,-.068,forearm);
+   cyl(.07,.07,.026,8,0x1b1b1b,0,-.26,0,forearm);
+   box(.034,.024,.02,0xd4d8dc,0,-.26,-.068,forearm);
+   sph(.012,0x0a192f,0,-.26,-.078,forearm);
   }
-  box(.074,.08,.038,skin,0,-.36,0,forearm);
-  box(.022,.045,.026,skin,(isLeft?.038:-.038),-.35,-.018,forearm);
-  box(.068,.05,.032,skin,0,-.42,.005,forearm);
+  box(.076,.075,.036,skin,0,-.36,0,forearm);
+  box(.024,.048,.028,skin,(isLeft?.038:-.038),-.35,-.018,forearm);
+  sph(.013,skin,(isLeft?.038:-.038),-.33,-.015,forearm);
+  const fX=[-.025,-.008,.009,.025],fH=[.048,.052,.048,.040];
+  for(let fi=0;fi<4;fi++){
+   cyl(.011,.010,fH[fi],6,skin,fX[fi],-.41-fH[fi]/2,.005,forearm);
+  }
+  cyl(.013,.013,.012,6,GOLD,fX[2],-.415,.005,forearm);
+
   a.onBeforeRender=()=>{
    const rx=a.rotation.x;
    if(a.forearm){
@@ -1338,11 +1384,84 @@ goto('out');let last=performance.now();
  cur=null;if(!seated&&!lock)for(const o of I)if(o.z==zone&&Math.hypot(o.x-P.x,o.y-P.z)<(o.r||4)&&(!o.when||o.when())){cur=o;break}
  const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent='[E] '+cur.l}else p.style.display='none';
  if(seated||lock||$('modal').style.display=='flex')moving=0;
-if(jy>0||vy>0){vy-=18*dt;jy+=vy*dt;if(jy<=0){jy=0;vy=0}}
-ph+=dt*moving*9;{const st=Math.floor(ph/Math.PI);if(st!==window._ls){window._ls=st;if(moving&&!seated&&!lock)stepSnd()}}amp+=((moving&&jy==0?1:0)-amp)*Math.min(1,dt*10);
-const G0=seated?0:gh();Gs+=(G0-Gs)*Math.min(1,dt*16);const G=Math.abs(G0-Gs)<.002?G0:Gs;
-if(seated){ME.position.set(P.x,seatY+(massage?msBob(t):0),P.z-.1);ME.rotation.y=seatYaw;ME.rotation.x=massage?msTilt(t):0;ME.rotation.z=massage?msRoll(t):0;const k=t/1000;ME.ll.rotation.x=ME.rl.rotation.x=1.5;ME.la.rotation.set(.5,0,0);ME.ra.rotation.set(.5,0,0);if(emT>0){emT-=dt;if(em=='wave')ME.ra.rotation.set(0,0,2.6+Math.sin(k*12)*.4);else if(em=='clap'){ME.la.rotation.set(1.3,0,.3);ME.ra.rotation.set(1.3+Math.sin(k*20)*.2,0,-.3)}else{ME.la.rotation.set(0,0,-2.6);ME.ra.rotation.set(0,0,2.6)}}}
-else{if(window.drv&&!window.drv.spec.rd){ME.position.set(P.x,-100,P.z)}else{const s=Math.sin(ph)*.9*amp,isG=jy==0&&!window.drv,breath=isG&&amp<.05?Math.sin(t*.0022)*.008:0,walkBob=isG?Math.abs(Math.sin(ph))*.032*amp:0,hipSway=isG?Math.cos(ph)*.025*amp:0;ME.position.set(P.x,G+jy+walkBob+breath,P.z);if(!window.drv)ME.rotation.z=hipSway;if(ME.torso)ME.torso.rotation.y=-s*.12;if(ME.head)ME.head.rotation.set(amp<.05?Math.sin(t*.002)*.025:0,0,-hipSway*.5);if(jy>0){ME.ll.rotation.x=-.25;ME.rl.rotation.x=-.25;ME.la.rotation.set(.3,0,-.2);ME.ra.rotation.set(.3,0,.2)}else{ME.ll.rotation.x=s;ME.rl.rotation.x=-s;ME.la.rotation.set(-s,0,0);ME.ra.rotation.set(s,0,0)}}}
+if(jy>0||vy>0){
+  const prevVy=vy;
+  vy-=18*dt;jy+=vy*dt;
+  if(jy<=0){jy=0;vy=0;if(prevVy<-3)window._landSquash=.90}
+ }
+ if(!window._landSquash)window._landSquash=1.0;
+ window._landSquash+=(1.0-window._landSquash)*Math.min(1,dt*14);
+ const isSprint=moving>1.2;
+ ph+=dt*moving*(isSprint?11:8.5);
+ {const st=Math.floor(ph/Math.PI);if(st!==window._ls){window._ls=st;if(moving&&!seated&&!lock)stepSnd()}}
+ amp+=((moving&&jy==0?1:0)-amp)*Math.min(1,dt*10);
+ const G0=seated?0:gh();Gs+=(G0-Gs)*Math.min(1,dt*16);const G=Math.abs(G0-Gs)<.002?G0:Gs;
+ if(seated){
+  ME.position.set(P.x,seatY+(massage?msBob(t):0),P.z-.1);
+  ME.rotation.y=seatYaw;ME.rotation.x=massage?msTilt(t):0;ME.rotation.z=massage?msRoll(t):0;
+  ME.scale.set(1,1,1);
+  const k=t/1000;ME.ll.rotation.x=ME.rl.rotation.x=1.5;ME.la.rotation.set(.5,0,0);ME.ra.rotation.set(.5,0,0);
+  if(emT>0){emT-=dt;if(em=='wave')ME.ra.rotation.set(0,0,2.6+Math.sin(k*12)*.4);else if(em=='clap'){ME.la.rotation.set(1.3,0,.3);ME.ra.rotation.set(1.3+Math.sin(k*20)*.2,0,-.3)}else{ME.la.rotation.set(0,0,-2.6);ME.ra.rotation.set(0,0,2.6)}}
+ }else{
+  if(window.drv&&!window.drv.spec.rd){
+   ME.position.set(P.x,-100,P.z);
+  }else{
+   const isG=jy==0&&!window.drv;
+   const s=Math.sin(ph)*(isSprint?1.15:.82)*amp;
+   const footImpact=Math.abs(Math.sin(ph));
+   const walkBob=isG?footImpact*(isSprint?.044:.026)*amp:0;
+   const hipSway=isG?Math.cos(ph)*(isSprint?.035:.022)*amp:0;
+   const breath=isG&&amp<.05?Math.sin(t*.0024)*.012:0;
+
+   // Centrifugal body banking when turning
+   const turnRate=(yaw-(window._prevYaw||yaw))/Math.max(.001,dt);
+   window._prevYaw=yaw;
+   const targetBank=-Math.max(-.16,Math.min(.16,turnRate*.065))*amp;
+   window._bodyBank=(window._bodyBank||0)+(targetBank-(window._bodyBank||0))*Math.min(1,dt*8);
+
+   ME.position.set(P.x,G+jy+walkBob+breath,P.z);
+   if(!window.drv){
+    ME.rotation.z=hipSway+(window._bodyBank||0);
+    if(jy>0){ME.scale.set(.96,1.05,.96)}
+    else{const sq=window._landSquash;ME.scale.set(1+(1-sq)*.5,sq,1+(1-sq)*.5)}
+   }
+
+   // Torso posture & chest expansion
+   if(ME.torso){
+    const torsoLean=isSprint?.16:(amp>.1?.04:0);
+    ME.torso.rotation.x=torsoLean;
+    ME.torso.rotation.y=-s*.14;
+    if(amp<.05)ME.torso.scale.set(1+breath*.6,1+breath,1+breath*.6);
+    else ME.torso.scale.set(1,1,1);
+   }
+
+   // Head gaze & look-ahead
+   if(ME.head){
+    if(amp<.05){
+     const gazePan=Math.sin(t*.0009)*.22+Math.sin(t*.0021)*.08;
+     const gazePitch=Math.sin(t*.0014)*.06;
+     ME.head.rotation.set(gazePitch,gazePan,-hipSway*.5);
+    }else{
+     ME.head.rotation.set(0,0,-hipSway*.5);
+    }
+   }
+
+   // Limbs kinematics
+   if(jy>0){
+    ME.ll.rotation.x=-.32;ME.rl.rotation.x=-.32;
+    ME.la.rotation.set(.42,0,-.28);ME.ra.rotation.set(.42,0,.28);
+   }else{
+    ME.ll.rotation.x=s;ME.rl.rotation.x=-s;
+    if(isSprint){
+     ME.la.rotation.set(-s*1.15,0,-.15);
+     ME.ra.rotation.set(s*1.15,0,.15);
+    }else{
+     ME.la.rotation.set(-s,0,0);
+     ME.ra.rotation.set(s,0,0);
+    }
+   }
+  }
+ }
 window.rrAnim&&rrAnim(t);window.vehTick&&vehTick(dt);walkers.forEach(w=>{AN.length&&0;w.t+=dt*w.s;const u=(Math.sin(w.t)+1)/2,sg=Math.cos(w.t)>=0?1:-1,dx=(w.b[0]-w.a[0])*sg,dz=(w.b[1]-w.a[1])*sg,q=Math.sin(w.t*26)*.7;w.g.position.x=w.a[0]+(w.b[0]-w.a[0])*u;w.g.position.z=w.a[1]+(w.b[1]-w.a[1])*u;if(w.g.parent===OUT){const gx=w.g.position.x,gz=w.g.position.z;w.g.position.y=(Math.abs(gx)<23&&gz<-4&&gz>-24)?.4:(window.__extraY?window.__extraY(gx,gz):0)}w.g.rotation.y=Math.atan2(-dx,-dz);w.g.ll.rotation.x=q;w.g.rl.rotation.x=-q;w.g.la.rotation.x=-q;w.g.ra.rotation.x=q});
 const pm=window.MOB&&innerWidth<innerHeight,cd=(seated?3.4:(window.drv?window.drv.spec.cam:4.2))*(pm?(seated?1.15:(window.drv?1.05:1.35)):1),bb=Z[zone].b,cp=Math.cos(pitch),dv=!!window.drv,cmin=dv?window.drv.spec.cam*.55:1;
 let cdd=cd,cx,cy,cz;{const minY=dv?(window.drv.t=='bus'?5.5:window.drv.t=='car'||window.drv.t=='auto'?2.8:2.4):.7;for(;cdd>cmin;cdd-=.3){cx=Math.max(bb[0]-.6,Math.min(bb[1]+.6,P.x+Math.sin(yaw)*cdd*cp));cy=Math.max(minY,P.y+G+jy+.3-Math.sin(pitch)*cdd);cz=Math.max(bb[2],Math.min(bb[3]+.3,P.z+Math.cos(yaw)*cdd*cp));if(!camBlocked(cx,cy,cz))break}}
