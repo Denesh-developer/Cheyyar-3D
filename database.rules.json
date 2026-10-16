@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "players": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null"
+      }
+    },
+    "chat": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["t"]
+    },
+    "seats": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "theatre": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "scores": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null"
+      },
+      ".indexOn": ["s"]
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "inbox": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
