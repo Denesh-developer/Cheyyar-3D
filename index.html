@@ -443,7 +443,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr){
    const rx=l.rotation.x;
    if(l.knee){
     if(rx>1.1)l.knee.rotation.x=-1.42;
-    else if(rx>.05)l.knee.rotation.x=-Math.sin(rx)*.72;
+    else if(rx>.05)l.knee.rotation.x=-Math.sin(rx)*.42;
     else l.knee.rotation.x=0;
    }
   };
@@ -1392,7 +1392,7 @@ if(jy>0||vy>0){
  if(!window._landSquash)window._landSquash=1.0;
  window._landSquash+=(1.0-window._landSquash)*Math.min(1,dt*14);
  const isSprint=moving>1.2;
- ph+=dt*moving*(isSprint?11:8.5);
+ ph+=dt*moving*(isSprint?7.5:6.2);
  {const st=Math.floor(ph/Math.PI);if(st!==window._ls){window._ls=st;if(moving&&!seated&&!lock)stepSnd()}}
  amp+=((moving&&jy==0?1:0)-amp)*Math.min(1,dt*10);
  const G0=seated?0:gh();Gs+=(G0-Gs)*Math.min(1,dt*16);const G=Math.abs(G0-Gs)<.002?G0:Gs;
@@ -1407,39 +1407,39 @@ if(jy>0||vy>0){
    ME.position.set(P.x,-100,P.z);
   }else{
    const isG=jy==0&&!window.drv;
-   const s=Math.sin(ph)*(isSprint?1.15:.82)*amp;
+   const s=Math.sin(ph)*(isSprint?.72:.55)*amp;
    const footImpact=Math.abs(Math.sin(ph));
-   const walkBob=isG?footImpact*(isSprint?.044:.026)*amp:0;
-   const hipSway=isG?Math.cos(ph)*(isSprint?.035:.022)*amp:0;
-   const breath=isG&&amp<.05?Math.sin(t*.0024)*.012:0;
+   const walkBob=isG?footImpact*(isSprint?.018:.012)*amp:0;
+   const hipSway=isG?Math.cos(ph)*(isSprint?.014:.008)*amp:0;
+   const breath=isG&&amp<.05?Math.sin(t*.0024)*.010:0;
 
    // Centrifugal body banking when turning
    const turnRate=(yaw-(window._prevYaw||yaw))/Math.max(.001,dt);
    window._prevYaw=yaw;
-   const targetBank=-Math.max(-.16,Math.min(.16,turnRate*.065))*amp;
+   const targetBank=-Math.max(-.06,Math.min(.06,turnRate*.025))*amp;
    window._bodyBank=(window._bodyBank||0)+(targetBank-(window._bodyBank||0))*Math.min(1,dt*8);
 
    ME.position.set(P.x,G+jy+walkBob+breath,P.z);
    if(!window.drv){
     ME.rotation.z=hipSway+(window._bodyBank||0);
-    if(jy>0){ME.scale.set(.96,1.05,.96)}
-    else{const sq=window._landSquash;ME.scale.set(1+(1-sq)*.5,sq,1+(1-sq)*.5)}
+    if(jy>0){ME.scale.set(.97,1.04,.97)}
+    else{const sq=window._landSquash;ME.scale.set(1+(1-sq)*.4,sq,1+(1-sq)*.4)}
    }
 
    // Torso posture & chest expansion
    if(ME.torso){
-    const torsoLean=isSprint?.16:(amp>.1?.04:0);
+    const torsoLean=isSprint?.06:(amp>.1?.02:0);
     ME.torso.rotation.x=torsoLean;
-    ME.torso.rotation.y=-s*.14;
-    if(amp<.05)ME.torso.scale.set(1+breath*.6,1+breath,1+breath*.6);
+    ME.torso.rotation.y=-s*.06;
+    if(amp<.05)ME.torso.scale.set(1+breath*.5,1+breath,1+breath*.5);
     else ME.torso.scale.set(1,1,1);
    }
 
    // Head gaze & look-ahead
    if(ME.head){
     if(amp<.05){
-     const gazePan=Math.sin(t*.0009)*.22+Math.sin(t*.0021)*.08;
-     const gazePitch=Math.sin(t*.0014)*.06;
+     const gazePan=Math.sin(t*.0009)*.20+Math.sin(t*.0021)*.07;
+     const gazePitch=Math.sin(t*.0014)*.05;
      ME.head.rotation.set(gazePitch,gazePan,-hipSway*.5);
     }else{
      ME.head.rotation.set(0,0,-hipSway*.5);
@@ -1448,16 +1448,16 @@ if(jy>0||vy>0){
 
    // Limbs kinematics
    if(jy>0){
-    ME.ll.rotation.x=-.32;ME.rl.rotation.x=-.32;
-    ME.la.rotation.set(.42,0,-.28);ME.ra.rotation.set(.42,0,.28);
+    ME.ll.rotation.x=-.25;ME.rl.rotation.x=-.25;
+    ME.la.rotation.set(.35,0,-.20);ME.ra.rotation.set(.35,0,.20);
    }else{
     ME.ll.rotation.x=s;ME.rl.rotation.x=-s;
     if(isSprint){
-     ME.la.rotation.set(-s*1.15,0,-.15);
-     ME.ra.rotation.set(s*1.15,0,.15);
+     ME.la.rotation.set(-s*.85,0,-.08);
+     ME.ra.rotation.set(s*.85,0,.08);
     }else{
-     ME.la.rotation.set(-s,0,0);
-     ME.ra.rotation.set(s,0,0);
+     ME.la.rotation.set(-s*.75,0,0);
+     ME.ra.rotation.set(s*.75,0,0);
     }
    }
   }
