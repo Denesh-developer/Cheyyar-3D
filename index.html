@@ -706,6 +706,7 @@ function modal(h){$('box').style.maxWidth='';$('box').innerHTML=h;$('modal').sty
 let bkTimer=null,ticketPending=false,lastTicket=null;
 function closeModal(){clearInterval(bkTimer);$('modal').style.display='none';if(ticketPending){ticketPending=false;afterTicket()}}
 function booking(){
+ if(window.CY_GUEST){toast('🎟 Ticket book panna Google login venum (🔑 button)',3500);return}
  clearInterval(bkTimer);
  const SHOWS=['10:30 AM','1:00 PM','4:15 PM','7:30 PM','10:15 PM'],RL='ABCDEFGHIJKL',price=id=>30;
  const MV={};CY_NOW.forEach(n=>MV[n]=['Action · Drama','Tamil · U/A','Starring Thalapathy Vijay']);
@@ -729,6 +730,17 @@ function booking(){
  $('sg').onclick=e=>{const b=e.target.closest('button[data-id]');if(!b||b.disabled)return;const id=b.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);b.className=sel.has(id)?'s':'';upd()};
  $('cf').onclick=()=>{if(!sel.size)return toast('Choose a seat first');const n=NOW[mi],a=[...sel],t=a.reduce((x,i)=>x+price(i),0);if(!spend(t,'Ticket'))return;clearInterval(bkTimer);curMovie=n;a.forEach(i=>{mine.add(i);seats[i].m.material=mat(0x22cc66)});$('task').textContent='Go to the Screen 1 door & show your ticket';ticketPending=true;lastTicket={seats:a,movie:n};const code='CYR'+Math.floor(Math.random()*90000+10000);
   modal('<div class="bk-top"><img src="'+poster(n,mi)+'" style="width:80px;height:112px;border-radius:8px"><div class="bk-ti"><h2 style="font-size:20px">✅ You bought a ticket!</h2><div class="g">'+n+'</div><small>'+tm+' · Screen 1<br>Seats: <b>'+a.join(', ')+'</b><br>Paid: '+t+' pts<br>Ticket: <b>'+code+'</b></small></div></div><p style="opacity:.8">Screen 1 door-kitta poi ticket kaattunga — usher ulla anuppuvaar.</p><button class="btn" onclick="closeModal()">✔ OK</button>')};
+ window.bkRefresh=()=>{const sg=$('sg');if(!sg||!$('bkHead'))return;sg.querySelectorAll('button[data-id]').forEach(b=>{const id=b.dataset.id;if(mine.has(id))return;if(taken.has(id)){b.className='t';b.disabled=true;sel.delete(id)}else if(b.className==='t'){b.className='';b.disabled=false}});upd();head()};
+ {const _cf=$('cf').onclick;let busy=false;$('cf').onclick=async()=>{
+  if(busy)return;if(!sel.size)return toast('Choose a seat first');
+  const a=[...sel];if(pts<a.length*price(a[0])){_cf();return}
+  busy=true;let r={ok:true,bad:[]};
+  try{if(window.CY_SEATCLAIM)r=await CY_SEATCLAIM(a)}catch(e){r={ok:false,bad:a,err:'error'}}
+  busy=false;
+  if(!r.ok){r.bad.forEach(i=>sel.delete(i));window.bkRefresh&&bkRefresh();
+   toast(r.err&&r.err!=='guest'?'⚠ Seat book aagala ('+r.err+') — database.rules.json publish pannunga':'❌ Seat '+r.bad.join(', ')+' vera oruthar already book pannitaanga — vera seat select pannunga',5000);return}
+  _cf();
+  if(!a.some(i=>mine.has(i))&&window.CY_SEATREL)CY_SEATREL(a)}}
 }
 function snacks(){
  const MENU={
@@ -754,7 +766,7 @@ function snacks(){
  draw();
 }
 let curSeat=null;
-function enterScreen(){if(!mine.size){toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket!"',4000);return}goto('aud');usherGuide([...mine][0])}
+function enterScreen(){if(!mine.size&&window.CY_GUEST){goto('aud');toast('👀 Guest view: seat book panna Google login venum (🔑)',4500);return}if(!mine.size){toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket!"',4000);return}goto('aud');usherGuide([...mine][0])}
 async function usherGuide(id){if(lock)return;const st=seats[id];if(!st){sit();return}lock=true;moving=0;pose={};const ax=st.x<0?-7.5:7.5,fz=st.z-1.05;
  try{toast('🎟 Usher: "Ticket check ✔ — Seat '+id+'. Pinnadi vaanga!"',4500);await sleep(700);await walkTo(ax,-598.5,4);await walkTo(ax,fz,4.5);await walkTo(st.x,fz,3);await face(0,350)}catch(e){console.error(e)}finally{lock=false;pose=null}
  sit();toast('🍿 Seat '+id+' — enjoy the show!',4000)}
@@ -2172,7 +2184,7 @@ const LINKS=window.CY_LINKS||['1.mp4','2.mp4','3.mp4'];
 const ID=u=>(u.match(/[?&]v=([\w-]{11})/)||u.match(/youtu\.be\/([\w-]{11})/)||u.match(/embed\/([\w-]{11})/)||[])[1];
 const ITEMS=LINKS.map(u=>{if(/\.(mp4|webm|ogv)(\?|$)/i.test(u))return{t:'v',src:u};const id=ID(u);return id?{t:'yt',id}:null}).filter(Boolean);
 const VW=1280,VH=542,PW=1280,YH=720;
-let wrap,msg,vid,yt=null,ready=false,idx=0,on=false,tried=false,fails=0;
+let wrap,msg,vid,yt=null,ready=false,idx=0,on=false,tried=false,fails=0,sync=null,pendingOff=0,lastDrift=0,tsBound=false;
 const showMsg=h=>{msg.innerHTML=h;msg.style.display='flex'},hideMsg=()=>{msg&&(msg.style.display='none')};
 const ytEl=()=>document.getElementById('cyYT');
 function pauseAll(){try{vid&&vid.pause()}catch(e){}try{ready&&yt.pauseVideo()}catch(e){}}
@@ -2182,14 +2194,38 @@ function playCur(){
   try{ready&&yt.pauseVideo()}catch(e){}
   if(ytEl())ytEl().style.visibility='hidden';
   vid.style.display='block';
-  if(vid.getAttribute('data-s')!=it.src){vid.setAttribute('data-s',it.src);vid.src=it.src}
+  const off=pendingOff;pendingOff=0;
+  if(vid.getAttribute('data-s')!=it.src){vid.setAttribute('data-s',it.src);vid.src=it.src;if(off>1)vid.addEventListener('loadedmetadata',()=>{try{vid.currentTime=off}catch(e){}},{once:true})}else if(off>1){try{vid.currentTime=off}catch(e){}}
   vid.play().catch(()=>{vid.muted=true;vid.play().catch(()=>{})})}
  else{
   vid.pause();vid.style.display='none';if(ytEl())ytEl().style.visibility='visible';
   if(!ready)return;
   const cu=yt.getVideoData&&yt.getVideoData().video_id;
-  if(cu!==it.id)yt.loadVideoById(it.id);else yt.playVideo();watch()}}
-function next(){idx=(idx+1)%ITEMS.length;hideMsg();playCur()}
+  const off=pendingOff;pendingOff=0;
+  if(cu!==it.id)yt.loadVideoById(off>1?{videoId:it.id,startSeconds:off}:it.id);else{if(off>1)yt.seekTo(off,true);yt.playVideo()}watch()}}
+const SN=()=>window.CY_TSYNC?CY_TSYNC.now():Date.now();
+function applyState(st){sync=st;idx=Math.min(Math.max(st.i|0,0),ITEMS.length-1);pendingOff=Math.max(0,(SN()-st.t0)/1000);hideMsg();playCur()}
+function bindSync(){const T=window.CY_TSYNC;if(!T||tsBound)return;tsBound=true;T.listen(st=>{if(!st||typeof st.i!=='number'||typeof st.t0!=='number'||!on)return;if(sync&&st.t0===sync.t0&&st.i===sync.i)return;applyState(st)})}
+function enterSync(){
+ const T=window.CY_TSYNC;
+ if(!T){sync=null;pendingOff=0;playCur();return}
+ bindSync();let done=false;
+ const fb=setTimeout(()=>{if(done||!on)return;done=true;sync=null;playCur()},3500);
+ T.get().then(st=>{if(done)return;done=true;clearTimeout(fb);if(!on)return;
+  if(st&&typeof st.i==='number'&&typeof st.t0==='number'&&ITEMS[st.i]&&T.others()){applyState(st)}
+  else{const fresh={i:0,t0:T.now()};sync=fresh;idx=0;pendingOff=0;if(T.canWrite)T.set(fresh);playCur()}
+ },()=>{if(done)return;done=true;clearTimeout(fb);if(!on)return;sync=null;playCur()})}
+function driftFix(){
+ if(!sync||!on)return;const it=ITEMS[idx];if(!it)return;const exp=(SN()-sync.t0)/1000;let cur=null;
+ try{if(it.t=='v')cur=vid.currentTime;else if(ready&&yt.getCurrentTime)cur=yt.getCurrentTime()}catch(e){}
+ if(cur==null||!isFinite(cur)||exp<3)return;
+ if(Math.abs(cur-exp)>4){try{if(it.t=='v')vid.currentTime=exp;else yt.seekTo(exp,true)}catch(e){}}}
+function next(){
+ const T=window.CY_TSYNC,from=idx,ni=(idx+1)%ITEMS.length;
+ if(T&&sync){
+  if(T.canWrite){T.adv(from,ni).then(st=>{if(!on||!st)return;if(sync&&st.t0===sync.t0&&st.i===sync.i)return;applyState(st)});return}
+  setTimeout(()=>{if(on&&idx===from&&sync){idx=ni;sync={i:ni,t0:SN()};hideMsg();playCur()}},4000);return}
+ idx=ni;hideMsg();playCur()}
 function fail(c,src){
  fails++;
  if(fails>=ITEMS.length){
@@ -2200,7 +2236,7 @@ function fail(c,src){
  if(ITEMS.length>1)setTimeout(()=>{if(on)next()},1500)}
 function watch(){if(tried)return;setTimeout(()=>{if(tried||!yt||!on||ITEMS[idx].t!='yt')return;const s=yt.getPlayerState();if(s!==1&&s!==3&&s!==-1){tried=true;yt.mute();yt.playVideo();toast('🔇 Autoplay block aachu — muted. U key = unmute',4500)}},2500)}
 function makePlayer(){
- const pv={autoplay:1,controls:0,disablekb:1,rel:0,modestbranding:1,playsinline:1,fs:0,iv_load_policy:3};
+ const pv={autoplay:0,controls:0,disablekb:1,rel:0,modestbranding:1,playsinline:1,fs:0,iv_load_policy:3};
  if(/^https?:/.test(location.protocol))pv.origin=location.origin;
  const first=ITEMS.find(i=>i.t=='yt');
  yt=new YT.Player('cyYT',{width:PW,height:YH,videoId:first?first.id:undefined,playerVars:pv,events:{
@@ -2234,7 +2270,8 @@ window.vidTick=function(){
  if(!ITEMS.length)return;
  if(!wrap)build();
  if(vbB.style.display==='none')vbB.style.display='block';
- if(!on){on=true;try{playCur()}catch(e){}if(!window._vbHint){window._vbHint=1;toast('🔆 Screen dim-ah irundha 🔆 button / B key press pannunga',4500)}}
+ if(!on){on=true;try{enterSync()}catch(e){try{playCur()}catch(e2){}}if(!window._vbHint){window._vbHint=1;toast('🔆 Screen dim-ah irundha 🔆 button / B key press pannunga',4500)}}
+ if(sync&&performance.now()-lastDrift>10000){lastDrift=performance.now();try{driftFix()}catch(e){}}
  C.updateMatrixWorld(true);
  const iw=innerWidth,ih=innerHeight,pts=[],v=new THREE.Vector3();
  for(const [x,y] of [[-11,10.65],[11,10.65],[11,1.35],[-11,1.35]]){
@@ -2407,6 +2444,35 @@ function run(uid,guest){
  pl.on('child_removed',s=>{const e=R.get(s.key);if(e)drop(e)});
  db.ref('.info/connected').on('value',s=>{if(s.val()&&joined){meRef.onDisconnect().remove();meRef.set(Object.assign({hb:Date.now()},snap()))}});
  if(!guest)addEventListener('beforeunload',()=>{try{meRef.remove()}catch(e){}});
+ /* ---- THEATRE SYNC: shared seats + shared video clock ---- */
+ {
+  const RS=new Map(),sref=db.ref('seats');let off=0;
+  db.ref('.info/serverTimeOffset').on('value',s=>{off=+s.val()||0});
+  const setS=(id,d)=>{if(!seats[id]||!d||d.u===uid)return;RS.set(id,d.u);taken.add(id);seats[id].m.material=mat(0x444444);window.bkRefresh&&bkRefresh()};
+  const clrS=id=>{if(!RS.has(id))return;RS.delete(id);if(!seats[id])return;if(!mine.has(id)){taken.delete(id);seats[id].m.material=mat(0x7d1224)}window.bkRefresh&&bkRefresh()};
+  sref.on('child_added',s=>setS(s.key,s.val()),er=>console.warn('[seats] listen failed:',er&&er.code||er));
+  sref.on('child_changed',s=>setS(s.key,s.val()));
+  sref.on('child_removed',s=>clrS(s.key));
+  if(!guest)sref.once('value').then(sn=>{sn.forEach(c=>{const d=c.val();if(d&&d.u===uid&&!mine.has(c.key))c.ref.remove().catch(()=>{})})}).catch(()=>{});
+  window.CY_SEATCLAIM=async ids=>{
+   if(guest)return{ok:false,bad:ids.slice(),err:'guest'};
+   const got=[],bad=[];let err='';
+   for(const id of ids){
+    try{const r=await db.ref('seats/'+id).transaction(c=>(c&&c.u!==uid)?undefined:{u:uid,n:myName,t:Date.now()},undefined,false);
+     if(r.committed){got.push(id);db.ref('seats/'+id).onDisconnect().remove().catch(()=>{})}
+     else{const v=r.snapshot&&r.snapshot.val();if(!(v&&v.u!==uid))err='failed';bad.push(id)}}
+    catch(e){err=(e&&e.code)||'error';bad.push(id)}}
+   if(bad.length)got.forEach(id=>db.ref('seats/'+id).remove().catch(()=>{}));
+   return{ok:!bad.length,bad,err}};
+  window.CY_SEATREL=ids=>{ids.forEach(id=>db.ref('seats/'+id).remove().catch(()=>{}))};
+  const ts=db.ref('theatre/state');
+  window.CY_TSYNC={live:true,canWrite:!guest,now:()=>Date.now()+off,
+   others:()=>{for(const e of R.values())if(e.zn==='aud')return true;return false},
+   get:()=>ts.once('value').then(s=>s.val()),
+   set:st=>{ts.set(st).catch(er=>console.warn('[theatre] set failed:',er&&er.code||er))},
+   adv:(from,to)=>ts.transaction(c=>{const n=Date.now()+off;if(c&&(c.i!==from||n-c.t0<3000))return;return{i:to,t0:n}},undefined,false).then(r=>r.snapshot.val()).catch(()=>null),
+   listen:fn=>ts.on('value',s=>fn(s.val()))};
+ }
  /* ---- chat ---- */
  const push=m=>{if(guest){toast('💬 Chat-ku Google login venum',2500);return false}const nw=Date.now();if(nw-lastPush<2000){toast('⏳ Konjam wait pannunga…',1200);return false}lastPush=nw;try{const r=db.ref('chat').push();r.set({u:uid,n:myName,m:m.slice(0,80),t:nw}).catch(er=>console.warn('[chat] send failed:',er&&er.code||er));setTimeout(()=>{r.remove().catch(()=>{})},30000);return true}catch(e){return false}};
  db.ref('chat').limitToLast(10).on('child_added',s=>{const d=s.val();if(!d||d.u===uid||MUTE.has(d.u)||Date.now()-d.t>20000||typeof d.m!=='string')return;
