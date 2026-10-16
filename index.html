@@ -2825,6 +2825,332 @@ function ringTempleBell(){
  toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் ஆசிர்வாதம்! (+10 pts & Vibhuti blessings)',4500);
 }
 I.push({z:'out',x:-108,y:-46,r:5.2,when:()=>!window.drv&&zone=='out',l:'🔔 Mani adinga (Ring Temple Bell)',f:ringTempleBell});
+
+/* =========================================================================
+   CHEYYAR VEDAPUREESWARAR TEMPLE COMPLEX - GRAND HISTORICAL EXPANSION
+   (திருவோத்தூர் அருள்மிகு வேதபுரீஸ்வரர் திருக்கோயில் முழுமையான விரிவாக்கம்)
+   ========================================================================= */
+(function(){
+  const TG = new THREE.Group();
+  OUT.add(TG);
+
+  // 1. Temple Sandstone Paved Courtyard Floor
+  box(52, 0.22, 28, 0xd4c6a6, -108, 0.11, -64, TG);
+  box(18, 0.24, 22, 0xe2d7bc, -108, 0.12, -43, TG);
+
+  // 2. Dhwajasthambam (தங்கக் கொடிமரம்) & Bali Peedam at (-108, -44)
+  const fg = new THREE.Group(); fg.position.set(-108, 0, -44); TG.add(fg);
+  box(2.2, 0.5, 2.2, 0x3a3a40, 0, 0.25, 0, fg);
+  box(1.7, 0.4, 1.7, 0x222226, 0, 0.7, 0, fg);
+  cyl(0.7, 0.8, 0.35, 12, 0xd4af37, 0, 1.05, 0, fg);
+  cyl(0.18, 0.24, 11, 14, 0xd4af37, 0, 6.6, 0, fg);
+  for (let ri = 0; ri < 6; ri++) cyl(0.24, 0.24, 0.08, 12, 0xffd54f, 0, 2.5 + ri * 1.6, 0, fg);
+  cyl(0.08, 0.35, 1.2, 8, 0xffd54f, 0, 12.6, 0, fg);
+  sph(0.22, 0xffd54f, 0, 13.3, 0, fg);
+  box(0.08, 1.5, 2.6, 0xff6600, 0, 11.8, 1.35, fg);
+  tag(fg, '🚩 தங்கக் கொடிமரம்');
+
+  // Bali Peedam (பலிபீடம்)
+  const bpG = new THREE.Group(); bpG.position.set(-108, 0, -42.2); TG.add(bpG);
+  box(1.5, 0.3, 1.5, 0x3a3a40, 0, 0.15, 0, bpG);
+  cyl(0.55, 0.7, 0.45, 12, 0x2e2e34, 0, 0.52, 0, bpG);
+  cyl(0.42, 0.52, 0.2, 12, 0xd4af37, 0, 0.85, 0, bpG);
+  sph(0.18, 0xd4af37, 0, 1.02, 0, bpG);
+
+  // 3. Maha Mandapam & Carved Stone Pillars (-108, -58 to -65)
+  box(18, 0.5, 14, 0x5a5a62, -108, 4.6, -61, TG);
+  const pillarPos = [
+    [-115, -56], [-101, -56],
+    [-115, -60], [-101, -60],
+    [-115, -64], [-101, -64],
+    [-111, -58], [-105, -58]
+  ];
+  pillarPos.forEach(([px, pz]) => {
+    box(0.9, 0.5, 0.9, 0x3a3a40, px, 0.25, pz, TG);
+    box(0.55, 3.6, 0.55, 0x4a4a52, px, 2.3, pz, TG);
+    box(0.85, 0.4, 0.85, 0x3a3a40, px, 4.25, pz, TG);
+    cyl(0.02, 0.02, 1.2, 6, 0x9a7a2a, px, 3.3, pz + 0.45, TG);
+    cyl(0.18, 0.14, 0.12, 8, 0xd9ac3c, px, 2.65, pz + 0.45, TG);
+    sph(0.06, 0xffaa22, px, 2.75, pz + 0.45, TG);
+    glow(0.25, 0.25, 0.25, 0xffaa22, px, 2.76, pz + 0.45, TG);
+  });
+
+  // 4. Moolavar Sanctum Sanctorum (ஸ்ரீ வேதபுரீஸ்வரர் கருவறை) at (-108, -71)
+  const sg = new THREE.Group(); sg.position.set(-108, 0, -71); TG.add(sg);
+  box(12, 6.2, 10, 0x333338, 0, 3.1, 0, sg);
+  for (let vi = 0; vi < 4; vi++) {
+    const vw = 11 - vi * 2.2, vy = 6.2 + vi * 1.5;
+    box(vw, 1.4, vw * 0.85, 0x6e5238, 0, vy + 0.7, 0, sg);
+    glow(vw, 0.1, 0.1, 0xffd34d, 0, vy + 1.4, 0, sg);
+  }
+  cyl(0.12, 0.35, 1.4, 8, GOLD_M, 0, 12.8, 0, sg);
+  sph(0.24, GOLD_M, 0, 13.6, 0, sg);
+  box(3.2, 4.2, 0.6, 0x1a0f08, 0, 2.1, 5.1, sg);
+  sign('மூலவர் ஸ்ரீ வேதபுரீஸ்வரர் சன்னதி', 7.2, 0.9, 0, 4.6, 5.4, 0, sg, '#5a1a1a', '#ffd34d');
+
+  [-2.2, 2.2].forEach((dx, di) => {
+    const dp = new THREE.Group(); dp.position.set(dx, 0, 5.2); sg.add(dp);
+    box(0.65, 0.35, 0.65, 0x222226, 0, 0.18, 0, dp);
+    cyl(0.22, 0.18, 1.2, 8, 0x222228, 0, 0.95, 0, dp);
+    sph(0.24, 0x222228, 0, 1.7, 0, dp);
+    cyl(0.08, 0.22, 0.5, 6, 0xd4af37, 0, 2.1, 0, dp);
+    cyl(0.06, 0.14, 1.6, 6, 0xd4af37, di === 0 ? 0.3 : -0.3, 0.9, 0.1, dp);
+    tag(dp, di === 0 ? '🛡️ துவாரபாலகர்' : '🛡️ துவாரபாலகி');
+  });
+
+  // Shiva Lingam
+  cyl(1.1, 1.3, 0.55, 18, 0x1b1b1f, 0, 0.5, 1.2, sg);
+  box(0.45, 0.35, 1.8, 0x1b1b1f, 0.95, 0.5, 1.2, sg);
+  cyl(0.44, 0.44, 0.9, 18, 0x0f0f12, 0, 1.15, 1.2, sg);
+  sph(0.44, 0x0f0f12, 0, 1.55, 1.2, sg);
+  box(0.38, 0.04, 0.02, 0xffffff, 0, 1.48, 1.65, sg);
+  box(0.38, 0.04, 0.02, 0xffffff, 0, 1.40, 1.65, sg);
+  box(0.38, 0.04, 0.02, 0xffffff, 0, 1.32, 1.65, sg);
+  sph(0.045, 0xcc1111, 0, 1.40, 1.67, sg);
+
+  const nagaG = new THREE.Group(); nagaG.position.set(0, 1.2, 0.85); sg.add(nagaG);
+  cyl(0.12, 0.12, 1.1, 8, 0xffd54f, 0, 0.6, 0, nagaG);
+  [-0.24, -0.12, 0, 0.12, 0.24].forEach((nx) => {
+    const hood = box(0.11, 0.32, 0.06, 0xffd54f, nx, 1.25, 0.25 - Math.abs(nx) * 0.15, nagaG);
+  });
+  cyl(0.48, 0.48, 0.14, 12, 0x2e7d32, 0, 0.95, 1.2, sg);
+  cyl(0.50, 0.50, 0.10, 12, 0xff7043, 0, 0.88, 1.2, sg);
+  cyl(0.15, 0.25, 0.6, 8, 0xd4af37, 0, 0.3, 2.6, sg);
+  sph(0.12, 0xffaa22, 0, 0.72, 2.6, sg);
+  glow(0.6, 0.6, 0.6, 0xffaa22, 0, 0.72, 2.6, sg);
+  tag(sg, '🕉️ மூலவர் ஸ்ரீ வேதபுரீஸ்வரர்');
+
+  // 5. Ambal Sannidhi (அருள்மிகு இளமுலை நாயகி அம்மன்) at (-122, -65)
+  const ag = new THREE.Group(); ag.position.set(-122, 0, -65); TG.add(ag);
+  box(9, 5.2, 9, 0x4a4a50, 0, 2.6, 0, ag);
+  for (let vi = 0; vi < 3; vi++) {
+    box(8 - vi * 2.2, 1.2, 8 - vi * 2.2, 0x7a4b2c, 0, 5.2 + vi * 1.2 + 0.6, 0, ag);
+  }
+  cyl(0.12, 0.3, 1.2, 8, GOLD_M, 0, 9.2, 0, ag);
+  sph(0.2, GOLD_M, 0, 9.9, 0, ag);
+  box(2.8, 3.6, 0.5, 0x1a0f08, 0, 1.8, 4.6, ag);
+  sign('அருள்மிகு இளமுலை நாயகி அம்மன் சன்னதி', 7.4, 0.85, 0, 4.1, 4.9, 0, ag, '#7b1113', '#ffd34d');
+  cyl(0.22, 0.26, 1.3, 8, 0xc0392b, 0, 1.1, 1.2, ag);
+  sph(0.22, 0xffd54f, 0, 1.85, 1.2, ag);
+  cyl(0.08, 0.22, 0.55, 8, 0xffd54f, 0, 2.25, 1.2, ag);
+  cyl(0.32, 0.32, 0.12, 10, 0xffffff, 0, 1.5, 1.2, ag);
+  [-1.2, 1.2].forEach(lx => {
+    cyl(0.05, 0.18, 1.1, 8, 0xd4af37, lx, 0.55, 1.4, ag);
+    sph(0.08, 0xffaa22, lx, 1.15, 1.4, ag);
+    glow(0.3, 0.3, 0.3, 0xffaa22, lx, 1.15, 1.4, ag);
+  });
+  tag(ag, '🌺 அருள்மிகு இளமுலை நாயகி அம்மன்');
+
+  // 6. Sthala Vriksham (ஆண் பனை மரம் & திருஞானசம்பந்தர்) at (-94, -58)
+  const pg = new THREE.Group(); pg.position.set(-94, 0, -58); TG.add(pg);
+  box(6.5, 0.45, 6.5, 0x3a3a40, 0, 0.22, 0, pg);
+  box(5.8, 0.25, 5.8, 0xd4c6a6, 0, 0.55, 0, pg);
+  cyl(0.34, 0.44, 11.5, 8, 0x4a321a, 0, 5.8, 0, pg);
+  for (let ri = 0; ri < 12; ri++) cyl(0.36, 0.36, 0.08, 8, 0x382210, 0, 1.2 + ri * 0.85, 0, pg);
+  for (let li = 0; li < 10; li++) {
+    const ang = (li / 10) * Math.PI * 2;
+    box(0.8, 0.08, 3.4, 0x1e6828, Math.cos(ang) * 1.5, 11.4, Math.sin(ang) * 1.5, pg);
+  }
+  [-0.45, 0.45].forEach((px, pi) => {
+    cyl(0.28, 0.18, 0.75, 8, 0x5a3010, px, 10.4, pi === 0 ? 0.35 : -0.35, pg);
+    for (let bi = 0; bi < 4; bi++) {
+      sph(0.14, 0x3d1f08, px + (bi % 2 ? 0.12 : -0.12), 10.1 - bi * 0.12, (pi === 0 ? 0.35 : -0.35), pg);
+    }
+  });
+
+  const sg_sam = new THREE.Group(); sg_sam.position.set(1.6, 0.55, 1.4); pg.add(sg_sam);
+  box(0.8, 0.3, 0.8, 0x3a3a40, 0, 0.15, 0, sg_sam);
+  cyl(0.18, 0.16, 0.9, 8, 0x9a6a38, 0, 0.75, 0, sg_sam);
+  sph(0.16, 0x9a6a38, 0, 1.32, 0, sg_sam);
+  sph(0.08, 0x14100c, 0, 1.52, -0.04, sg_sam);
+  box(0.35, 0.05, 0.15, 0xe2d7bc, 0, 0.85, 0.22, sg_sam);
+  sign('ஆண் பனை பெண் பனையான அற்புதத் தலம் · திருஞானசம்பந்தர்', 5.6, 0.65, 0, 2.2, 1.4, 0, pg, '#3e2723', '#ffd54f');
+  tag(pg, '🌴 தல விருட்சம் ஆண் பனை & திருஞானசம்பந்தர்');
+
+  // 7. Navagraha Mandapam at (-96, -68)
+  const nvg = new THREE.Group(); nvg.position.set(-96, 0, -68); TG.add(nvg);
+  box(6.8, 0.75, 6.8, 0x222226, 0, 0.38, 0, nvg);
+  box(6.2, 0.2, 6.2, 0x1a1a1d, 0, 0.85, 0, nvg);
+  [[-2.8, -2.8], [2.8, -2.8], [-2.8, 2.8], [2.8, 2.8]].forEach(([cx, cz]) => {
+    cyl(0.18, 0.22, 3.2, 8, 0x3a3a40, cx, 2.45, cz, nvg);
+  });
+  box(7.2, 0.4, 7.2, 0x4a4a50, 0, 4.15, 0, nvg);
+  cyl(0.1, 0.3, 0.8, 8, GOLD_M, 0, 4.75, 0, nvg);
+  const grahas = [
+    { n: 'சூரியன்', x: 0, z: 0, c: 0xc0392b },
+    { n: 'சந்திரன்', x: 0, z: 1.8, c: 0xffffff },
+    { n: 'செவ்வாய்', x: 0, z: -1.8, c: 0xd32f2f },
+    { n: 'புதன்', x: -1.8, z: 0, c: 0x388e3c },
+    { n: 'குரு', x: 1.8, z: 0, c: 0xfbc02d },
+    { n: 'சுக்கிரன்', x: 1.8, z: 1.8, c: 0xffffff },
+    { n: 'சனி', x: -1.8, z: -1.8, c: 0x212121 },
+    { n: 'ராகு', x: -1.8, z: 1.8, c: 0x424242 },
+    { n: 'கேது', x: 1.8, z: -1.8, c: 0x5d4037 }
+  ];
+  grahas.forEach(gr => {
+    cyl(0.24, 0.28, 0.25, 8, 0x2a2a2e, gr.x, 1.05, gr.z, nvg);
+    cyl(0.14, 0.14, 0.85, 8, 0x111114, gr.x, 1.55, gr.z, nvg);
+    sph(0.13, 0x111114, gr.x, 2.05, gr.z, nvg);
+    cyl(0.16, 0.16, 0.3, 8, gr.c, gr.x, 1.4, gr.z, nvg);
+    cyl(0.08, 0.06, 0.08, 6, 0x111111, gr.x, 1.15, gr.z + 0.35, nvg);
+    sph(0.035, 0xffaa22, gr.x, 1.22, gr.z + 0.35, nvg);
+  });
+  tag(nvg, '🪐 நவகிரக சன்னதி');
+
+  // 8. Kalyani Pushkarini Temple Tank at (-132, -66)
+  const kg = new THREE.Group(); kg.position.set(-132, 0, -66); TG.add(kg);
+  box(22, 0.5, 20, 0x4a4a50, 0, 0.25, 0, kg);
+  for (let si = 0; si < 4; si++) {
+    const sw = 19 - si * 1.6, sd = 17 - si * 1.6, sy = 0.1 - si * 0.45;
+    box(sw, 0.45, sd, 0x3a3a40, 0, sy, 0, kg);
+  }
+  const tkWater = new THREE.Mesh(new THREE.PlaneGeometry(13, 11), new THREE.MeshLambertMaterial({color: 0x1f7a68, transparent: true, opacity: 0.88, emissive: 0x082b24}));
+  tkWater.rotation.x = -Math.PI / 2;
+  tkWater.position.set(0, -1.25, 0);
+  kg.add(tkWater);
+  window.__templeTankWater = tkWater;
+
+  const nzm = new THREE.Group(); nzm.position.set(0, -1.2, 0); kg.add(nzm);
+  box(3.2, 0.6, 3.2, 0x3a3a40, 0, 0.3, 0, nzm);
+  [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2]].forEach(([px, pz]) => {
+    cyl(0.12, 0.14, 2.2, 6, 0x5a5a62, px, 1.7, pz, nzm);
+  });
+  box(3.4, 0.3, 3.4, 0x5a5a62, 0, 2.9, 0, nzm);
+  cyl(0.08, 0.22, 0.8, 8, GOLD_M, 0, 3.4, 0, nzm);
+  sph(0.14, GOLD_M, 0, 3.9, 0, nzm);
+
+  [[-3.5, -2], [2.8, -3], [-2, 3], [3.2, 2.5], [0, -3.8]].forEach(([lx, lz], li) => {
+    cyl(0.25, 0.25, 0.02, 8, 0x2e7d32, lx, -1.23, lz, kg);
+    sph(0.09, li % 2 ? 0xff69b4 : 0xffffff, lx, -1.17, lz, kg);
+  });
+  tag(kg, '🌊 கல்யாணி திருக்குளம் (தீர்த்தம்)');
+
+  // 9. Brahmotsavam Grand Wooden Chariot (வேதபுரீஸ்வரர் திருத்தேர்) at (-126, -32)
+  const tg = new THREE.Group(); tg.position.set(-126, 0, -32); TG.add(tg);
+  const wm = mat(0x5a3818);
+  [[-1.8, -1.6], [1.8, -1.6], [-1.8, 1.6], [1.8, 1.6]].forEach(([wx, wz]) => {
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.45, 16), wm);
+    wheel.position.set(wx, 1.3, wz);
+    wheel.rotation.z = Math.PI / 2;
+    tg.add(wheel);
+    cyl(0.3, 0.3, 0.65, 12, 0x222222, wx, 1.3, wz, tg);
+  });
+  box(4.2, 0.5, 4.6, 0x4a2a10, 0, 1.5, 0, tg);
+  box(3.8, 0.8, 4.2, 0x5a3416, 0, 2.15, 0, tg);
+  box(3.4, 0.7, 3.8, 0x6a3e1c, 0, 2.9, 0, tg);
+  [[-1.3, -1.3], [1.3, -1.3], [-1.3, 1.3], [1.3, 1.3]].forEach(([px, pz]) => {
+    cyl(0.14, 0.16, 2.4, 8, 0x8a5224, px, 4.45, pz, tg);
+  });
+  const canopyCols = [0xd32f2f, 0xfbc02d, 0x1976d2, 0x388e3c];
+  for (let ci = 0; ci < 4; ci++) {
+    const cw = 3.6 - ci * 0.75, cy = 5.65 + ci * 1.1;
+    box(cw, 0.95, cw, canopyCols[ci], 0, cy + 0.48, 0, tg);
+    box(cw + 0.15, 0.15, cw + 0.15, 0xffd54f, 0, cy + 0.08, 0, tg);
+  }
+  cyl(0.12, 0.35, 1.2, 8, GOLD_M, 0, 10.6, 0, tg);
+  sph(0.22, GOLD_M, 0, 11.3, 0, tg);
+  cyl(0.4, 0.4, 0.35, 12, 0xc2a66f, 0, 0.2, 3.4, tg);
+  tag(tg, '🎪 அருள்மிகு வேதபுரீஸ்வரர் திருத்தேர்');
+
+  hit(-114, -102, -76, -66, 6.5, 'out');
+  hit(-127, -117, -70, -60, 5.5, 'out');
+  hit(-140, -124, -74, -58, 2.0, 'out');
+})();
+
+/* ---------- TEMPLE INTERACTIVE RITUALS & DEVOTIONAL AUDIO ---------- */
+window.darshanMoolavar = function(){
+  const a = ac();
+  if (a) {
+    [130, 260, 390, 520, 880].forEach((f, i) => {
+      const o = a.createOscillator(), gn = a.createGain(), T = a.currentTime;
+      o.type = i < 2 ? 'sine' : 'triangle';
+      o.frequency.value = f;
+      gn.gain.setValueAtTime(0.2 / (i + 1), T);
+      gn.gain.exponentialRampToValueAtTime(0.0001, T + 3.5);
+      o.connect(gn); gn.connect(a.destination);
+      o.start(T); o.stop(T + 3.5);
+    });
+  }
+  addPts(25, 'Moolavar Vedapureeswarar darshan complete');
+  chingSnd();
+  toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் திருவருள்! "நமசிவாய வாழ்க நாதன் தாள் வாழ்க" (+25 pts & திருநீறு பிரசாதம்)', 5500);
+};
+
+window.darshanAmbal = function(){
+  const a = ac();
+  if (a) {
+    [1046, 1318, 1567, 2093].forEach((f, i) => {
+      setTimeout(() => sTone(f, f * 0.99, 1.4, 0.16 / (i + 1), 'sine'), i * 140);
+    });
+  }
+  addPts(15, 'Ambal darshan complete');
+  chingSnd();
+  toast('🌺 அருள்மிகு இளமுலை நாயகி அம்மன் ஆசிர்வாதம்! மங்களகரமான குங்குமப் பிரசாதம் (+15 pts)', 4800);
+};
+
+window.worshipPalmTree = function(){
+  try {
+    const hymn = [330, 370, 415, 440, 494, 554, 494, 440, 415, 370, 330];
+    hymn.forEach((f, i) => {
+      setTimeout(() => sTone(f, f * 1.005, 0.45, 0.18, 'sine'), i * 280);
+    });
+  } catch(e) {}
+  addPts(15, 'Sthala Vriksham miracle palm worship');
+  chingSnd();
+  toast('🌴 திருவோத்தூர் திருஞானசம்பந்தர் தேவாரம்: "பூத்தேர்ந்து ஆயன கொண்டு நின்று... திருவோத்தூர்" (+15 pts)', 5500);
+};
+
+window.pradakshinamNavagraha = function(){
+  const a = ac();
+  if (a) {
+    for (let i = 0; i < 9; i++) {
+      setTimeout(() => sTone(660 + i * 55, 655 + i * 55, 0.35, 0.14, 'triangle'), i * 160);
+    }
+  }
+  addPts(20, 'Navagraha 9 pradakshinams complete');
+  chingSnd();
+  toast('🪐 நவகிரக தோஷ நிவர்த்தி & கிரக சுப ஆசிர்வாதம்! (+20 pts)', 5000);
+};
+
+window.sprinkleTheertham = function(){
+  try {
+    sNoise(0.35, 0.22, 600);
+    sTone(520, 260, 0.25, 0.2, 'sine');
+  } catch(e) {}
+  addPts(10, 'Sacred theertham purification');
+  chingSnd();
+  toast('🌊 சேயாறு கோயில் திருக்குள புனித தீர்த்தம்! உடல் & மன அமைதி (+10 pts)', 4500);
+};
+
+window.lightTempleDeepam = function(){
+  try {
+    sNoise(0.08, 0.18, 1200);
+    setTimeout(() => sTone(880, 1100, 0.6, 0.15, 'sine'), 100);
+  } catch(e) {}
+  addPts(10, 'Light temple deepam');
+  chingSnd();
+  toast('🪔 நெய் தீப ஜோதி வழிபாடு! இருள் நீங்கி ஞான ஒளி பெருகட்டும் (+10 pts)', 4500);
+};
+
+window.worshipChariot = function(){
+  try {
+    sTone(240, 360, 1.8, 0.22, 'sawtooth');
+    setTimeout(() => sTone(360, 350, 1.4, 0.18, 'sine'), 400);
+  } catch(e) {}
+  addPts(10, 'Temple chariot darshan');
+  chingSnd();
+  toast('🎪 பிரம்மோற்சவ அருள்மிகு வேதபுரீஸ்வரர் திருத்தேர் தரிசனம்! (+10 pts)', 4500);
+};
+
+I.push(
+  { z: 'out', x: -108, y: -65.5, r: 4.8, when: () => !window.drv && zone == 'out', l: '🕉️ மூலவர் வேதபுரீஸ்வரர் தரிசனம் (Lord Shiva Darshan)', f: window.darshanMoolavar },
+  { z: 'out', x: -122, y: -61.5, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: window.darshanAmbal },
+  { z: 'out', x: -94, y: -55.5, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: window.worshipPalmTree },
+  { z: 'out', x: -96, y: -64.8, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: window.pradakshinamNavagraha },
+  { z: 'out', x: -124, y: -66, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌊 கோயில் குள புனித தீர்த்தம் (Sacred Theertham)', f: window.sprinkleTheertham },
+  { z: 'out', x: -108, y: -48, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 அகல் விளக்கு ஏற்றுங்கள் (Light Deepam)', f: window.lightTempleDeepam },
+  { z: 'out', x: -126, y: -30, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: window.worshipChariot }
+);
 }catch(e){console.warn('street/gopuram',e)}
 
 /* ---------- 4. TIMETABLE BUSES ---------- */
@@ -3852,6 +4178,18 @@ function run(uid,guest){
   const t = performance.now() / 1000;
   if (window.__riverWat) {
    window.__riverWat.position.y = 0.10 + Math.sin(t * 1.8) * 0.035;
+  }
+  if (window.__templeTankWater) {
+   window.__templeTankWater.material.opacity = 0.84 + Math.sin(t * 1.6) * 0.08;
+  }
+  // Auspicious temple ambience sound when nearby
+  const tDist = Math.hypot(P.x - (-108), P.z - (-58));
+  if (tDist < 52 && zone === 'out' && typeof started !== 'undefined' && started) {
+   window._nextTempleBell = window._nextTempleBell || 0;
+   if (t > window._nextTempleBell) {
+    window._nextTempleBell = t + 14 + Math.random() * 8;
+    try { sTone(550, 545, 1.8, 0.035, 'sine'); sTone(825, 820, 1.2, 0.02, 'sine'); } catch(e){}
+   }
   }
   if (!window.drv && curStation >= 0) {
    curStation = -1;
