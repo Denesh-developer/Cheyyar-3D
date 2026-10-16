@@ -193,9 +193,9 @@ function finish(){setTimeout(()=>{done=true;bar.style.animation='none';bar.style
 if(document.readyState==='complete')finish();else addEventListener('load',finish);
 setTimeout(()=>{if(!done){sp.classList.add('out');setTimeout(()=>sp.remove(),950)}},30000)})();</script>
 
-<div id="hud"><div id="zone"></div><div>Drag = look · WASD = walk/drive · H = horn · Shift = run · Space = jump · E = interact · B = Emotes · V = Camera · R = Radio · T = Weather</div></div>
+<div id="hud"><div id="zone"></div><div>Drag = look · WASD = walk/drive · H = horn · Shift = run · Space = jump · E = interact · V = Camera · R = Radio · T = Weather</div></div>
 <div id="pills"><div class="pl" id="plName" style="display:none">🙋 <b id="pnm"></b></div><div class="pl">🟡 Namma Ooru · Cheyyar</div><div class="pl">🏆 <b id="pts">0</b> points</div><div class="pl" id="walPill" style="display:none" onclick="topUp()" title="Tap to add 125 pts (demo)">💰 ₹<b id="wal">1000</b> <small style="opacity:.6">＋</small></div><div class="pl">🎯 Level <b id="lvl">0</b></div><div class="pl">📋 <span id="task">Walk to the theatre door</span></div><div class="pl" id="tktPill" style="display:none">🎟 <b id="tkt"></b></div><div class="pl" id="plOn">👥 7 exploring together</div></div>
-<div id="side"><button id="timeBtn" onclick="window.CY_CYCLE_WEATHER&&CY_CYCLE_WEATHER()" title="Weather & Time: Day / Sunset / Night / Rain (T)">🌤️</button><button id="emoteBtn" onclick="window.CY_TOGGLE_EMOTES&&CY_TOGGLE_EMOTES()" title="Free Fire Emotes (B)">🕺</button><button id="camBtn" onclick="window.CY_CYCLE_CAM&&CY_CYCLE_CAM()" title="Camera Mode (V)">📷</button><button id="radioBtn" onclick="window.CY_TOGGLE_RADIO&&CY_TOGGLE_RADIO()" title="Tamil FM Radio (R)">📻</button><button id="gfxBtn" onclick="setGfx(gfx=='low'?'high':'low')" title="Graphics: High / Low">✨</button><button id="mapBtn" onclick="window.toggleMap&&toggleMap()" title="Minimap (M)">🗺</button><button id="dressBtn" onclick="window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()" title="Change Dress / Outfit (O)">👔</button><button onclick="toggleChat()">💬</button><button onclick="window.showLB?showLB():toast('Leaderboard needs online mode',3000)">🏆</button><button onclick="toast('WASD walk · Shift run · Space jump · E interact',3500)">❓</button><button id="fsBtn" onclick="toggleFS()" title="Full Screen">⛶</button></div>
+<div id="side"><button id="timeBtn" onclick="window.CY_CYCLE_WEATHER&&CY_CYCLE_WEATHER()" title="Weather & Time: Day / Sunset / Night / Rain (T)">🌤️</button><button id="camBtn" onclick="window.CY_CYCLE_CAM&&CY_CYCLE_CAM()" title="Camera Mode (V)">📷</button><button id="radioBtn" onclick="window.CY_TOGGLE_RADIO&&CY_TOGGLE_RADIO()" title="Tamil FM Radio (R)">📻</button><button id="gfxBtn" onclick="setGfx(gfx=='low'?'high':'low')" title="Graphics: High / Low">✨</button><button id="mapBtn" onclick="window.toggleMap&&toggleMap()" title="Minimap (M)">🗺</button><button id="dressBtn" onclick="window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()" title="Change Dress / Outfit (O)">👔</button><button onclick="toggleChat()">💬</button><button onclick="window.showLB?showLB():toast('Leaderboard needs online mode',3000)">🏆</button><button onclick="toast('WASD walk · Shift run · Space jump · E interact',3500)">❓</button><button id="fsBtn" onclick="toggleFS()" title="Full Screen">⛶</button></div>
 <div id="lobbybar"><button onclick="toast('Upcoming: '+CY_UP.join(' · '),5000)">📋 Shows</button><button onclick="snacks()">🍿 Food</button><button onclick="goto('out');P.set(38,1.6,0);yaw=Math.PI/2">🚪 Exit</button></div>
 <div id="prompt"></div><div id="toast"></div>
 <div id="pad"><span></span><button data-k="w">▲</button><span></span><button data-k="a">◀</button><button data-k="s">▼</button><button data-k="d">▶</button></div>
@@ -1437,7 +1437,7 @@ if(jy>0||vy>0){
   ME.rotation.y=seatYaw;ME.rotation.x=massage?msTilt(t):0;ME.rotation.z=massage?msRoll(t):0;
   ME.scale.set(1,1,1);
   const k=t/1000;ME.ll.rotation.x=ME.rl.rotation.x=1.5;ME.la.rotation.set(.5,0,0);ME.ra.rotation.set(.5,0,0);
-  if(emT>0){emT-=dt;if(window.applyEmote)window.applyEmote(ME,em,k,true);else{if(em=='wave')ME.ra.rotation.set(0,0,2.6+Math.sin(k*12)*.4);else if(em=='clap'){ME.la.rotation.set(1.3,0,.3);ME.ra.rotation.set(1.3+Math.sin(k*20)*.2,0,-.3)}else{ME.la.rotation.set(0,0,-2.6);ME.ra.rotation.set(0,0,2.6)}}}
+  if(emT>0){emT-=dt;if(em=='wave')ME.ra.rotation.set(0,0,2.6+Math.sin(k*12)*.4);else if(em=='clap'){ME.la.rotation.set(1.3,0,.3);ME.ra.rotation.set(1.3+Math.sin(k*20)*.2,0,-.3)}else{ME.la.rotation.set(0,0,-2.6);ME.ra.rotation.set(0,0,2.6)}}
  }else{
   if(window.drv&&!window.drv.spec.rd){
    ME.position.set(P.x,-100,P.z);
@@ -1483,24 +1483,17 @@ if(jy>0||vy>0){
    }
 
    // Limbs kinematics
-   if(moving>0&&emT>0){emT=0;if(ME.rotation.x!==0)ME.rotation.x=0}
-   if(emT>0){
-    emT-=dt;
-    if(window.applyEmote)window.applyEmote(ME,em,(t/1000),false);
+   if(jy>0){
+    ME.ll.rotation.x=-.25;ME.rl.rotation.x=-.25;
+    ME.la.rotation.set(.35,0,-.20);ME.ra.rotation.set(.35,0,.20);
    }else{
-    if(ME.rotation.x!==0)ME.rotation.x=0;
-    if(jy>0){
-     ME.ll.rotation.x=-.25;ME.rl.rotation.x=-.25;
-     ME.la.rotation.set(.35,0,-.20);ME.ra.rotation.set(.35,0,.20);
+    ME.ll.rotation.x=s;ME.rl.rotation.x=-s;
+    if(isSprint){
+     ME.la.rotation.set(-s*.85,0,-.08);
+     ME.ra.rotation.set(s*.85,0,.08);
     }else{
-     ME.ll.rotation.x=s;ME.rl.rotation.x=-s;
-     if(isSprint){
-      ME.la.rotation.set(-s*.85,0,-.08);
-      ME.ra.rotation.set(s*.85,0,.08);
-     }else{
-      ME.la.rotation.set(-s*.75,0,0);
-      ME.ra.rotation.set(s*.75,0,0);
-     }
+     ME.la.rotation.set(-s*.75,0,0);
+     ME.ra.rotation.set(s*.75,0,0);
     }
    }
   }
@@ -3507,7 +3500,7 @@ function run(uid,guest){
  const MUTE=(()=>{try{return new Set(JSON.parse(localStorage.getItem('cyr3d_mute')||'[]'))}catch(e){return new Set()}})();let lastPush=0;
  const hash=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h};
  const TY={bike:2.4,cycle:2.4,auto:3,car:2.8,bus:5},RIDE={bike:{l:.85,a:.55,z:.3},cycle:{l:.55,a:.4,z:0}},HID={car:1,auto:1,bus:1};
- const EM={popper:'🎉',wave:'👋',clap:'👏',whistle:'😙',pop:'🍿',kuthu:'🕺',dance:'💃',flex:'💪',namaste:'🙏',pushup:'🏋️',laugh:'😂',kiss:'😘',selfie:'🤳'};window.EM=EM;window.bubble=bubble;
+ const EM={popper:'🎉',wave:'👋',clap:'👏',whistle:'😙',pop:'🍿'};
  const grp=zn=>Z[zn]&&Z[zn].g;
  const count=()=>{const el=$('plOn');if(el)el.textContent='👥 '+(R.size+1)+' exploring together'};
  count();
@@ -3702,237 +3695,15 @@ function run(uid,guest){
 <script>
 /* =========================================================================
    NAMMA CHEYYAR 3D - ADVANCED SYSTEMS SUITE
-   1. Free Fire Style Emotes Wheel & Full-Body Kinematics Engine
-   2. Vehicle Tamil FM Radio (Leo / Naa Ready / Jana Nayagan / Cheyyar Flute)
-   3. Unified Dynamic Day / Night / Sunset / Monsoon Rain Weather System
-   4. Multi-Perspective Camera System (3rd Person / 1st Person POV / Selfie)
-   5. Savaari Destination Beacon & River Shimmer Animations
+   1. Vehicle Tamil FM Radio (Leo / Naa Ready / Jana Nayagan / Cheyyar Flute)
+   2. Unified Dynamic Day / Night / Sunset / Monsoon Rain Weather System
+   3. Multi-Perspective Camera System (3rd Person / 1st Person POV / Selfie)
+   4. Savaari Destination Beacon & River Wave Animations
    ========================================================================= */
 (function(){
  'use strict';
 
- /* ---------- 1. FREE FIRE EMOTES SYSTEM ---------- */
- const EMOTES = [
-  { id: 'kuthu',  icon: '🕺', key: '1', n: 'Kuthu Dance',  ta: 'குத்து டான்ஸ்', d: 'Local Tamil energetic beat' },
-  { id: 'dance',  icon: '💃', key: '2', n: 'Thara Local',  ta: 'தாரா லோக்கல்', d: 'Free Fire hip-hop step' },
-  { id: 'flex',   icon: '💪', key: '3', n: 'Body Builder', ta: 'பாடி பில்டர்', d: 'Biceps flex & power pose' },
-  { id: 'namaste',icon: '🙏', key: '4', n: 'Vanakkam',     ta: 'வணக்கம்',     d: 'Respectful namaste bow' },
-  { id: 'pushup', icon: '🏋️', key: '5', n: 'Push-ups',     ta: 'புஷ்-அப்',    d: 'One-arm ground pushups' },
-  { id: 'laugh',  icon: '😂', key: '6', n: 'LOL Siripu',   ta: 'சிரிப்பு',    d: 'Belly laugh head toss' },
-  { id: 'kiss',   icon: '😘', key: '7', n: 'Flying Kiss',  ta: 'பறக்கும் முத்தம்', d: 'Heart kiss with love' },
-  { id: 'selfie', icon: '🤳', key: '8', n: 'Selfie Pose',  ta: 'செல்பி',      d: 'Smile & phone flash' },
-  { id: 'clap',   icon: '👏', key: '9', n: 'Kai Thattal',  ta: 'கைதட்டல்',    d: 'Cheering applause' },
-  { id: 'wave',   icon: '👋', key: '0', n: 'Vanakkam Bye', ta: 'டாட்டா',      d: 'Friendly wave hello' }
- ];
- window.CY_EMOTES_LIST = EMOTES;
-
- // Emote Kinematics Processor
- window.applyEmote = function(g, em, et, seated) {
-  if (!g || !g.la || !g.ra || !g.ll || !g.rl) return;
-  if (seated) {
-   const k = et;
-   if (em === 'wave') g.ra.rotation.set(0, 0, 2.6 + Math.sin(k * 12) * 0.4);
-   else if (em === 'clap') { g.la.rotation.set(1.3, 0, 0.3); g.ra.rotation.set(1.3 + Math.sin(k * 18) * 0.25, 0, -0.3); }
-   else if (em === 'laugh') { const sh = Math.sin(k * 20) * 0.12; if (g.head) g.head.rotation.set(-0.2 + sh, 0, 0); g.la.rotation.set(0.9, 0, 0.4); g.ra.rotation.set(0.9, 0, -0.4); }
-   else if (em === 'namaste') { g.la.rotation.set(0.85, 0, 0.65); g.ra.rotation.set(0.85, 0, -0.65); if (g.head) g.head.rotation.x = 0.2; }
-   else if (em === 'selfie') { g.ra.rotation.set(1.3, 0, 0.7); g.la.rotation.set(0.5, 0, -0.4); if (g.head) g.head.rotation.set(-0.1, 0.35, -0.15); }
-   else if (em === 'flex') { g.la.rotation.set(1.5, 0, -1.2); g.ra.rotation.set(1.5, 0, 1.2); if (g.head) g.head.rotation.set(-0.1, 0, 0); }
-   else if (em === 'kiss') { const p = (k * 2) % 2; if (p < 0.8) g.ra.rotation.set(1.4, 0, -0.25); else g.ra.rotation.set(0.4, 0, 0.75); }
-   else { g.la.rotation.set(0, 0, -2.6); g.ra.rotation.set(0, 0, 2.6); }
-   return;
-  }
-
-  if (em === 'kuthu') {
-   const beat = Math.sin(et * 15);
-   const bounce = Math.abs(beat) * 0.12;
-   g.position.y += bounce;
-   if (g.torso) g.torso.rotation.z = Math.cos(et * 15) * 0.12;
-   if (g.head) g.head.rotation.x = Math.sin(et * 15) * 0.25;
-   g.ll.rotation.x = beat > 0 ? 0.65 : -0.2;
-   g.rl.rotation.x = beat <= 0 ? 0.65 : -0.2;
-   g.la.rotation.set(1.4 + beat * 0.45, 0, -0.6);
-   g.ra.rotation.set(1.4 - beat * 0.45, 0, 0.6);
-  } else if (em === 'dance') {
-   const w = Math.sin(et * 8), w2 = Math.cos(et * 8);
-   g.la.rotation.set(0.6 + w * 0.8, 0, -0.8 - w2 * 0.3);
-   g.ra.rotation.set(0.6 - w * 0.8, 0, 0.8 + w2 * 0.3);
-   g.ll.rotation.set(0.15, 0, -w * 0.25);
-   g.rl.rotation.set(0.15, 0, w * 0.25);
-   if (g.torso) g.torso.rotation.set(w * 0.08, w2 * 0.18, -w * 0.12);
-  } else if (em === 'flex') {
-   g.ll.rotation.set(0, 0, -0.32);
-   g.rl.rotation.set(0, 0, 0.32);
-   g.la.rotation.set(1.55, 0, -1.25);
-   g.ra.rotation.set(1.55, 0, 1.25);
-   if (g.torso) g.torso.rotation.x = -0.08;
-   if (g.head) g.head.rotation.set(-0.12, Math.sin(et * 4) * 0.1, 0);
-  } else if (em === 'namaste') {
-   const bow = Math.sin(Math.min(Math.PI, et * 2.5)) * 0.22;
-   g.la.rotation.set(0.85, 0, 0.65);
-   g.ra.rotation.set(0.85, 0, -0.65);
-   if (g.torso) g.torso.rotation.x = bow;
-   if (g.head) g.head.rotation.x = bow * 1.2;
-  } else if (em === 'pushup') {
-   const push = (Math.sin(et * 9) + 1) * 0.5;
-   g.position.y += 0.22 + push * 0.15;
-   g.rotation.x = 1.35;
-   g.la.rotation.set(0.3 + push * 0.5, 0, -0.4);
-   g.ra.rotation.set(0.3 + push * 0.5, 0, 0.4);
-   g.ll.rotation.set(0, 0, 0);
-   g.rl.rotation.set(0, 0, 0);
-  } else if (em === 'laugh') {
-   const sh = Math.sin(et * 20) * 0.12;
-   g.la.rotation.set(0.9, 0, 0.45);
-   g.ra.rotation.set(0.9, 0, -0.45);
-   if (g.torso) g.torso.rotation.x = -0.12 + sh;
-   if (g.head) g.head.rotation.set(-0.22 + sh * 1.5, Math.sin(et * 5) * 0.1, 0);
-  } else if (em === 'selfie') {
-   g.ra.rotation.set(1.3, 0, 0.7);
-   g.la.rotation.set(0.5, 0, -0.4);
-   if (g.head) g.head.rotation.set(-0.1, 0.35, -0.15);
-  } else if (em === 'kiss') {
-   const p = (et * 2) % 2;
-   if (p < 0.8) g.ra.rotation.set(1.4, 0, -0.25);
-   else g.ra.rotation.set(0.4, 0, 0.75);
-  } else if (em === 'clap') {
-   const cp = Math.sin(et * 18);
-   g.la.rotation.set(1.1, 0, 0.3 + cp * 0.25);
-   g.ra.rotation.set(1.1, 0, -0.3 - cp * 0.25);
-  } else if (em === 'wave') {
-   g.ra.rotation.set(0, 0, 2.6 + Math.sin(et * 14) * 0.45);
-  } else if (em === 'popper') {
-   g.la.rotation.set(0, 0, -2.6);
-   g.ra.rotation.set(0, 0, 2.6);
-  } else if (em === 'whistle') {
-   g.la.rotation.set(1.3, 0, 0.4);
-   g.ra.rotation.set(1.3, 0, -0.4);
-   if (g.head) g.head.rotation.x = -0.25;
-  } else if (em === 'pop') {
-   const m = Math.sin(et * 10);
-   g.la.rotation.set(0.8, 0, 0.3);
-   g.ra.rotation.set(1.2 + m * 0.3, 0, -0.2);
-  }
- };
-
- // Procedural Sound Synthesizer for Emotes
- window.playEmoteAudio = function(k) {
-  try {
-   const a = ac();
-   if (!a) return;
-   if (k === 'kuthu') {
-    for (let i = 0; i < 4; i++) {
-     setTimeout(() => { sNoise(0.08, 0.26, 120); sTone(140, 60, 0.12, 0.32, 'sine'); }, i * 220);
-     setTimeout(() => { sNoise(0.05, 0.18, 450); sTone(280, 200, 0.08, 0.18, 'triangle'); }, i * 220 + 110);
-    }
-   } else if (k === 'dance') {
-    [220, 261, 329, 392].forEach((f, i) => { setTimeout(() => sTone(f, f * 0.9, 0.18, 0.16, 'sawtooth'), i * 140); });
-   } else if (k === 'flex') {
-    sNoise(0.2, 0.2, 300);
-    setTimeout(() => { sTone(330, 440, 0.4, 0.22, 'sine'); sTone(550, 660, 0.4, 0.16, 'triangle'); }, 150);
-   } else if (k === 'namaste') {
-    sTone(880, 875, 1.2, 0.22, 'sine'); sTone(1320, 1310, 0.9, 0.12, 'sine');
-   } else if (k === 'pushup') {
-    [0, 300, 600, 900].forEach(d => { setTimeout(() => sTone(180, 110, 0.1, 0.2, 'sine'), d); });
-   } else if (k === 'laugh') {
-    [520, 580, 520, 620, 580].forEach((f, i) => { setTimeout(() => sTone(f, f * 0.95, 0.09, 0.18, 'triangle'), i * 110); });
-   } else if (k === 'kiss') {
-    sTone(600, 950, 0.12, 0.2, 'sine'); setTimeout(() => sTone(1200, 1600, 0.2, 0.15, 'sine'), 120);
-   } else if (k === 'selfie') {
-    sNoise(0.04, 0.35, 1200); setTimeout(() => sTone(1800, 2400, 0.06, 0.25, 'sine'), 50);
-   } else if (k === 'clap') {
-    for (let i = 0; i < 5; i++) { setTimeout(() => sNoise(0.05, 0.22, 900), i * 160); }
-   } else if (k === 'wave') {
-    sTone(523, 659, 0.25, 0.18, 'sine'); setTimeout(() => sTone(659, 784, 0.3, 0.18, 'sine'), 150);
-   } else if (k === 'whistle') {
-    if (window.whistleSound) whistleSound();
-   } else if (k === 'popper') {
-    if (window.confettiBlast) confettiBlast();
-   }
-  } catch (e) {}
- };
-
- // Trigger an emote for local player and broadcast
- window.triggerEmote = function(id) {
-  const item = EMOTES.find(e => e.id === id);
-  if (!item) return;
-  if (window.emote) window.emote(id);
-  else if (typeof emote === 'function') emote(id);
-  window.playEmoteAudio(id);
-  if (typeof em !== 'undefined') { em = id; emT = 3.5; }
-  // Display floating bubble for self
-  if (window.bubble && typeof ME !== 'undefined') {
-   window.bubble({ bub: window._myBub, set bub(v){ window._myBub = v; }, get bub(){ return window._myBub; } }, ME, item.icon + ' ' + item.n, 2.5);
-  }
-  toast(item.icon + ' ' + item.n + ' (' + item.ta + ')', 2600);
-  window.CY_TOGGLE_EMOTES(false);
- };
-
- // Free Fire Emote Modal DOM & Styling
- const emStyle = document.createElement('style');
- emStyle.textContent = `
-  #emoteWheelModal {
-   position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center;
-   background: rgba(8, 10, 15, 0.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  }
-  .ff-box {
-   width: min(560px, 94vw); background: linear-gradient(135deg, rgba(28, 18, 22, 0.96), rgba(14, 18, 28, 0.98));
-   border: 2px solid #ffd34d; border-radius: 20px; box-shadow: 0 0 35px rgba(255, 211, 77, 0.4), inset 0 0 15px rgba(255, 211, 77, 0.15);
-   padding: 16px 20px 20px; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-   animation: ffPop 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  }
-  @keyframes ffPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  .ff-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 211, 77, 0.3); padding-bottom: 10px; margin-bottom: 14px; }
-  .ff-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; color: #ffd34d; text-shadow: 0 2px 10px rgba(255, 211, 77, 0.4); }
-  .ff-close { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #eee; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .ff-close:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; transform: rotate(90deg); }
-  .ff-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
-  @media(max-width: 520px){ .ff-grid { grid-template-columns: repeat(3, 1fr); } }
-  .ff-card { background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 211, 77, 0.04) 100%); border: 1px solid rgba(255, 211, 77, 0.28); border-radius: 12px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; transition: all 0.18s cubic-bezier(0.2, 0, 0, 1); user-select: none; }
-  .ff-card:hover, .ff-card:focus { background: linear-gradient(180deg, rgba(255, 211, 77, 0.28) 0%, rgba(255, 165, 0, 0.22) 100%); border-color: #ffd34d; box-shadow: 0 0 16px rgba(255, 211, 77, 0.6), inset 0 0 8px rgba(255, 211, 77, 0.3); transform: translateY(-4px) scale(1.05); }
-  .ff-card:active { transform: translateY(1px) scale(0.96); }
-  .ff-k { position: absolute; top: 4px; left: 6px; font-size: 10px; font-weight: 700; color: #ffd34d; background: rgba(0, 0, 0, 0.6); padding: 1px 5px; border-radius: 6px; border: 1px solid rgba(255, 211, 77, 0.4); }
-  .ff-ic { font-size: 32px; margin-top: 6px; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
-  .ff-nm { font-size: 11px; font-weight: 700; color: #fff; text-align: center; line-height: 1.15; white-space: nowrap; }
-  .ff-ta { font-size: 10px; color: #ffd34d; opacity: 0.9; text-align: center; white-space: nowrap; }
-  .ff-foot { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: rgba(255, 255, 255, 0.7); border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
-  .ff-foot b { color: #ffd34d; }
- `;
- document.head.append(emStyle);
-
- const emModal = document.createElement('div');
- emModal.id = 'emoteWheelModal';
- emModal.onclick = function(e){ if (e.target === this) window.CY_TOGGLE_EMOTES(false); };
- emModal.innerHTML = `
-  <div class="ff-box">
-   <div class="ff-head">
-    <div class="ff-title"><span>🕺</span> FREE FIRE EMOTES · எமோட்ஸ்</div>
-    <button class="ff-close" onclick="window.CY_TOGGLE_EMOTES(false)">✕</button>
-   </div>
-   <div class="ff-grid">
-    ${EMOTES.map(e => `
-     <div class="ff-card" onclick="window.triggerEmote('${e.id}')" title="${e.d}">
-      <span class="ff-k">${e.key}</span>
-      <span class="ff-ic">${e.icon}</span>
-      <span class="ff-nm">${e.n}</span>
-      <span class="ff-ta">${e.ta}</span>
-     </div>
-    `).join('')}
-   </div>
-   <div class="ff-foot">
-    <span>Press <b>[1 - 0]</b> or tap to emote · <b>[B]</b> toggle wheel</span>
-    <span style="opacity:.6">Cheyyar 3D</span>
-   </div>
-  </div>
- `;
- document.body.append(emModal);
-
- window.CY_TOGGLE_EMOTES = function(force) {
-  const isShow = typeof force === 'boolean' ? force : (emModal.style.display !== 'flex');
-  emModal.style.display = isShow ? 'flex' : 'none';
- };
-
-
- /* ---------- 2. VEHICLE TAMIL FM RADIO SYSTEM ---------- */
+ /* ---------- 1. VEHICLE TAMIL FM RADIO SYSTEM ---------- */
  const FM_STATIONS = [
   { id: 'leo',     freq: '93.5', name: 'Suryan FM',       track: 'LEO - Badass Theme',        ta: 'லியோ படாஸ் தீம்',     tempo: 128 },
   { id: 'mirchi',  freq: '98.3', name: 'Radio Mirchi',    track: 'Naa Ready Kuthu Vibe',     ta: 'நா ரெடி குத்து பாட்டு', tempo: 140 },
@@ -3977,24 +3748,20 @@ function run(uid,guest){
    if (!a) return;
    const step = radioStep % 16;
    if (st.id === 'leo') {
-    // Badass driving beat
     if (step % 4 === 0) { sNoise(0.06, 0.25, 140); sTone(130, 55, 0.14, 0.3, 'sine'); }
     if (step % 4 === 2) { sNoise(0.05, 0.18, 800); }
     const bass = [110, 110, 130, 146, 110, 98, 110, 130][step % 8];
     sTone(bass, bass * 0.98, 0.12, 0.2, 'sawtooth');
    } else if (st.id === 'mirchi') {
-    // Naa Ready energetic dappankuthu
     if (step % 2 === 0) { sNoise(0.07, 0.22, 110); sTone(160, 70, 0.1, 0.28, 'sine'); }
     else { sNoise(0.04, 0.15, 600); }
     const mel = [330, 392, 440, 494, 440, 392, 330, 294][step % 8];
     sTone(mel, mel, 0.09, 0.14, 'triangle');
    } else if (st.id === 'janan') {
-    // Heroic brass fanfare
     const notes = [261, 329, 392, 523, 494, 392, 440, 392, 349, 329, 294, 261, 329, 392, 523, 659];
     sTone(notes[step], notes[step] * 0.99, 0.18, 0.16, 'sawtooth');
     if (step % 4 === 0) sTone(130, 65, 0.15, 0.22, 'sine');
    } else if (st.id === 'cheyyar') {
-    // Peaceful soulful Tamil flute
     const flute = [392, 494, 587, 659, 587, 494, 440, 392][step % 8];
     sTone(flute, flute * 1.01, 0.28, 0.15, 'sine');
    }
@@ -4025,7 +3792,7 @@ function run(uid,guest){
  };
 
 
- /* ---------- 3. UNIFIED DYNAMIC WEATHER & DAY/NIGHT SYSTEM ---------- */
+ /* ---------- 2. UNIFIED DYNAMIC WEATHER & DAY/NIGHT SYSTEM ---------- */
  const WEATHER_MODES = [
   { id: 'day',    icon: '☀️', name: 'Bright Sun',      ta: 'பகல்பொழுது ☀️' },
   { id: 'sunset', icon: '🌅', name: 'Golden Sunset',   ta: 'அந்திப் பொழுது 🌅' },
@@ -4052,7 +3819,7 @@ function run(uid,guest){
  };
 
 
- /* ---------- 4. MULTI-PERSPECTIVE CAMERA MODES ---------- */
+ /* ---------- 3. MULTI-PERSPECTIVE CAMERA MODES ---------- */
  window.camMode = 0; // 0: 3rd Person, 1: 1st Person POV, 2: Selfie Cam
  const CAM_NAMES = ['🎥 3rd Person View', '👁️ 1st Person POV', '🤳 Selfie Mode'];
  const CAM_ICONS = ['🎥', '👁️', '🤳'];
@@ -4065,25 +3832,16 @@ function run(uid,guest){
  };
 
 
- /* ---------- 5. GLOBAL KEYBOARD SHORTCUTS ---------- */
+ /* ---------- 4. GLOBAL KEYBOARD SHORTCUTS ---------- */
  addEventListener('keydown', function(e) {
   if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
   const k = e.key.toLowerCase();
-  if (k === 'b') {
-   window.CY_TOGGLE_EMOTES();
-  } else if (k === 'v') {
+  if (k === 'v') {
    window.CY_CYCLE_CAM();
   } else if (k === 'r') {
    window.CY_TOGGLE_RADIO();
   } else if (k === 't') {
    window.CY_CYCLE_WEATHER();
-  } else if ('1234567890'.includes(k)) {
-   const idx = k === '0' ? 9 : (+k - 1);
-   if (EMOTES[idx]) {
-    window.triggerEmote(EMOTES[idx].id);
-   }
-  } else if (e.key === 'Escape') {
-   window.CY_TOGGLE_EMOTES(false);
   }
  });
 
@@ -4095,7 +3853,6 @@ function run(uid,guest){
   if (window.__riverWat) {
    window.__riverWat.position.y = 0.10 + Math.sin(t * 1.8) * 0.035;
   }
-  // Turn off radio when dismounted
   if (!window.drv && curStation >= 0) {
    curStation = -1;
    stopRadio();
@@ -4104,7 +3861,7 @@ function run(uid,guest){
   }
  };
 
- console.info('[NAMMA CHEYYAR] All advanced systems (Emotes, Radio, Weather, Camera, Temple, River) initialized successfully.');
+ console.info('[NAMMA CHEYYAR] Advanced systems (Radio, Weather, Camera, Temple, River) active.');
 })();
 </script>
 
