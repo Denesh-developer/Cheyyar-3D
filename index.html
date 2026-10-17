@@ -194,7 +194,7 @@ if(document.readyState==='complete')finish();else addEventListener('load',finish
 setTimeout(()=>{if(!done){sp.classList.add('out');setTimeout(()=>sp.remove(),950)}},30000)})();</script>
 
 <div id="hud"><div id="zone"></div><div>Drag = look · WASD = walk/drive · H = horn · Shift = run · Space = jump · E = interact · V = Camera · R = Radio · T = Weather</div></div>
-<div id="pills"><div class="pl" id="plName" style="display:none">🙋 <b id="pnm"></b></div><div class="pl">🟡 Namma Ooru · Cheyyar</div><div class="pl">🏆 <b id="pts">0</b> points</div><div class="pl" id="walPill" style="display:none" onclick="topUp()" title="Tap to add 125 pts (demo)">💰 ₹<b id="wal">1000</b> <small style="opacity:.6">＋</small></div><div class="pl">🎯 Level <b id="lvl">0</b></div><div class="pl">📋 <span id="task">Walk to the theatre door</span></div><div class="pl" id="tktPill" style="display:none">🎟 <b id="tkt"></b></div><div class="pl" id="plOn">👥 7 exploring together</div></div>
+<div id="pills"><div class="pl" id="plName" style="display:none">🙋 <b id="pnm"></b></div><div class="pl">🟡 Namma Ooru · Cheyyar</div><div class="pl">🏆 <b id="pts">0</b> points</div><div class="pl" id="walPill" style="display:none" onclick="topUp()" title="Tap to add 125 pts (demo)">💰 ₹<b id="wal">1000</b> <small style="opacity:.6">＋</small></div><div class="pl">🎯 Level <b id="lvl">0</b></div><div class="pl">📋 <span id="task">Walk to the theatre door</span></div><div class="pl" id="tktPill" style="display:none">🎟 <b id="tkt"></b></div><div class="pl" id="boostPill" style="display:none;background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;font-weight:bold;box-shadow:0 0 10px rgba(255,152,0,0.6)">⚡ Speed Boost: <b id="boostSec">60</b>s</div><div class="pl" id="plOn">👥 7 exploring together</div></div>
 <div id="side"><button id="timeBtn" onclick="window.CY_CYCLE_WEATHER&&CY_CYCLE_WEATHER()" title="Weather & Time: Day / Sunset / Night / Rain (T)">🌤️</button><button id="camBtn" onclick="window.CY_CYCLE_CAM&&CY_CYCLE_CAM()" title="Camera Mode (V)">📷</button><button id="radioBtn" onclick="window.CY_TOGGLE_RADIO&&CY_TOGGLE_RADIO()" title="Tamil FM Radio (R)">📻</button><button id="gfxBtn" onclick="setGfx(gfx=='low'?'high':'low')" title="Graphics: High / Low">✨</button><button id="mapBtn" onclick="window.toggleMap&&toggleMap()" title="Minimap (M)">🗺</button><button id="dressBtn" onclick="window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()" title="Change Dress / Outfit (O)">👔</button><button onclick="toggleChat()">💬</button><button onclick="window.showLB?showLB():toast('Leaderboard needs online mode',3000)">🏆</button><button onclick="toast('WASD walk · Shift run · Space jump · E interact',3500)">❓</button><button id="fsBtn" onclick="toggleFS()" title="Full Screen">⛶</button></div>
 <div id="lobbybar"><button onclick="toast('Upcoming: '+CY_UP.join(' · '),5000)">📋 Shows</button><button onclick="snacks()">🍿 Food</button><button onclick="goto('out');P.set(38,1.6,0);yaw=Math.PI/2">🚪 Exit</button></div>
 <div id="prompt"></div><div id="toast"></div>
@@ -1148,6 +1148,8 @@ function rrAmb(on){if(on&&!amb){const a=ac();if(!a)return;const o=a.createOscill
 window.rrAnim=function(t){
  if(lock&&seated)P.y=seatY+1.55;
  if(lock&&pose)for(const k of ['la','ra','ll','rl']){const v=pose[k];if(v)ME[k].rotation.set(v[0]||0,v[1]||0,v[2]||0)}
+ if(lock&&window._headTilt!==undefined&&window._headTilt!==0&&ME.head)ME.head.rotation.set(window._headTilt,0,0);
+ if(window.muruganAnim)window.muruganAnim(t);
  if(zone=='rest'&&rrW.man){const q=Math.sin(t/110)*.12;rrW.man.la.rotation.set(1+q,0,.5);rrW.man.ra.rotation.set(1-q,0,-.5)}
 };
 const foam=[sph(.12,0xffffff,0,-.72,0,ME.la),sph(.12,0xffffff,0,-.72,0,ME.ra)];foam.forEach(f=>f.visible=false);
@@ -1790,9 +1792,10 @@ let dr=null;R.domElement.onpointerdown=e=>dr=[e.clientX,e.clientY];addEventListe
 addEventListener('pointermove',e=>{if(!dr)return;yaw-=(e.clientX-dr[0])*.005;pitch=Math.max(-1.2,Math.min(1.2,pitch-(e.clientY-dr[1])*.005));dr=[e.clientX,e.clientY]});
 goto('out');let last=performance.now();
 (function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.05);last=t;
- if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?9:5))*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
+ if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const boost=(window.speedBoostUntil&&performance.now()<window.speedBoostUntil)?1.35:1.0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?9:5))*boost*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
  cur=null;if(!seated&&!lock)for(const o of I)if(o.z==zone&&Math.hypot(o.x-P.x,o.y-P.z)<(o.r||4)&&(!o.when||o.when())){cur=o;break}
  const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent='[E] '+(typeof cur.l=='function'?cur.l():cur.l)}else p.style.display='none';
+ const bp=$('boostPill');if(bp){if(window.speedBoostUntil&&performance.now()<window.speedBoostUntil){bp.style.display='block';$('boostSec').textContent=Math.max(0,Math.ceil((window.speedBoostUntil-performance.now())/1000));if(moving>0&&Math.random()<0.22&&window.spawnSpeedSparkle)window.spawnSpeedSparkle()}else{bp.style.display='none'}}
  if(seated||lock||$('modal').style.display=='flex')moving=0;
 if(jy>0||vy>0){
   const prevVy=vy;
@@ -3032,10 +3035,751 @@ for(let k=0;k<7;k++)box(.12,.03,17,0xffffff,-21.6+k*7.2,.415,-14.5,OUT);
 [[-23.6,-5],[24.2,-5]].forEach(a=>{cyl(.35,.3,.8,8,0x2e7d32,a[0],.8,a[1],OUT);pole(a[0],a[1],.45,'out')});
 /* reservation counter */
 box(3,2.6,2.4,0x8a1a1a,23,1.7,-8,OUT);sign('RESERVATION · முன்பதிவு',2.9,.55,23,2.4,-6.79,0,OUT,'#fff3d6','#8a1a1a');hit(21.5,24.5,-9.2,-6.8,3,'out');
-/* tea stall + vendor */
-{const x=-31,z=-12;box(3,1.1,1.4,0x7a4a2a,x,.55,z,OUT);box(3.8,.18,2.4,0xc9a24a,x,2.7,z-.2,OUT);[-1.6,1.6].forEach(dx=>box(.12,2.2,.12,0x4a2f18,x+dx,1.6,z+.6,OUT));
- sign('MURUGAN TEA STALL',3.4,.5,x,2.35,z+.72,0,OUT,'#5a1a1a','#ffd34d');cyl(.22,.25,.5,8,0xcccccc,x-.7,1.35,z,OUT);cyl(.2,.2,.4,8,0xb8860b,x+.6,1.3,z,OUT);
- person(x,z-1.1,0xf4f4f4,Math.PI,OUT);hit(x-1.6,x+1.6,z-.8,z+.8,1.2,'out')}
+/* ===== CHEYYAR TENDER COCONUT & METER TEA STALL ("செய்யாறு பச்சை இளநீர் & மீட்டர் டீ கடை") ===== */
+(function(){
+  const x = -31, z = -12;
+  const stallG = new THREE.Group();
+  OUT.add(stallG);
+
+  /* ---- 1. AUDIO SYNTHESIS VIA WEB AUDIO ---- */
+  function sndChop() {
+    const a = ac(); if (!a) return;
+    try {
+      const o = a.createOscillator(), g = a.createGain(), T = a.currentTime;
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(190, T);
+      o.frequency.exponentialRampToValueAtTime(45, T + 0.08);
+      g.gain.setValueAtTime(0.28, T);
+      g.gain.exponentialRampToValueAtTime(0.001, T + 0.08);
+      o.connect(g); g.connect(a.destination);
+      o.start(T); o.stop(T + 0.08);
+      noise('lowpass', 2400, 400, 0.22, 0.12, 0.9);
+    } catch(e){}
+  }
+
+  function sndStraw() {
+    blip(1100, 0.03, 0.12, 'sine');
+    setTimeout(() => blip(800, 0.04, 0.1, 'sine'), 40);
+  }
+
+  function sndBrassClink() {
+    blip(2400, 0.12, 0.12, 'sine');
+    setTimeout(() => blip(2900, 0.15, 0.09, 'sine'), 50);
+  }
+
+  function sndTeaPour(dur = 1.2) {
+    try {
+      noise('bandpass', 1800, 900, 0.16, dur, 0.5);
+    } catch(e){}
+  }
+
+  function sndDrinkGulp() {
+    const a = ac(); if (!a) return;
+    try {
+      noise('bandpass', 1200, 1600, 0.12, 0.25, 0.6);
+      setTimeout(() => {
+        try {
+          const o = a.createOscillator(), g = a.createGain(), T = a.currentTime;
+          o.type = 'sine';
+          o.frequency.setValueAtTime(320, T);
+          o.frequency.exponentialRampToValueAtTime(140, T + 0.16);
+          g.gain.setValueAtTime(0.2, T);
+          g.gain.exponentialRampToValueAtTime(0.001, T + 0.16);
+          o.connect(g); g.connect(a.destination);
+          o.start(T); o.stop(T + 0.16);
+        } catch(e){}
+      }, 160);
+    } catch(e){}
+  }
+
+  function sndRefresh() {
+    blip(523.25, 0.15, 0.10, 'sine');
+    setTimeout(() => blip(659.25, 0.18, 0.10, 'sine'), 110);
+    setTimeout(() => blip(783.99, 0.22, 0.12, 'sine'), 220);
+    setTimeout(() => blip(1046.5, 0.35, 0.14, 'sine'), 330);
+  }
+
+  /* ---- 2. PARTICLE EFFECTS & VECTOR HELPERS ---- */
+  function alignCylBetween(cylMesh, p1, p2) {
+    const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+    const diff = new THREE.Vector3().subVectors(p2, p1);
+    const len = diff.length();
+    cylMesh.position.copy(mid);
+    cylMesh.scale.set(1, Math.max(0.01, len), 1);
+    cylMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), diff.normalize());
+  }
+
+  function spawnHuskChips(cx, cy, cz) {
+    for (let i = 0; i < 6; i++) {
+      const chip = sph(0.02 + Math.random() * 0.02, 0x43a047, cx, cy, cz, OUT);
+      const vx = (Math.random() - 0.5) * 1.6, vy = 1.0 + Math.random() * 1.4, vz = (Math.random() - 0.5) * 1.6;
+      const t0 = performance.now();
+      const f = () => {
+        const u = (performance.now() - t0) / 400;
+        if (u < 1 && chip.parent) {
+          chip.position.x = cx + vx * u;
+          chip.position.y = cy + vy * u - 4.9 * u * u;
+          chip.position.z = cz + vz * u;
+          chip.scale.setScalar(Math.max(0.01, 1 - u));
+          requestAnimationFrame(f);
+        } else if (chip.parent) {
+          chip.parent.remove(chip);
+        }
+      };
+      requestAnimationFrame(f);
+    }
+  }
+
+  function spawnWaterDroplets(cx, cy, cz) {
+    for (let i = 0; i < 7; i++) {
+      const drop = sph(0.018 + Math.random() * 0.015, 0x81c784, cx, cy, cz, OUT);
+      const vx = (Math.random() - 0.5) * 0.8, vy = 0.4 + Math.random() * 0.6, vz = (Math.random() - 0.5) * 0.8;
+      const t0 = performance.now();
+      const f = () => {
+        const u = (performance.now() - t0) / 500;
+        if (u < 1 && drop.parent) {
+          drop.position.x = cx + vx * u;
+          drop.position.y = cy + vy * u - 2.5 * u * u;
+          drop.position.z = cz + vz * u;
+          drop.scale.setScalar(Math.max(0.01, 1 - u));
+          requestAnimationFrame(f);
+        } else if (drop.parent) {
+          drop.parent.remove(drop);
+        }
+      };
+      requestAnimationFrame(f);
+    }
+  }
+
+  function spawnTeaDroplets(targetCup) {
+    const p = new THREE.Vector3();
+    targetCup.getWorldPosition(p);
+    for (let i = 0; i < 3; i++) {
+      const drop = sph(0.015, 0xc87d32, p.x + (Math.random() - 0.5) * 0.08, p.y + 0.06, p.z + (Math.random() - 0.5) * 0.08, OUT);
+      const vy = 0.5 + Math.random() * 0.4;
+      const t0 = performance.now();
+      const f = () => {
+        const u = (performance.now() - t0) / 350;
+        if (u < 1 && drop.parent) {
+          drop.position.y += (vy - 4 * u) * 0.015;
+          drop.scale.setScalar(Math.max(0.01, 1 - u));
+          requestAnimationFrame(f);
+        } else if (drop.parent) {
+          drop.parent.remove(drop);
+        }
+      };
+      requestAnimationFrame(f);
+    }
+  }
+
+  function spawnSteamWisps(cx, cy, cz) {
+    for (let i = 0; i < 4; i++) {
+      const s = sph(0.024 + Math.random() * 0.02, 0xffffff, cx + (Math.random() - 0.5) * 0.1, cy, cz + (Math.random() - 0.5) * 0.1, OUT);
+      s.material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 });
+      const t0 = performance.now();
+      const f = () => {
+        const u = (performance.now() - t0) / 700;
+        if (u < 1 && s.parent) {
+          s.position.y = cy + u * 0.45;
+          s.scale.setScalar(1 + u * 1.5);
+          s.material.opacity = Math.max(0, 0.55 * (1 - u));
+          requestAnimationFrame(f);
+        } else if (s.parent) {
+          s.parent.remove(s);
+        }
+      };
+      requestAnimationFrame(f);
+    }
+  }
+
+  window.triggerEnergyRing = function(col = 0x4caf50) {
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.25, 0.42, 32),
+      new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, transparent: true, opacity: 0.95 })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(P.x, 0.08, P.z);
+    OUT.add(ring);
+    const t0 = performance.now();
+    const f = () => {
+      const u = (performance.now() - t0) / 750;
+      if (u < 1 && ring.parent) {
+        const sc = 1 + u * 3.2;
+        ring.scale.set(sc, sc, sc);
+        ring.material.opacity = Math.max(0, 0.95 * (1 - u));
+        requestAnimationFrame(f);
+      } else if (ring.parent) {
+        ring.parent.remove(ring);
+      }
+    };
+    requestAnimationFrame(f);
+  };
+
+  window.spawnSpeedSparkle = function() {
+    if (zone !== 'out' || !ME.visible) return;
+    const sp = sph(0.032, 0x76ff03, P.x + (Math.random() - 0.5) * 0.35, 0.1, P.z + (Math.random() - 0.5) * 0.35, OUT);
+    sp.material = new THREE.MeshBasicMaterial({ color: 0x76ff03, transparent: true, opacity: 0.8 });
+    const t0 = performance.now();
+    const f = () => {
+      const u = (performance.now() - t0) / 320;
+      if (u < 1 && sp.parent) {
+        sp.position.y = 0.1 + u * 0.22;
+        sp.scale.setScalar(Math.max(0.01, 1 - u));
+        sp.material.opacity = Math.max(0, 0.8 * (1 - u));
+        requestAnimationFrame(f);
+      } else if (sp.parent) {
+        sp.parent.remove(sp);
+      }
+    };
+    requestAnimationFrame(f);
+  };
+
+  /* ---- 3. BUILD 3D SHOP ARCHITECTURE ---- */
+  // A. Bamboo posts & Palm Thatch Awning
+  [[-1.8, -1.2], [-1.8, 0.8], [1.8, -1.2], [1.8, 0.8]].forEach(([dx, dz]) => {
+    cyl(0.065, 0.075, 2.7, 8, 0x4e3629, x + dx, 1.35, z + dz, stallG);
+    cyl(0.08, 0.08, 0.05, 8, 0xd7ccc8, x + dx, 0.03, z + dz, stallG);
+  });
+  box(4.2, 0.12, 2.7, 0x5c4033, x, 2.72, z - 0.2, stallG);
+  box(4.35, 0.18, 2.8, 0x795548, x, 2.80, z - 0.2, stallG);
+  box(4.4, 0.18, 0.08, 0xbcaaa4, x, 2.65, z + 1.2, stallG);
+
+  // Signboard
+  sign('முருகன் பச்சை இளநீர் & ஸ்பெஷல் மீட்டர் டீ', 3.8, 0.58, x, 2.42, z + 1.22, 0, stallG, '#4a0e0e', '#ffd54f');
+
+  // Cozy warm tungsten hanging bulb
+  cyl(0.006, 0.006, 0.45, 6, 0x222222, x, 2.45, z + 0.1, stallG);
+  sph(0.055, 0xffeb3b, x, 2.22, z + 0.1, stallG);
+  glow(0.28, 0.28, 0.28, 0xffd54f, x, 2.22, z + 0.1, stallG);
+  const stallLight = new THREE.PointLight(0xffb74d, 1.2, 8.5);
+  stallLight.position.set(x, 2.2, z + 0.1);
+  stallG.add(stallLight);
+
+  // Counter Table
+  box(3.8, 1.05, 1.4, 0x5d4037, x, 0.525, z, stallG);
+  box(4.0, 0.08, 1.5, 0x3e2723, x, 1.08, z, stallG);
+  box(3.9, 0.15, 0.1, 0x2e1d17, x, 0.08, z + 0.7, stallG);
+
+  // B. Tender Coconut Section (Left Counter)
+  // Pyramid stack of green coconuts
+  [
+    [-1.3, -0.3], [-1.0, -0.3], [-0.7, -0.3],
+    [-1.2, 0.1], [-0.9, 0.1], [-0.6, 0.1]
+  ].forEach(([dx, dz]) => {
+    sph(0.14, 0x2e7d32, x + dx, 1.22, z + dz, stallG, 1.0, 1.15, 1.0);
+    cyl(0.035, 0.05, 0.03, 6, 0x81c784, x + dx, 1.36, z + dz, stallG);
+  });
+  [[-1.15, -0.1], [-0.85, -0.1], [-1.0, 0.15]].forEach(([dx, dz]) => {
+    sph(0.14, 0x2e7d32, x + dx, 1.48, z + dz, stallG, 1.0, 1.15, 1.0);
+    cyl(0.035, 0.05, 0.03, 6, 0x81c784, x + dx, 1.62, z + dz, stallG);
+  });
+  sph(0.14, 0x2e7d32, x - 1.0, 1.74, z, stallG, 1.0, 1.15, 1.0);
+  cyl(0.035, 0.05, 0.03, 6, 0x81c784, x - 1.0, 1.88, z, stallG);
+
+  // Heavy chopping tree-trunk block
+  cyl(0.24, 0.25, 0.20, 12, 0x4a2a14, x - 0.35, 1.18, z, stallG);
+  cyl(0.22, 0.22, 0.01, 12, 0x6d4c41, x - 0.35, 1.285, z, stallG);
+
+  // Machete resting on chopping block
+  const restBlade = box(0.012, 0.08, 0.26, 0xc0c8d0, x - 0.35, 1.33, z - 0.02, stallG);
+  restBlade.rotation.x = 0.25; restBlade.rotation.z = -0.35;
+  cyl(0.02, 0.02, 0.12, 6, 0x3e2723, x - 0.38, 1.37, z - 0.16, stallG);
+
+  // Straw jar
+  cyl(0.065, 0.06, 0.15, 8, 0xbbdefb, x - 0.05, 1.16, z + 0.2, stallG);
+  [-0.02, 0, 0.02].forEach((sx, si) => {
+    const str = cyl(0.007, 0.007, 0.24, 4, [0xe53935, 0x43a047, 0xfbc02d][si], x - 0.05 + sx, 1.24, z + 0.2, stallG);
+    str.rotation.z = (si - 1) * 0.15;
+  });
+
+  // Husk basket on side floor
+  cyl(0.35, 0.28, 0.45, 10, 0x8d6e63, x - 2.2, 0.22, z - 0.2, stallG);
+  sph(0.26, 0x5d4037, x - 2.2, 0.38, z - 0.2, stallG, 1.1, 0.5, 1.1);
+
+  // C. Meter Tea Section (Right Counter)
+  // Brass boiler / samovar
+  cyl(0.22, 0.24, 0.65, 12, 0xd4af37, x + 0.9, 1.42, z - 0.15, stallG);
+  sph(0.13, 0xd4af37, x + 0.9, 1.76, z - 0.15, stallG, 1, 0.6, 1);
+  sph(0.03, 0xd4af37, x + 0.9, 1.84, z - 0.15, stallG);
+  cyl(0.016, 0.016, 0.09, 6, 0xd4af37, x + 0.9, 1.22, z + 0.12, stallG);
+
+  // Animated steam puffs from boiler
+  const boilerSteam = [];
+  for (let si = 0; si < 4; si++) {
+    const sp = sph(0.035, 0xffffff, x + 0.9, 1.84 + si * 0.12, z - 0.15, stallG);
+    sp.material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
+    boilerSteam.push(sp);
+  }
+
+  // Brass tumblers on tray
+  box(0.38, 0.02, 0.25, 0xd4af37, x + 0.45, 1.09, z + 0.1, stallG);
+  cyl(0.055, 0.042, 0.11, 8, 0xd4af37, x + 0.38, 1.15, z + 0.1, stallG);
+  cyl(0.055, 0.042, 0.11, 8, 0xd4af37, x + 0.52, 1.15, z + 0.1, stallG);
+
+  // Glass Vadai Showcase
+  box(0.70, 0.04, 0.46, 0x3e2723, x + 1.45, 1.10, z, stallG);
+  box(0.68, 0.40, 0.44, 0xbbdefb, x + 1.45, 1.30, z, stallG);
+  // Medu Vadais inside
+  [-0.14, 0.14].forEach(vx => {
+    [-0.1, 0.1].forEach(vz => {
+      const vad = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.022, 6, 10), mat(0xc88228));
+      vad.rotation.x = Math.PI / 2;
+      vad.position.set(x + 1.45 + vx, 1.14, z + vz);
+      stallG.add(vad);
+    });
+  });
+
+  // D. Shopkeeper Murugan Anna NPC
+  const murugan = person(x, z - 1.1, 0xf5f5f5, Math.PI, stallG, 0, 0x8a5a3a, 0x1b5e20, 0x14100c, false, 0xd4af37, 'shirt');
+  window.muruganAnna = murugan;
+
+  // Vibhuti & kumkum tilak on Murugan's forehead
+  box(0.08, 0.015, 0.01, 0xffffff, 0, 0.09, -0.215, murugan.head);
+  sph(0.012, 0xd32f2f, 0, 0.09, -0.222, murugan.head);
+
+  // Green towel on Murugan's shoulder
+  const towel = box(0.18, 0.45, 0.14, 0x2e7d32, -0.28, 1.35, 0, murugan);
+  towel.rotation.z = -0.15;
+
+  tag(murugan, "👨‍🌾 முருகன் அண்ணா (Tea & Elaneer)");
+
+  // Collision box for stall
+  hit(x - 2.2, x + 2.2, z - 1.6, z + 0.7, 2.5, 'out');
+
+  // Ambient Idle Animation (steam & breathing)
+  window.muruganAnim = function(t) {
+    for (let si = 0; si < boilerSteam.length; si++) {
+      const sp = boilerSteam[si];
+      const off = (t * 0.0012 + si * 0.25) % 1.0;
+      sp.position.y = 1.84 + off * 0.65;
+      sp.position.x = x + 0.9 + Math.sin(t * 0.002 + si) * 0.035;
+      sp.scale.setScalar(1 + off * 1.5);
+      sp.material.opacity = Math.max(0, 0.45 * (1 - off));
+    }
+    if (!lock && murugan && murugan.head) {
+      const br = Math.sin(t * 0.002) * 0.035;
+      murugan.head.position.y = 1.78 + br * 0.25;
+      murugan.ra.rotation.z = Math.sin(t * 0.0018) * 0.03;
+      murugan.la.rotation.z = -Math.sin(t * 0.0018) * 0.03;
+    }
+  };
+
+  /* ---- 4. INTERACTIVE CUTSCENES: MAKING, HANDOVER & DRINKING ---- */
+
+  // Item 1: Elaneer Animation
+  async function runElaneerAnimation() {
+    if (lock) return;
+    lock = true; moving = 0; pose = {};
+    try {
+      await walkTo(-31, -10.5, 2.8);
+      await face(0, 300);
+      toast('👨‍🌾 முருகன் அண்ணா: "வணக்கம் தம்பி! இப்போவே பிரஷ்ஷா மட்டையை சீவி, ஸ்ட்ரா போட்டு தரேன்!"', 3200);
+      await sleep(350);
+
+      // Active coconut on chopping block
+      const cutCoco = new THREE.Group();
+      cutCoco.position.set(-31.35, 1.25, -12.0);
+      stallG.add(cutCoco);
+      sph(0.14, 0x2e7d32, 0, 0, 0, cutCoco, 1.0, 1.15, 1.0);
+      const capMesh = cyl(0.08, 0.02, 0.05, 8, 0x2e7d32, 0, 0.14, 0, cutCoco);
+      const waterMesh = cyl(0.075, 0.075, 0.01, 8, 0xa5d6a7, 0, 0.13, 0, cutCoco);
+      waterMesh.visible = false;
+      const strawMesh = cyl(0.012, 0.012, 0.32, 6, 0xe53935, 0.02, 0.22, 0.02, cutCoco);
+      strawMesh.rotation.z = 0.2;
+      strawMesh.visible = false;
+
+      murugan.la.rotation.set(0.85, 0.2, 0.1);
+
+      // Machete attached to Murugan's right hand
+      const mach = new THREE.Group();
+      box(0.014, 0.085, 0.26, 0xc0c8d0, 0, 0.09, 0.10, mach);
+      cyl(0.02, 0.02, 0.12, 6, 0x3e2723, 0, 0, 0, mach);
+      mach.position.set(0, -0.62, -0.05);
+      murugan.ra.add(mach);
+
+      // Chop 1: Side slice
+      await tween(200, u => murugan.ra.rotation.x = lp(0, 2.3, u));
+      await tween(90, u => murugan.ra.rotation.x = lp(2.3, 0.82, u));
+      sndChop();
+      spawnHuskChips(-31.35, 1.25, -12.0);
+      toast('🔪 தக்! (பச்சை மட்டை சீவுதல்...)', 1100);
+      await sleep(180);
+
+      // Chop 2: Angle slice
+      await tween(180, u => murugan.ra.rotation.x = lp(0.82, 2.4, u));
+      await tween(90, u => murugan.ra.rotation.x = lp(2.4, 0.85, u));
+      sndChop();
+      spawnHuskChips(-31.35, 1.25, -12.0);
+      toast('🔪 தக்! தக்! (அரிவாள் சுழற்றி சீவுதல்...)', 1100);
+      await sleep(180);
+
+      // Chop 3: Top cap slice
+      await tween(180, u => murugan.ra.rotation.x = lp(0.85, 2.5, u));
+      await tween(80, u => murugan.ra.rotation.x = lp(2.5, 0.85, u));
+      sndChop();
+      spawnHuskChips(-31.35, 1.25, -12.0);
+      waterMesh.visible = true;
+
+      // Sliced cap flies off to side of block
+      await tween(280, u => {
+        capMesh.position.x = lp(0, -0.22, u);
+        capMesh.position.y = lp(0.14, -0.06, u);
+        capMesh.position.z = lp(0, 0.12, u);
+        capMesh.rotation.z = u * 2.2;
+      });
+
+      await tween(200, u => murugan.ra.rotation.set(0, 0, 0));
+      murugan.ra.remove(mach);
+
+      // Straw insertion
+      await tween(220, u => murugan.ra.rotation.set(1.4, -0.3, 0));
+      sndStraw();
+      strawMesh.visible = true;
+      await sleep(250);
+      toast('🥤 ஸ்ட்ரா போட்டாச்சு! குளு குளு இளநீர் தயார்!', 1800);
+      await tween(200, u => murugan.ra.rotation.set(0, 0, 0));
+
+      // Murugan lifts coconut in both hands
+      cutCoco.position.set(-31, 1.35, -12.3);
+      murugan.ra.rotation.set(1.15, 0, -0.25);
+      murugan.la.rotation.set(1.15, 0, 0.25);
+
+      // HANDOVER ACROSS COUNTER
+      toast('👨‍🌾 முருகன் அண்ணா: "இந்தாங்க தம்பி, நல்லா ஜில்லுனு குடிங்க!"', 2600);
+      pose = { ra: [1.1, 0, -0.22], la: [1.1, 0, 0.22] };
+      await sleep(200);
+
+      await tween(700, u => {
+        cutCoco.position.z = lp(-12.3, -10.9, u);
+        cutCoco.position.y = lp(1.35, 1.28, u);
+      });
+      sndBrassClink();
+
+      // Handover to player's right hand
+      stallG.remove(cutCoco);
+      cutCoco.position.set(0, -0.66, -0.12);
+      ME.ra.add(cutCoco);
+
+      murugan.ra.rotation.set(0, 0, 0);
+      murugan.la.rotation.set(0, 0, 0);
+
+      // DRINKING ANIMATION
+      await tween(600, u => {
+        pose = {
+          ra: [lp(1.1, 1.58, u), lp(0, 0.24, u), lp(-0.22, -0.42, u)],
+          la: [lp(1.1, 0.35, u), 0, 0.18]
+        };
+        window._headTilt = lp(0, -0.32, u);
+      });
+
+      toast('🥥 ஸ்ஸுர்ர்ர்ப்... ஆஹா! அமுதமா இருக்கு செய்யாறு இளநீர்! 😋', 3200);
+      sndDrinkGulp();
+      spawnWaterDroplets(P.x, 1.72, P.z - 0.25);
+      await sleep(850);
+      sndDrinkGulp();
+      spawnWaterDroplets(P.x, 1.72, P.z - 0.25);
+      await sleep(1000);
+      sndRefresh();
+
+      // Lower arms and satisfied head nod
+      await tween(500, u => {
+        pose = {
+          ra: [lp(1.58, 0, u), 0, 0],
+          la: [0.35 * (1 - u), 0, 0]
+        };
+        window._headTilt = lp(-0.32, 0.12, u);
+      });
+      await tween(220, u => window._headTilt = lp(0.12, 0, u));
+
+      ME.ra.remove(cutCoco);
+
+      window.triggerEnergyRing(0x4caf50);
+      addPts(15);
+      window.speedBoostUntil = performance.now() + 60000;
+      toast('⚡ எனர்ஜி பூஸ்ட்! 60 விநாடிகள் வேகம் +35%! (+15 Points) 🏃‍♂️💨', 5000);
+    } catch(e) {
+      console.error(e);
+    } finally {
+      lock = false;
+      pose = null;
+      window._headTilt = 0;
+    }
+  }
+
+  // Item 2: Meter Tea Animation
+  async function runMeterTeaAnimation() {
+    if (lock) return;
+    lock = true; moving = 0; pose = {};
+    try {
+      await walkTo(-31, -10.5, 2.8);
+      await face(0, 300);
+      toast('👨‍🌾 முருகன் அண்ணா: "சூப்பர் சாய்ஸ் தம்பி! 1 மீட்டர் உயரத்துல நுரை பொங்க ஆத்தி தரேன்!"', 3200);
+      await sleep(400);
+
+      // Brass tumblers in Murugan's hands
+      const topCup = cyl(0.062, 0.046, 0.12, 10, 0xd4af37, 0, -0.64, 0, murugan.ra);
+      const botCup = cyl(0.062, 0.046, 0.12, 10, 0xd4af37, 0, -0.64, 0, murugan.la);
+      sndBrassClink();
+
+      // Dynamic tea stream mesh in stallG
+      const teaStream = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.016, 0.009, 1.0, 8),
+        new THREE.MeshLambertMaterial({ color: 0x935116, transparent: true, opacity: 0.92 })
+      );
+      teaStream.visible = false;
+      stallG.add(teaStream);
+
+      const updateTeaStream = () => {
+        const p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
+        topCup.getWorldPosition(p1);
+        botCup.getWorldPosition(p2);
+        alignCylBetween(teaStream, p1, p2);
+        teaStream.visible = true;
+      };
+
+      // PULL 1: Right arm high (1-Meter pull!)
+      toast('☕ சரசரன்னு 1 மீட்டர் டீ ஆற்றுதல்... (Pull 1/2) ♨️', 1500);
+      sndTeaPour(1.2);
+      await tween(1000, u => {
+        murugan.ra.rotation.set(lp(0, 2.45, u), 0, -0.15);
+        murugan.la.rotation.set(lp(0, 0.75, u), 0, 0.15);
+        updateTeaStream();
+        if (Math.random() < 0.4) spawnTeaDroplets(botCup);
+      });
+      await sleep(200);
+
+      // PULL 2: Reverse pull (froth formation!)
+      toast('☕ நுரை பொங்கி வழியுது... (Pull 2/2) ✨', 1500);
+      sndTeaPour(1.1);
+      await tween(1000, u => {
+        murugan.ra.rotation.set(lp(2.45, 0.75, u), 0, -0.15);
+        murugan.la.rotation.set(lp(0.75, 2.40, u), 0, 0.15);
+        updateTeaStream();
+        if (Math.random() < 0.4) spawnTeaDroplets(topCup);
+      });
+      teaStream.visible = false;
+      stallG.remove(teaStream);
+
+      // Murugan levels hands
+      await tween(400, u => {
+        murugan.ra.rotation.set(lp(0.75, 0, u), 0, 0);
+        murugan.la.rotation.set(lp(2.40, 1.15, u), 0, 0);
+      });
+      murugan.ra.remove(topCup);
+
+      // HANDOVER ACROSS COUNTER
+      toast('👨‍🌾 முருகன் அண்ணா: "இந்தாங்க தம்பி! சுடச்சுட மீட்டர் டீ, பொறுமையா குடிங்க!"', 2600);
+      pose = { ra: [1.1, 0, -0.22], la: [0.8, 0, 0.22] };
+      await sleep(200);
+
+      const handCup = new THREE.Group();
+      handCup.position.set(-31, 1.32, -12.3);
+      cyl(0.062, 0.046, 0.12, 10, 0xd4af37, 0, 0, 0, handCup);
+      sph(0.056, 0xfff9c4, 0, 0.06, 0, handCup, 1.0, 0.4, 1.0);
+      stallG.add(handCup);
+      murugan.la.remove(botCup);
+      murugan.la.rotation.set(0, 0, 0);
+
+      await tween(700, u => {
+        handCup.position.z = lp(-12.3, -10.9, u);
+        handCup.position.y = lp(1.32, 1.25, u);
+      });
+      sndBrassClink();
+
+      stallG.remove(handCup);
+      handCup.position.set(0, -0.65, -0.10);
+      ME.ra.add(handCup);
+
+      // DRINKING ANIMATION
+      await tween(600, u => {
+        pose = {
+          ra: [lp(1.1, 1.58, u), lp(0, 0.22, u), lp(-0.22, -0.40, u)],
+          la: [lp(0.8, 0.32, u), 0, 0.15]
+        };
+        window._headTilt = lp(0, -0.30, u);
+      });
+
+      toast('☕ ஸ்ஸ்ஸ்... ஆஹா! இஞ்சி-ஏலக்காய் மணக்க சுடச்சுட மீட்டர் டீ! 😋', 3200);
+      sndDrinkGulp();
+      spawnSteamWisps(P.x, 1.70, P.z - 0.25);
+      await sleep(850);
+      sndDrinkGulp();
+      spawnSteamWisps(P.x, 1.70, P.z - 0.25);
+      await sleep(1000);
+      sndRefresh();
+
+      await tween(500, u => {
+        pose = {
+          ra: [lp(1.58, 0, u), 0, 0],
+          la: [0.32 * (1 - u), 0, 0]
+        };
+        window._headTilt = lp(-0.30, 0.12, u);
+      });
+      await tween(220, u => window._headTilt = lp(0.12, 0, u));
+
+      ME.ra.remove(handCup);
+
+      window.triggerEnergyRing(0xffb300);
+      addPts(10);
+      window.speedBoostUntil = performance.now() + 60000;
+      toast('⚡ சுடச்சுட டீ எனர்ஜி! 60 விநாடிகள் வேகம் +35%! (+10 Points) ☕🏃‍♂️', 5000);
+    } catch(e) {
+      console.error(e);
+    } finally {
+      lock = false;
+      pose = null;
+      window._headTilt = 0;
+    }
+  }
+
+  // Item 3: Medu Vadai Animation
+  async function runVadaiAnimation() {
+    if (lock) return;
+    lock = true; moving = 0; pose = {};
+    try {
+      await walkTo(-31, -10.5, 2.8);
+      await face(0, 300);
+      toast('👨‍🌾 முருகன் அண்ணா: "மொறுமொறு மெதுவடை வாழை இலையில வச்சு சட்னியோட தரேன்!"', 3000);
+      await sleep(400);
+
+      const plate = new THREE.Group();
+      plate.position.set(-31, 1.25, -12.3);
+      box(0.32, 0.02, 0.22, 0x2e7d32, 0, 0, 0, plate);
+      const vadMesh = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.024, 8, 12), mat(0xc88228));
+      vadMesh.rotation.x = Math.PI / 2;
+      vadMesh.position.set(0, 0.03, 0);
+      plate.add(vadMesh);
+      sph(0.035, 0xffffff, -0.08, 0.03, 0, plate);
+      sph(0.028, 0xd32f2f, 0.08, 0.03, 0, plate);
+      stallG.add(plate);
+
+      murugan.ra.rotation.set(1.1, 0, -0.2);
+      murugan.la.rotation.set(1.1, 0, 0.2);
+      pose = { ra: [1.1, 0, -0.2], la: [1.1, 0, 0.2] };
+
+      await tween(700, u => {
+        plate.position.z = lp(-12.3, -10.9, u);
+        plate.position.y = lp(1.25, 1.22, u);
+      });
+      sndBrassClink();
+
+      stallG.remove(plate);
+      plate.position.set(0, -0.65, -0.1);
+      ME.ra.add(plate);
+      murugan.ra.rotation.set(0, 0, 0);
+      murugan.la.rotation.set(0, 0, 0);
+
+      await tween(500, u => {
+        pose = {
+          ra: [lp(1.1, 1.5, u), 0, -0.3],
+          la: [lp(1.1, 0.4, u), 0, 0.2]
+        };
+      });
+      blip(1600, 0.05, 0.14, 'square');
+      setTimeout(() => blip(900, 0.08, 0.12, 'triangle'), 60);
+      toast('🥟 மொறுக்கு! மொறுமொறு மெதுவடை & தேங்காய் சட்னி செம்ம டேஸ்ட்! 😋', 3000);
+      await sleep(900);
+      sndRefresh();
+
+      await tween(400, u => {
+        pose = { ra: [lp(1.5, 0, u), 0, 0], la: [lp(0.4, 0, u), 0, 0] };
+      });
+      ME.ra.remove(plate);
+
+      addPts(8);
+      toast('🥐 ஸ்டாமினா ரீசார்ஜ்! பசி அடங்குச்சு! (+8 Points) ✨', 3500);
+    } catch(e) {
+      console.error(e);
+    } finally {
+      lock = false;
+      pose = null;
+    }
+  }
+
+  /* ---- 5. MODAL MENU & INTERACTION ---- */
+  window.openMuruganStall = function() {
+    const h = `
+    <div style="text-align:center;color:#fff;font-family:sans-serif">
+      <div style="font-size:44px;line-height:1.1;margin-bottom:2px">🥥 ☕ 🥟</div>
+      <h2 style="margin:4px 0 2px;color:#ffd54f;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,0.5)">
+        முருகன் பச்சை இளநீர் & ஸ்பெஷல் மீட்டர் டீ கடை
+      </h2>
+      <div style="font-size:12.5px;color:#a5d6a7;font-weight:bold;letter-spacing:0.5px;margin-bottom:10px">
+        CHEYYAR PURE TENDER COCONUT & TRADITIONAL METER TEA
+      </div>
+      <p style="font-size:13px;line-height:1.55;color:#e0d8c8;margin:0 auto 12px;max-width:380px">
+        மரம் ஏறி பறிச்ச ஜில்லுனு பச்சை இளநீர், 1 மீட்டர் உயரத்துல நுரை ததும்பி ஆத்துன மீட்டர் டீ, மற்றும் மொறுமொறு மெதுவடை!
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:9px;max-width:400px;margin:0 auto;text-align:left">
+        <div style="background:rgba(46,125,50,0.32);border:1.5px solid #4caf50;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer"
+             onclick="window.buyMuruganItem('elaneer')">
+          <div>
+            <div style="font-weight:bold;color:#c8e6c9;font-size:15px">🥥 பச்சை இளநீர் (Tender Coconut)</div>
+            <div style="font-size:11.5px;color:#a5d6a7;margin-top:2px">அரிவாள் வெட்டி, ஸ்ட்ரா போட்டு தருவோம் · ⚡ 60s Speed Boost</div>
+          </div>
+          <button class="btn" style="background:#2e7d32;border:1px solid #81c784;padding:6px 14px;font-size:13.5px;font-weight:bold;border-radius:8px">15 pts</button>
+        </div>
+
+        <div style="background:rgba(212,175,55,0.25);border:1.5px solid #d4af37;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer"
+             onclick="window.buyMuruganItem('tea')">
+          <div>
+            <div style="font-weight:bold;color:#fff176;font-size:15px">☕ ஸ்பெஷல் மீட்டர் டீ (Meter Tea)</div>
+            <div style="font-size:11.5px;color:#ffe082;margin-top:2px">1 மீட்டர் இழுத்து ஆத்திய சுடச்சுட நுரை டீ · ⚡ 60s Speed Boost</div>
+          </div>
+          <button class="btn" style="background:#b8860b;border:1px solid #ffd54f;padding:6px 14px;font-size:13.5px;font-weight:bold;border-radius:8px">8 pts</button>
+        </div>
+
+        <div style="background:rgba(230,81,0,0.25);border:1.5px solid #ff9800;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer"
+             onclick="window.buyMuruganItem('vadai')">
+          <div>
+            <div style="font-weight:bold;color:#ffcc80;font-size:15px">🥟 மொறுமொறு மெதுவடை (Hot Vadai)</div>
+            <div style="font-size:11.5px;color:#ffe0b2;margin-top:2px">கண்ணாடி பெட்டி பிரஷ் வடை & தேங்காய் சட்னி · 🥐 Stamina Recharge</div>
+          </div>
+          <button class="btn" style="background:#e65100;border:1px solid #ffb74d;padding:6px 14px;font-size:13.5px;font-weight:bold;border-radius:8px">5 pts</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;justify-content:center;gap:12px">
+        <button class="btn" style="background:#3e2723;border:1px solid #8d6e63;font-size:13px;padding:6px 14px"
+                onclick="closeModal();window.shopCard('tea2')">ℹ️ கடை வரலாறு (Story)</button>
+        <button class="btn" style="background:#424242;border:1px solid #757575;font-size:13px;padding:6px 14px"
+                onclick="closeModal()">❌ வேண்டாம் (Close)</button>
+      </div>
+    </div>`;
+    modal(h);
+  };
+
+  window.buyMuruganItem = function(type) {
+    closeModal();
+    if (lock) return;
+    const cfg = {
+      elaneer: { name: 'பச்சை இளநீர்', pts: 15, run: runElaneerAnimation },
+      tea: { name: 'மீட்டர் டீ', pts: 8, run: runMeterTeaAnimation },
+      vadai: { name: 'மெதுவடை', pts: 5, run: runVadaiAnimation }
+    }[type];
+    if (!cfg) return;
+
+    if (pts < cfg.pts) {
+      pts += 50;
+      walletShow();
+      toast('🎁 Bonus: +50 points credited! ' + cfg.name + ' வாங்கியாச்சு!', 3000);
+    }
+    pts -= cfg.pts; spent += cfg.pts; walletShow(); chingSnd();
+    cfg.run();
+  };
+
+  // Register interactive prompt
+  I.push({
+    z: 'out',
+    x: -31,
+    y: -10.3,
+    r: 4.2,
+    when: () => !window.drv && !window.boatDrv && zone == 'out',
+    l: '🥥 ☕ முருகன் பச்சை இளநீர் & மீட்டர் டீ கடை (Buy Elaneer & Tea)',
+    f: () => window.openMuruganStall()
+  });
+})();
 /* auto stand */
 {[-40,-36].forEach(x=>{const g=VBUILD('auto');g.position.set(x,0,5);g.rotation.y=-Math.PI/2;OUT.add(g);hit(x-1.9,x+1.9,5-1,5+1,1.6,'out')});
  sign('AUTO STAND · ஆட்டோ நிறுத்தம்',4.2,.6,-38,4.2,6.6,0,OUT,'#f2c200','#111');box(.15,4,.15,0x333333,-40.5,2,6.6,OUT);box(.15,4,.15,0x333333,-35.5,2,6.6,OUT)}
@@ -3934,7 +4678,7 @@ FN.forEach(a=>shop(a[0],a[1],a[2],a[3]));
  rsv:{ic:'🎫',en:'Reservation Counter',ta:'முன்பதிவு',kind:'Bus ticket reservation',about:'Long-distance bus-ku advance seat booking, ticket cancel, timing details — Chennai, Bengaluru, Vellore pogura buses-ku inge booking panna mudiyum.',hours:'6:00 AM – 9:00 PM',sp:'Advance booking · timetable help',tip:'Festival days-la 2-3 naal munnaadi book pannunga.'}};
  const SPT=[];FN.forEach(a=>{const o=a[3],d=o.d||9;SPT.push({k:o.p,x:a[0],z:a[1]+a[2]*(d/2+3.2)})});
  [[-70,'sar'],[-56,'mur'],[-42,'apo'],[-28,'cs'],[-14,'mob'],[0,'bak'],[14,'tex'],[28,'ann']].forEach(([x,k])=>SPT.push({k,x,z:-42.3}));
- SPT.push({k:'tea2',x:-31,z:-9.8,r:3.6},{k:'rsv',x:23,z:-5.4,r:3.6});
+ SPT.push({k:'rsv',x:23,z:-5.4,r:3.6});
  const seenS=new Set();
  window.shopCard=function(k){const s=SH[k];if(!s)return;const first=!seenS.has(k);if(first){seenS.add(k);addPts(2)}
   modal('<div style="text-align:center"><div style="font-size:48px;line-height:1.1">'+s.ic+'</div><h2 style="margin:6px 0 2px;color:#ffd34d">'+s.en+'</h2><div style="opacity:.85;margin-bottom:8px">'+s.ta+'</div><span style="display:inline-block;background:#fff1;border:1px solid #6a4a1a;border-radius:20px;padding:4px 12px;font-size:12.5px">'+s.kind+'</span></div><p style="line-height:1.65;margin:12px 0 8px">'+s.about+'</p><div style="font-size:13px;line-height:1.9;background:#0004;border-radius:10px;padding:8px 12px">🕒 <b>Timing:</b> '+s.hours+'<br>⭐ <b>Special:</b> '+s.sp+'<br>💡 <b>Tip:</b> '+s.tip+(first?'<br>🎁 <b>+2 points</b> · first visit':'')+'</div><div style="text-align:center;margin-top:12px"><button class="btn" onclick="closeModal()">👍 OK</button></div>')};
