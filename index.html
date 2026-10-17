@@ -8,16 +8,80 @@ if(window.MOB)document.documentElement.className+=' mob';</script>
 <script>if("serviceWorker"in navigator&&/^https?:/.test(location.protocol))addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})</script>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <style>
-:root{--bg:#0b0d12;--fg:#f2f2f2;--ac:#ff7a1a;--pn:#171a22}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;overflow:hidden;touch-action:none}
+:root{--bg:#0b0d12;--fg:#fff8ec;--ac:#f0a91b;--pn:#2a100d;
+--maroon:#5b1f1a;--maroon-2:#7a2a22;--maroon-dark:#3a110e;
+--turmeric:#f0a91b;--turmeric-2:#ffcf5a;--jasmine:#fff8ec;
+--leaf:#2f7d4a;--leaf-2:#4cd964;--sea:#1f8fa3;
+--panel:rgba(42, 16, 13, .88);--panel-hover:rgba(62, 22, 18, .96);
+--panel-line:rgba(255, 207, 90, .32);--text:#fff8ec;--muted:rgba(255, 248, 236, .72);
+--radius:16px;--radius-pill:999px;--font:'Baloo Thambi 2','Mukta Malar',system-ui,-apple-system,sans-serif;
+--shadow-panel:0 8px 24px rgba(0,0,0,.5),0 0 1px rgba(255,207,90,.38)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;touch-action:none}
 canvas{display:block}
-#hud{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;padding:10px 14px;pointer-events:none;font-size:13px;display:flex;justify-content:space-between;gap:8px}
-#hud b{color:var(--ac)}#zone{background:#000a;padding:6px 10px;border-radius:8px}
-#prompt{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--ac);color:#000;font-weight:700;padding:10px 18px;border-radius:24px;display:none;cursor:pointer;z-index:5;max-width:90%;text-align:center}
-#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#000c;padding:10px 16px;border-radius:10px;display:none;z-index:6;max-width:90%;text-align:center}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10;font-family:var(--font);color:var(--text);overflow:hidden}
+.hud-top-left,#pills{position:fixed;left:14px;top:14px;display:flex;flex-direction:column;gap:7px;align-items:flex-start;pointer-events:auto;z-index:10;max-width:calc(100vw - 120px)}
+.chip,.pl{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--panel-line);box-shadow:var(--shadow-panel);border-radius:var(--radius-pill);padding:6px 13px;font-size:13px;font-weight:600;color:var(--text);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);user-select:none;transition:transform .18s,border-color .18s;width:max-content}
+.chip:hover,.pl:hover{border-color:var(--turmeric)}
+.chip b,.pl b{color:var(--turmeric-2)}
+.brand-chip{background:linear-gradient(135deg,rgba(91,31,26,.95),rgba(42,16,13,.95));border-color:rgba(255,207,90,.55);box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 12px rgba(240,169,27,.35);font-size:13.5px;font-weight:700;letter-spacing:.3px;padding:7px 15px}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--turmeric);box-shadow:0 0 10px var(--turmeric),0 0 16px var(--turmeric);animation:pdot 2s infinite ease-in-out;flex-shrink:0}
+@keyframes pdot{0%,100%{transform:scale(.9);opacity:.85}50%{transform:scale(1.25);opacity:1;box-shadow:0 0 14px var(--turmeric-2),0 0 22px var(--turmeric-2)}}
+.profile-chip{padding:4px 12px 4px 6px;gap:7px}
+.avatar-circle{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--turmeric),#e65100);color:#1a0806;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.75);flex-shrink:0}
+.v-badge{background:#1da1f2;color:#fff;border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900}
+.score-chip{background:linear-gradient(135deg,rgba(62,22,18,.92),rgba(42,16,13,.9))}
+.score-chip .score-val{font-size:14px;font-weight:800;color:var(--turmeric-2)}
+.score-chip .pts-label{font-size:11.5px;color:var(--muted);font-weight:500}
+.score-chip .rank-tag{background:rgba(240,169,27,.22);color:var(--turmeric-2);border:1px solid rgba(240,169,27,.45);border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700}
+.level-chip{padding-right:12px}
+.level-bar-track{width:50px;height:6px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,207,90,.25);overflow:hidden;margin-left:4px}
+.level-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--turmeric),#ff8a2a);transition:width .35s ease;box-shadow:0 0 6px var(--turmeric)}
+.where-chip{background:linear-gradient(135deg,rgba(42,16,13,.94),rgba(26,10,8,.96));border-color:rgba(255,207,90,.4)}
+.boost-chip{background:linear-gradient(135deg,#e65100,#ff8a2a)!important;color:#fff!important;border-color:#ffd166!important;box-shadow:0 0 16px rgba(255,138,42,.75)!important;animation:bpulse 1.2s infinite alternate ease-in-out}
+@keyframes bpulse{from{transform:scale(1)}to{transform:scale(1.04);box-shadow:0 0 22px rgba(255,138,42,.95)}}
+.hud-side{position:fixed;right:14px;top:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:auto;z-index:10}
+.hud-buttons,#side{display:grid;grid-template-columns:repeat(2,44px);gap:8px}
+#side button,.icon-btn{width:44px;height:44px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-line);color:var(--jasmine);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-panel);transition:transform .15s,background .15s,border-color .15s;padding:0;user-select:none}
+#side button:hover,.icon-btn:hover{transform:translateY(-2px);background:rgba(91,31,26,.96);border-color:var(--turmeric);box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 10px rgba(240,169,27,.35)}
+#side button:active,.icon-btn:active{transform:scale(.94)}
+.zoom-pad{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.zoom-btn{width:44px;height:36px;border-radius:10px;background:var(--panel);border:1px solid var(--panel-line);color:var(--turmeric-2);font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-panel);transition:transform .15s,background .15s;padding:0}
+.zoom-btn:hover{background:rgba(91,31,26,.95);border-color:var(--turmeric);transform:translateY(-1px)}
+.zoom-btn:active{transform:scale(.92)}
+.lm-card{position:fixed;bottom:24px;left:20px;width:min(380px,calc(100vw - 40px));background:linear-gradient(145deg,rgba(58,17,14,.95),rgba(28,9,7,.97));border:1.5px solid var(--turmeric);border-radius:var(--radius);padding:16px 18px;color:var(--text);box-shadow:0 18px 48px rgba(0,0,0,.65),0 0 24px rgba(240,169,27,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:12;transform:translateY(140px);opacity:0;pointer-events:none;transition:transform .4s cubic-bezier(.18,.89,.32,1.25),opacity .3s ease}
+.lm-card.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.lm-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--turmeric-2);background:rgba(240,169,27,.16);padding:3px 8px;border-radius:6px;border:1px solid rgba(240,169,27,.35);margin-bottom:8px}
+.lm-title{font-size:18px;font-weight:800;color:#fff;margin:0 0 2px;line-height:1.2}
+.lm-sub{font-size:13px;font-weight:600;color:var(--turmeric);margin-bottom:6px}
+.lm-desc{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0 0 12px}
+.lm-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,207,90,.18);padding-top:10px}
+.lm-bonus{font-size:12px;font-weight:700;color:var(--turmeric-2)}
+.lm-close{background:none;border:0;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.lm-close:hover{color:#fff;background:rgba(255,255,255,.1)}
+#rail{position:fixed;top:14px;right:14px;width:min(320px,calc(100vw - 28px));max-height:calc(100vh - 28px);background:linear-gradient(160deg,rgba(46,17,14,.96),rgba(26,9,7,.98));border:1px solid var(--panel-line);border-radius:var(--radius);padding:18px;color:var(--text);box-shadow:0 16px 44px rgba(0,0,0,.68),0 0 20px rgba(240,169,27,.22);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:100;overflow-y:auto;display:none;flex-direction:column;gap:15px;transform:translateX(20px);opacity:0;transition:transform .25s ease,opacity .25s ease}
+#rail.open{display:flex;transform:translateX(0);opacity:1}
+.rail-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,207,90,.2);padding-bottom:10px}
+.rail-title{font-size:16px;font-weight:800;color:var(--turmeric-2)}
+.rail-close{background:rgba(255,255,255,.08);border:1px solid rgba(255,207,90,.2);color:var(--jasmine);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+.rail-close:hover{background:rgba(255,255,255,.18)}
+.rail-subtitle{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.rail-board{display:flex;flex-direction:column;gap:6px}
+.rail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.04);font-size:13px;border:1px solid transparent}
+.rail-row.active{background:linear-gradient(90deg,rgba(240,169,27,.22),rgba(240,169,27,.06));border-color:rgba(240,169,27,.4);font-weight:700}
+.rail-row .r-rank{color:var(--turmeric-2);font-weight:800;width:24px}
+.rail-row .r-name{flex:1;color:#fff;margin:0 6px}
+.rail-row .r-pts{color:var(--turmeric-2);font-weight:700}
+.rail-section{border-top:1px solid rgba(255,207,90,.15);padding-top:12px}
+.rail-sec-title{font-size:12px;font-weight:700;color:var(--turmeric);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.rail-meta{font-size:12.5px;line-height:1.6;color:var(--muted)}
+.rail-controls{display:flex;flex-direction:column;gap:5px}
+.ctrl-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.ctrl-row kbd{background:rgba(255,255,255,.12);border:1px solid rgba(255,207,90,.25);border-radius:4px;padding:2px 6px;font-family:monospace;font-size:11px;color:var(--turmeric-2)}
+#prompt{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:linear-gradient(135deg,var(--turmeric),#e65100);color:#1a0806;font-family:var(--font);font-weight:800;font-size:15px;padding:10px 20px;border-radius:24px;border:2px solid rgba(255,248,236,.8);box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 16px rgba(240,169,27,.5);display:none;cursor:pointer;z-index:15;max-width:90%;text-align:center}
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--panel-line);color:var(--jasmine);padding:10px 18px;border-radius:12px;display:none;z-index:20;max-width:90%;text-align:center;box-shadow:var(--shadow-panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-weight:600}
 #pad{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,48px);gap:4px;z-index:4}
 #pad button{height:48px;border-radius:10px;border:0;background:#fff3;color:#fff;font-size:18px}
-#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;padding:12px}
+#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:12px}
 #box{background:var(--pn);border-radius:14px;padding:16px;max-width:560px;width:100%;max-height:90%;overflow:auto}
 #box h3{margin:0 0 8px;color:var(--ac)}select,input{background:#0007;color:#fff;border:1px solid #555;border-radius:8px;padding:8px;margin:2px 0}
 .seats{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin:10px 0}
@@ -30,7 +94,7 @@ canvas{display:block}
 #seatUI{position:fixed;right:10px;bottom:10px;width:min(300px,92vw);background:#000b;border-radius:12px;padding:10px;display:none;z-index:5}
 #seatUI:not(.chatOn) #chat,#seatUI:not(.chatOn) .cmrow{display:none}
 #chat{height:110px;overflow:auto;font-size:12px;margin-bottom:6px}
-#pills{position:fixed;left:10px;top:52px;display:flex;flex-direction:column;gap:6px;z-index:3;pointer-events:none}.pl{background:#2a120ccc;border:1px solid #6a4a1a;border-radius:20px;padding:6px 12px;font-size:13px;width:max-content}.pl b{color:#ffd34d}#side{position:fixed;right:10px;top:52px;display:flex;flex-direction:column;gap:8px;z-index:3}#side button{width:42px;height:42px;border-radius:12px;border:1px solid #6a4a1a;background:#2a120c;color:#fff;font-size:18px}#lobbybar{position:fixed;top:50px;left:50%;transform:translateX(-50%);display:none;gap:6px;background:#2a120ccc;border:1px solid #6a4a1a;border-radius:14px;padding:8px;z-index:3}#lobbybar button{background:#fff2;border:0;color:#fff;border-radius:8px;padding:6px 10px}#seatUI{left:50%;right:auto;transform:translateX(-50%);width:min(560px,96vw);background:#2a120cdd;border:1px solid #6a4a1a}#chat{height:70px}
+#lobbybar{position:fixed;top:50px;left:50%;transform:translateX(-50%);display:none;gap:6px;background:#2a120ccc;border:1px solid #6a4a1a;border-radius:14px;padding:8px;z-index:3}#lobbybar button{background:#fff2;border:0;color:#fff;border-radius:8px;padding:6px 10px}#seatUI{left:50%;right:auto;transform:translateX(-50%);width:min(560px,96vw);background:#2a120cdd;border:1px solid #6a4a1a}#chat{height:70px}
 .fl{position:fixed;font-size:30px;pointer-events:none;animation:up 2s forwards;z-index:7}
 #intro{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 25%,#4a220ccc,#07070ceb);backdrop-filter:blur(7px);padding:14px;touch-action:auto}
 #intro .ic{width:min(420px,100%);background:linear-gradient(160deg,#2a1409f5,#12121cf5);border:1px solid #c9a24a;border-radius:22px;padding:26px 24px 20px;box-shadow:0 24px 90px #000b,inset 0 0 0 4px #c9a24a1c;text-align:center}
@@ -87,36 +151,32 @@ canvas{display:block}
 #intro .hint{margin-top:12px;opacity:.5}
 
 html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-.mbtn{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:2px solid #fff5;background:#2a120ccc;color:#fff;font-size:24px;z-index:4;display:none;touch-action:none;align-items:center;justify-content:center;padding:0}
-.mbtn:active,.mbtn.on{background:#ff7a1a;color:#000}
+.mbtn{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:1.5px solid var(--panel-line);background:var(--panel);color:var(--jasmine);font-size:22px;z-index:15;display:none;touch-action:none;align-items:center;justify-content:center;padding:0;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-panel);transition:transform .15s,background .15s,border-color .15s}
+.mbtn:active,.mbtn.on{background:linear-gradient(135deg,var(--turmeric),#e65100);color:#1a0806;border-color:#fff;transform:scale(.92);box-shadow:0 0 16px rgba(240,169,27,.6)}
 @media (orientation:landscape){.mbtn{margin-right:calc(min(92px,22vh) + 16px)}}
-@media (orientation:portrait){
- .mbtn{bottom:calc(172px + env(safe-area-inset-bottom,0px))}
-}
+@media (orientation:portrait){.mbtn{bottom:calc(172px + env(safe-area-inset-bottom,0px))}}
 @media (max-height:520px){
- #hud{padding:6px 10px;font-size:11px}
- #pills{top:34px;left:8px;right:112px;flex-direction:row;flex-wrap:wrap;gap:4px}
- .pl{padding:3px 8px;font-size:11px}
- #side{top:34px;right:8px;gap:4px;flex-direction:column;flex-wrap:wrap;max-height:184px;align-content:flex-end}
- #side button{width:32px;height:32px;font-size:15px;border-radius:9px}
- #prompt{bottom:78px;padding:7px 14px;font-size:14px}
+ .hud-top-left,#pills{top:8px;left:8px;gap:4px}
+ .chip,.pl{padding:3px 8px;font-size:11px}
+ .hud-side,#side{top:8px;right:8px;gap:5px}
+ #side button,.icon-btn{width:34px;height:34px;font-size:15px;border-radius:9px}
+ #prompt{bottom:78px;padding:7px 14px;font-size:13px}
 }
-
-/* ===== phone layout: smaller HUD + buttons ===== */
-.mob #hud{padding:6px 8px;font-size:11px}
-.mob #hud>div:last-child{display:none}
-.mob #zone{font-size:11px;padding:4px 8px}
-.mob #pills{gap:3px}
-.mob .pl{padding:2px 8px;font-size:10.5px;border-radius:14px}
-.mob #side{gap:5px;right:6px}
-.mob #side button{width:32px;height:32px;font-size:14px;border-radius:9px}
-.mob .mbtn{width:46px;height:46px;font-size:20px}
-.mob #sndBtn{width:32px!important;height:32px!important;font-size:14px!important;left:8px!important;bottom:126px!important}
+.mob .hud-top-left,.mob #pills{top:8px;left:8px;gap:4px}
+.mob .chip,.mob .pl{padding:3px 8px;font-size:11px;border-radius:12px}
+.mob .brand-chip{font-size:11.5px;padding:4px 10px}
+.mob .avatar-circle{width:20px;height:20px;font-size:10px}
+.mob .hud-side{top:8px;right:8px}
+.mob #side,.mob .hud-buttons{gap:5px;grid-template-columns:repeat(2,34px)}
+.mob #side button,.mob .icon-btn{width:34px;height:34px;font-size:15px;border-radius:9px}
+.mob .zoom-btn{width:34px;height:28px;font-size:16px}
+.mob .mbtn{width:48px;height:48px;font-size:20px}
+.mob #sndBtn{width:34px!important;height:34px!important;font-size:15px!important;left:8px!important;bottom:126px!important}
 .mob #prompt{font-size:13px;padding:7px 14px;bottom:110px}
 .mob #toast{font-size:12px;padding:7px 12px}
-@media (orientation:portrait){.mob #pills{top:50px;left:6px}.mob #side{top:50px}.mob .mbtn{bottom:calc(138px + env(safe-area-inset-bottom,0px))}}
+@media (orientation:portrait){.mob .hud-top-left,.mob #pills{top:8px;left:6px}.mob .hud-side{top:8px}.mob .mbtn{bottom:calc(138px + env(safe-area-inset-bottom,0px))}}
 @media (orientation:landscape){.mob .mbtn{margin-right:calc(min(92px,22vh) + 12px)}.mob #sndBtn{bottom:130px!important}}
-</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;800&family=Tiro+Tamil&display=swap" rel="stylesheet"><style>
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@400;500;600;700;800&family=Mukta+Malar:wght@400;600;800&family=Tiro+Tamil&display=swap" rel="stylesheet"><style>
 :root{--cr:#fff2d6;--gd:#ffd166;--em:#ff8a2a}
 #intro,#splash{font-family:'Mukta Malar',system-ui,sans-serif;background:linear-gradient(180deg,#0d0a1f 0%,#2a1250 40%,#8a2f55 70%,#ff8a2a 118%)}
 #intro{display:block;padding:0;overflow:hidden;backdrop-filter:none}
@@ -193,9 +253,151 @@ function finish(){setTimeout(()=>{done=true;bar.style.animation='none';bar.style
 if(document.readyState==='complete')finish();else addEventListener('load',finish);
 setTimeout(()=>{if(!done){sp.classList.add('out');setTimeout(()=>sp.remove(),950)}},30000)})();</script>
 
-<div id="hud"><div id="zone"></div><div>Drag = look · WASD = walk/drive · H = horn · Shift = run · Space = jump · E = interact · V = Camera · R = Radio · T = Weather</div></div>
-<div id="pills"><div class="pl" id="plName" style="display:none">🙋 <b id="pnm"></b></div><div class="pl">🟡 Namma Ooru · Cheyyar</div><div class="pl">🏆 <b id="pts">0</b> points</div><div class="pl" id="walPill" style="display:none" onclick="topUp()" title="Tap to add 125 pts (demo)">💰 ₹<b id="wal">1000</b> <small style="opacity:.6">＋</small></div><div class="pl">🎯 Level <b id="lvl">0</b></div><div class="pl">📋 <span id="task">Walk to the theatre door</span></div><div class="pl" id="tktPill" style="display:none">🎟 <b id="tkt"></b></div><div class="pl" id="boostPill" style="display:none;background:linear-gradient(135deg,#ff9800,#e65100);color:#fff;font-weight:bold;box-shadow:0 0 10px rgba(255,152,0,0.6)">⚡ Speed Boost: <b id="boostSec">60</b>s</div><div class="pl" id="plOn">👥 7 exploring together</div></div>
-<div id="side"><button id="timeBtn" onclick="window.CY_CYCLE_WEATHER&&CY_CYCLE_WEATHER()" title="Weather & Time: Day / Sunset / Night / Rain (T)">🌤️</button><button id="camBtn" onclick="window.CY_CYCLE_CAM&&CY_CYCLE_CAM()" title="Camera Mode (V)">📷</button><button id="radioBtn" onclick="window.CY_TOGGLE_RADIO&&CY_TOGGLE_RADIO()" title="Tamil FM Radio (R)">📻</button><button id="gfxBtn" onclick="setGfx(gfx=='low'?'high':'low')" title="Graphics: High / Low">✨</button><button id="mapBtn" onclick="window.toggleMap&&toggleMap()" title="Minimap (M)">🗺</button><button id="dressBtn" onclick="window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()" title="Change Dress / Outfit (O)">👔</button><button onclick="toggleChat()">💬</button><button onclick="window.showLB?showLB():toast('Leaderboard needs online mode',3000)">🏆</button><button onclick="toast('WASD walk · Shift run · Space jump · E interact',3500)">❓</button><button id="fsBtn" onclick="toggleFS()" title="Full Screen">⛶</button></div>
+<div id="hud">
+  <div id="pills" class="hud-top-left">
+    <div class="chip brand-chip">
+      <span class="brand-dot"></span>
+      <span>Namma Ooru · செய்யாறு</span>
+    </div>
+    <div class="chip profile-chip" id="plName" style="display:none">
+      <span class="avatar-circle" id="plAvatar">D</span>
+      <b id="pnm">Denesh</b>
+      <span class="v-badge" title="Verified Citizen">✓</span>
+    </div>
+    <div class="chip score-chip">
+      <span>🏆</span>
+      <b class="score-val" id="score">0</b>
+      <span class="pts-label">points</span>
+      <span class="rank-tag">#1</span>
+      <b id="pts" style="display:none">0</b>
+    </div>
+    <div class="chip level-chip">
+      <span>🎯</span>
+      <span>Level <b id="lvl">0</b></span>
+      <div class="level-bar-track">
+        <div class="level-bar-fill" id="lvl-bar" style="width: 0%;"></div>
+      </div>
+    </div>
+    <div class="chip where-chip" id="where-chip">
+      <span>📍</span>
+      <span id="zone"><b>Cheyyar Bus Stand</b></span>
+    </div>
+    <div class="chip boost-chip" id="boostPill" style="display:none">
+      <span>⚡</span>
+      <span>Speed Boost: <b id="boostSec">60</b>s</span>
+    </div>
+    <div class="chip players-chip" id="plOn">
+      <span>👥</span>
+      <span id="pcount">12</span> exploring together
+    </div>
+    <div class="chip task-chip" id="taskChip">
+      <span>📋</span>
+      <span id="task">Walk to the theatre door</span>
+    </div>
+    <div class="chip tkt-chip" id="tktPill" style="display:none">
+      <span>🎟️</span>
+      <b id="tkt"></b>
+    </div>
+    <div class="chip wal-chip" id="walPill" style="display:none" onclick="topUp()" title="Tap to add points">
+      <span>💰</span>
+      ₹<b id="wal">1000</b>
+    </div>
+  </div>
+
+  <div class="hud-side">
+    <div id="side" class="hud-buttons">
+      <button id="mapBtn" onclick="window.toggleMap&&toggleMap()" title="Minimap (M)">🗺️</button>
+      <button id="chatBtn" onclick="toggleChat()" title="Chat">💬</button>
+      <button id="camBtn" onclick="window.CY_CYCLE_CAM&&CY_CYCLE_CAM()" title="Camera Mode (V)">📷</button>
+      <button id="lbBtn" onclick="toggleRail('board')" title="District Race / Leaderboard">🏆</button>
+      <button id="timeBtn" onclick="window.CY_CYCLE_WEATHER&&CY_CYCLE_WEATHER()" title="Weather & Time: Day / Sunset / Night / Rain (T)">🌤️</button>
+      <button id="radioBtn" onclick="window.CY_TOGGLE_RADIO&&CY_TOGGLE_RADIO()" title="Tamil FM Radio (R)">📻</button>
+      <button id="dressBtn" onclick="window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()" title="Change Dress / Outfit (O)">👔</button>
+      <button id="gfxBtn" onclick="setGfx(gfx=='low'?'high':'low')" title="Graphics: High / Low">✨</button>
+      <button id="fsBtn" onclick="toggleFS()" title="Full Screen">⛶</button>
+      <button id="helpBtn" onclick="toggleRail('help')" title="How to play">❓</button>
+    </div>
+    <div class="zoom-pad">
+      <button class="zoom-btn" id="zoomInBtn" onclick="window.cyZoom&&cyZoom(-0.6)" title="Zoom in">＋</button>
+      <button class="zoom-btn" id="zoomOutBtn" onclick="window.cyZoom&&cyZoom(0.6)" title="Zoom out">−</button>
+    </div>
+  </div>
+</div>
+
+<div id="lm-card" class="lm-card">
+  <div class="lm-badge" id="lm-cat">BUS TERMINAL</div>
+  <div class="lm-title" id="lm-ta">செய்யாறு பேருந்து நிலையம்</div>
+  <div class="lm-sub" id="lm-en">Cheyyar Central Bus Stand</div>
+  <div class="lm-desc" id="lm-desc">Connecting Cheyyar with Kanchipuram, Arani, Vandavasi & Chennai. Explore town shops and buses!</div>
+  <div class="lm-foot">
+    <span class="lm-bonus" id="lm-bonus">🎁 +10 Exploration Points</span>
+    <button class="lm-close" onclick="closeLmCard()">✕</button>
+  </div>
+</div>
+
+<div id="rail" class="rail-panel">
+  <div class="rail-head">
+    <div class="rail-title" id="rail-title">🏆 District Race · நந்தவனம்</div>
+    <button class="rail-close" onclick="toggleRail()">✕</button>
+  </div>
+  <div class="rail-body">
+    <div id="rail-sec-board">
+      <div class="rail-subtitle">Tiruvannamalai District Belt</div>
+      <div class="rail-board">
+        <div class="rail-row active">
+          <span class="r-rank">#1</span>
+          <span class="r-name">🥇 செய்யாறு (Cheyyar)</span>
+          <span class="r-pts">14,820 pts</span>
+        </div>
+        <div class="rail-row">
+          <span class="r-rank">#2</span>
+          <span class="r-name">🥈 ஆரணி (Arani)</span>
+          <span class="r-pts">11,450 pts</span>
+        </div>
+        <div class="rail-row">
+          <span class="r-rank">#3</span>
+          <span class="r-name">🥉 வந்தவாசி (Vandavasi)</span>
+          <span class="r-pts">9,210 pts</span>
+        </div>
+        <div class="rail-row">
+          <span class="r-rank">#4</span>
+          <span class="r-name">காஞ்சிபுரம் (Kanchipuram)</span>
+          <span class="r-pts">8,600 pts</span>
+        </div>
+        <div class="rail-row">
+          <span class="r-rank">#5</span>
+          <span class="r-name">திருவண்ணாமலை (Tiruvannamalai)</span>
+          <span class="r-pts">7,940 pts</span>
+        </div>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-sec-title">📍 Live Town Status</div>
+        <div class="rail-meta">
+          <div>Player: <b style="color:var(--turmeric-2)" id="rail-player">Denesh</b></div>
+          <div>Standing: <b style="color:var(--leaf-2)">District Leader #1</b></div>
+          <div>Active in Cheyyar: <b id="rail-pcount-val">12 players</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rail-sec-help" style="display:none">
+      <div class="rail-sec-title">🎮 How to Play / Controls</div>
+      <div class="rail-controls">
+        <div class="ctrl-row"><kbd>WASD</kbd> / <kbd>Arrows</kbd> <span>Walk / Drive</span></div>
+        <div class="ctrl-row"><kbd>Shift</kbd> <span>Sprint / Fast Run</span></div>
+        <div class="ctrl-row"><kbd>Space</kbd> <span>Jump</span></div>
+        <div class="ctrl-row"><kbd>E</kbd> <span>Interact / Ride / Sit</span></div>
+        <div class="ctrl-row"><kbd>H</kbd> <span>Vehicle Horn</span></div>
+        <div class="ctrl-row"><kbd>V</kbd> <span>Switch Camera View</span></div>
+        <div class="ctrl-row"><kbd>R</kbd> <span>Tamil FM Radio</span></div>
+        <div class="ctrl-row"><kbd>T</kbd> <span>Weather / Day & Night</span></div>
+        <div class="ctrl-row"><kbd>M</kbd> <span>Minimap</span></div>
+        <div class="ctrl-row"><kbd>O</kbd> <span>Dress / Outfit</span></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="lobbybar"><button onclick="toast('Upcoming: '+CY_UP.join(' · '),5000)">📋 Shows</button><button onclick="snacks()">🍿 Food</button><button onclick="goto('out');P.set(38,1.6,0);yaw=Math.PI/2">🚪 Exit</button></div>
 <div id="prompt"></div><div id="toast"></div>
 <div id="pad"><span></span><button data-k="w">▲</button><span></span><button data-k="a">◀</button><button data-k="s">▼</button><button data-k="d">▶</button></div>
@@ -960,7 +1162,53 @@ window.CY_CYCLE_DRESS=()=>{
 };
 let msPaid=false,spent=0,coinTot=0;window.CY_LEG={sp:0,coin:0,pr:null};try{CY_LEG.sp=+localStorage.getItem('cyr3d_spent')||0;CY_LEG.coin=+localStorage.getItem('cyr3d_coins')||0}catch(e){}
 const PT=r=>Math.max(1,Math.ceil(r/4));
-function walletShow(){if(pts<0)pts=0;$('pts').textContent=pts;$('lvl').textContent=Math.floor((pts+spent)/25);window.CY_PERSIST&&CY_PERSIST()}
+function walletShow(){
+ if(pts<0)pts=0;
+ if($('pts'))$('pts').textContent=pts;
+ if($('score'))$('score').textContent=pts;
+ const currentLvl=Math.floor((pts+spent)/25);
+ if($('lvl'))$('lvl').textContent=currentLvl;
+ const pct=Math.min(100,Math.round(((pts+spent)%25)/25*100));
+ if($('lvl-bar'))$('lvl-bar').style.width=pct+'%';
+ window.CY_PERSIST&&CY_PERSIST();
+}
+window.discoveredLm=window.discoveredLm||{};
+window.showLmCard=function(lm){
+ const card=$('lm-card');if(!card)return;
+ if($('lm-cat'))$('lm-cat').textContent=lm.cat;
+ if($('lm-ta'))$('lm-ta').textContent=lm.ta;
+ if($('lm-en'))$('lm-en').textContent=lm.en;
+ if($('lm-desc'))$('lm-desc').textContent=lm.desc;
+ if(!window.discoveredLm[lm.id]){
+  window.discoveredLm[lm.id]=true;
+  if($('lm-bonus'))$('lm-bonus').textContent='🎁 +10 Exploration Points!';
+  addPts(10,'Discovered '+lm.en);
+  if(typeof chimeSnd==='function')chimeSnd();
+ }else{
+  if($('lm-bonus'))$('lm-bonus').textContent='📍 Town Landmark';
+ }
+ card.classList.add('show');
+ clearTimeout(window._lmCardTimer);
+ window._lmCardTimer=setTimeout(()=>{card.classList.remove('show')},7500);
+};
+window.closeLmCard=function(){const card=$('lm-card');if(card)card.classList.remove('show')};
+window.toggleRail=function(sec){
+ const r=$('rail');if(!r)return;
+ if(r.classList.contains('open')&&sec===window._curRailSec){r.classList.remove('open');return}
+ window._curRailSec=sec;
+ if(sec==='help'){
+  $('rail-title').textContent='❓ How to Play';
+  $('rail-sec-board').style.display='none';
+  $('rail-sec-help').style.display='block';
+ }else{
+  $('rail-title').textContent='🏆 District Race · நந்தவனம்';
+  $('rail-sec-board').style.display='block';
+  $('rail-sec-help').style.display='none';
+ }
+ if($('rail-player'))$('rail-player').textContent=(typeof myName!=='undefined'&&myName)?myName:'Denesh';
+ r.classList.add('open');
+};
+window.cyZoom=function(d){window._camZoomDelta=Math.max(-2,Math.min(8,(window._camZoomDelta||0)+d))};
 function spend(n,what){if(n>pts){
  if(window.CY_GUEST||(typeof guest!=='undefined'&&guest)){pts+=Math.max(60,n);walletShow();toast('🎁 Demo points credited! (+'+Math.max(60,n)+' pts)',2500)}
  else{toast('🪙 '+n+' points venum — ungalukku '+pts+' thaan irukku. Roadla irukkura 🪙 coins collect pannunga (1 coin = 5 points)',4500);return false}}pts-=n;spent+=n;walletShow();chingSnd();toast('💸 '+what+' · '+n+' pts · Balance '+pts+' pts',3000);return true}
@@ -1781,7 +2029,7 @@ function afterTicket(){
  $('acSw').onclick=()=>window.CY_SIGNOUT&&CY_SIGNOUT();
  const go=()=>{const v=nm.value.trim().replace(/\s+/g,' ');if(!v){nm.classList.add('bad');nm.focus();setTimeout(()=>nm.classList.remove('bad'),700);return}
   myName=v.slice(0,14);myGender=g;try{localStorage.setItem('cyr3d_player',JSON.stringify({n:myName,g}))}catch(e){}
-  makeMe();$('pnm').textContent=myName;$('plName').style.display='block';$('intro').style.display='none';started=true;
+  makeMe();$('pnm').textContent=myName;if($('plAvatar'))$('plAvatar').textContent=myName.trim().charAt(0).toUpperCase()||'D';if($('rail-player'))$('rail-player').textContent=myName;$('plName').style.display='inline-flex';$('intro').style.display='none';started=true;
   try{window.CY_SAVEPROF&&CY_SAVEPROF()}catch(e){}
   toast('🙏 Vanakkam '+myName+'! Namma Ooru Cheyyar-ku welcome',4500);
   if(window.CY_GUEST){const kb=$('keyBtn');if(kb)kb.style.display='block';setTimeout(()=>toast('👀 Guest mode: town-a suthi paarkalaam · chat, rank, points save-ku Google login venum (🔑 button)',6500),4800)}else if(window.CY_USER){const ob=$('outBtn');if(ob)ob.style.display='block'}};
@@ -1798,7 +2046,8 @@ goto('out');let last=performance.now();
  if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const boost=(window.speedBoostUntil&&performance.now()<window.speedBoostUntil)?1.35:1.0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?9:5))*boost*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
  cur=null;if(!seated&&!lock)for(const o of I)if(o.z==zone&&Math.hypot(o.x-P.x,o.y-P.z)<(o.r||4)&&(!o.when||o.when())){cur=o;break}
  const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent='[E] '+(typeof cur.l=='function'?cur.l():cur.l)}else p.style.display='none';
- const bp=$('boostPill');if(bp){if(window.speedBoostUntil&&performance.now()<window.speedBoostUntil){bp.style.display='block';$('boostSec').textContent=Math.max(0,Math.ceil((window.speedBoostUntil-performance.now())/1000));if(moving>0&&Math.random()<0.22&&window.spawnSpeedSparkle)window.spawnSpeedSparkle()}else{bp.style.display='none'}}
+ const bp=$('boostPill');if(bp){if(window.speedBoostUntil&&performance.now()<window.speedBoostUntil){bp.style.display='inline-flex';$('boostSec').textContent=Math.max(0,Math.ceil((window.speedBoostUntil-performance.now())/1000));if(moving>0&&Math.random()<0.22&&window.spawnSpeedSparkle)window.spawnSpeedSparkle()}else{bp.style.display='none'}}
+ if(zone==='out'&&t-(window._lastLmCheck||0)>350){window._lastLmCheck=t;const LMS=[{id:'bus_stand',cat:'BUS TERMINAL',ta:'செய்யாறு பேருந்து நிலையம்',en:'Cheyyar Central Bus Stand',desc:'Connecting Cheyyar with Kanchipuram, Arani, Vandavasi & Chennai. Explore town shops and buses!',x:0,z:20,r:34},{id:'temple',cat:'ANCIENT TEMPLE',ta:'அருள்மிகு வேதபுரீஸ்வரர் திருக்கோயில்',en:'Sri Vedapureeswarar Temple',desc:'Historic Chola temple where Saint Thirugnanasambandar performed miracles. Sannadhi street & sacred sanctum.',x:-95,z:-74,r:36},{id:'river',cat:'SACRED RIVER',ta:'செய்யாறு நதி & படகுத்துறை',en:'Cheyyar River & Boating Ghat',desc:'Pavitra Cheyyar river flowing through the town. Enjoy boat rides, riverside seating and traditional walks.',x:205,z:25,r:42},{id:'theatre',cat:'ENTERTAINMENT',ta:'செய்யாறு டாக்கீஸ் (I-MAX)',en:'Cheyyar Talkies & Screen 1',desc:'Cheyyars premier movie theatre with luxury recliner seats, Dolby sound, snack stall & massage chairs.',x:38,z:-10,r:25},{id:'tender_stall',cat:'REFRESHMENTS',ta:'முருகன் இளநீர் & மீட்டர் டீ கடை',en:'Murugan Tender Coconut & Tea Stall',desc:'Fresh Sevvalaneer tender coconuts and authentic Tamil meter tea brewed right before your eyes.',x:-24,z:32,r:16},{id:'bazaar',cat:'MARKETPLACE',ta:'காந்தி ரோடு அங்காடி',en:'Gandhi Road Town Market',desc:'Vibrant local bazaar with textile showrooms, flower stalls, grocery shops and bustling street traffic.',x:-55,z:38,r:25},{id:'petrol_bunk',cat:'FUEL STATION',ta:'பாரத் பெட்ரோலியம் பங்க்',en:'Cheyyar Town Petrol Bunk',desc:'24x7 fuel station for autos, cars and bikes driving across Cheyyar highway.',x:-45,z:10,r:20}];let match=null;for(const lm of LMS){if(Math.hypot(P.x-lm.x,P.z-lm.z)<lm.r){match=lm;break}}if(match){if(window._curLmId!==match.id){window._curLmId=match.id;if($('zone'))$('zone').innerHTML='<b>'+match.ta+' · '+match.en+'</b>';window.showLmCard&&window.showLmCard(match)}}else if(window._curLmId!==null){window._curLmId=null;if($('zone'))$('zone').innerHTML='<b>Cheyyar Town · செய்யாறு</b>'}}
  if(seated||lock||$('modal').style.display=='flex')moving=0;
 if(jy>0||vy>0){
   const prevVy=vy;
@@ -1885,7 +2134,7 @@ if(jy>0||vy>0){
  }
 window.rrAnim&&rrAnim(t);window.vehTick&&vehTick(dt);walkers.forEach(w=>{AN.length&&0;w.t+=dt*w.s;const u=(Math.sin(w.t)+1)/2,sg=Math.cos(w.t)>=0?1:-1,dx=(w.b[0]-w.a[0])*sg,dz=(w.b[1]-w.a[1])*sg,q=Math.sin(w.t*26)*.7;w.g.position.x=w.a[0]+(w.b[0]-w.a[0])*u;w.g.position.z=w.a[1]+(w.b[1]-w.a[1])*u;if(w.g.parent===OUT){const gx=w.g.position.x,gz=w.g.position.z;w.g.position.y=(Math.abs(gx)<23&&gz<-4&&gz>-24)?.4:(window.__extraY?window.__extraY(gx,gz):0)}w.g.rotation.y=Math.atan2(-dx,-dz);w.g.ll.rotation.x=q;w.g.rl.rotation.x=-q;w.g.la.rotation.x=-q;w.g.ra.rotation.x=q});
 const pm=window.MOB&&innerWidth<innerHeight,cd=(seated?3.4:(window.drv?window.drv.spec.cam:4.2))*(pm?(seated?1.15:(window.drv?1.05:1.35)):1),bb=Z[zone].b,cp=Math.cos(pitch),dv=!!window.drv,cmin=dv?window.drv.spec.cam*.55:1;
-let cdd=cd,cx,cy,cz;{const minY=dv?(window.drv.t=='bus'?5.5:window.drv.t=='car'||window.drv.t=='auto'?2.8:2.4):.7;for(;cdd>cmin;cdd-=.3){cx=Math.max(bb[0]-.6,Math.min(bb[1]+.6,P.x+Math.sin(yaw)*cdd*cp));cy=Math.max(minY,P.y+G+jy+.3-Math.sin(pitch)*cdd);cz=Math.max(bb[2],Math.min(bb[3]+.3,P.z+Math.cos(yaw)*cdd*cp));if(!camBlocked(cx,cy,cz))break}}
+let cdd=Math.max(cmin,cd+(window._camZoomDelta||0)),cx,cy,cz;{const minY=dv?(window.drv.t=='bus'?5.5:window.drv.t=='car'||window.drv.t=='auto'?2.8:2.4):.7;for(;cdd>cmin;cdd-=.3){cx=Math.max(bb[0]-.6,Math.min(bb[1]+.6,P.x+Math.sin(yaw)*cdd*cp));cy=Math.max(minY,P.y+G+jy+.3-Math.sin(pitch)*cdd);cz=Math.max(bb[2],Math.min(bb[3]+.3,P.z+Math.cos(yaw)*cdd*cp));if(!camBlocked(cx,cy,cz))break}}
 C.position.set(cx,cy,cz);
 C.rotation.set(pitch,yaw,0);
  if(zone=='aud'){paintScreen(t);if(window.__screenLight&&window.__audDimmed!==false){const flk=Math.sin(t*0.0031)*0.08+Math.cos(t*0.0073)*0.05;window.__screenLight.intensity=Math.max(0.4,0.70+flk);}}if(zone=='out')animOut(t);window.vidTick&&vidTick();
@@ -3869,8 +4118,8 @@ const hhmm=s=>{const m=Math.floor(s/60)%1440;return String(Math.floor(m/60)).pad
 
 /* ---------- 1. CONTROLS: mobile joystick, drag look, hold-W sprint ---------- */
 const touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/[?&]mobile=1/.test(location.search);
-const js=el('div','position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:100px;height:100px;border-radius:50%;background:#fff2;border:2px solid #fff4;z-index:4;touch-action:none;display:none');
-const kn=el('div','position:absolute;left:29px;top:29px;width:42px;height:42px;border-radius:50%;background:#ffd34dcc;pointer-events:none');js.append(kn);document.body.append(js);
+const js=el('div','position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,rgba(91,31,26,.45),rgba(42,16,13,.88));border:2px solid var(--turmeric);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 16px rgba(240,169,27,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:15;touch-action:none;display:none');
+const kn=el('div','position:absolute;left:30px;top:30px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fff3c4,var(--turmeric));border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 10px rgba(240,169,27,.8);pointer-events:none');js.append(kn);document.body.append(js);
 if(touch)$('pad').style.display='none';
 let jid=null,jx=0,jy=0,jOn=false;
 function jset(e){const r=js.getBoundingClientRect();let dx=e.clientX-(r.left+50),dy=e.clientY-(r.top+50);const m=H(dx,dy);if(m>38){dx*=38/m;dy*=38/m}jx=dx/38;jy=dy/38;kn.style.transform='translate('+dx+'px,'+dy+'px)'}
@@ -5402,7 +5651,7 @@ window.CY_EDIT=()=>{if(!started)return;if(seated||window.drv){toast('Seat/vehicl
   const pick=prompt(`Select dress (1-${list.length}):\n${msg}`, (myOutfit%list.length)+1);
   if(pick&&+pick>=1&&+pick<=list.length)myOutfit=(+pick)-1;
  }
- myName=v;myGender=gd;makeMe();$('pnm').textContent=myName;try{localStorage.setItem('cyr3d_player',JSON.stringify({n:myName,g:myGender,o:myOutfit}))}catch(e){}CY_FLUSH();toast('✅ Profile updated',2000)};
+ myName=v;myGender=gd;makeMe();$('pnm').textContent=myName;if($('plAvatar'))$('plAvatar').textContent=myName.trim().charAt(0).toUpperCase()||'D';if($('rail-player'))$('rail-player').textContent=myName;try{localStorage.setItem('cyr3d_player',JSON.stringify({n:myName,g:myGender,o:myOutfit}))}catch(e){}CY_FLUSH();toast('✅ Profile updated',2000)};
 addEventListener('keydown',e=>{if(!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')&&e.code=='KeyO')window.CY_CYCLE_DRESS&&CY_CYCLE_DRESS()});
 })();
 </script>
