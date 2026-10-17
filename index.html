@@ -973,8 +973,8 @@ function getTheaterScheduleState(){
  const doorOpenEarly=nextShow&&(diffMin<=15&&diffMin>=0);
  const isDoorUnlocked=!!activeShow||doorOpenEarly;
  const availableShows=THEATER_SHOWS.filter(s=>{
-  if(s.id==='s4'&&curMin<(s.endMin-1440))return false;
-  return curMin<s.startMin;
+  if(s.id==='s4')return !(curMin>=(s.endMin-1440)&&curMin<s.startMin);
+  return curMin<s.endMin;
  });
  return{curMin,nowSec,activeShow,nextShow,diffMin,countdownTa,countdownEn,isTomorrow,isDoorUnlocked,availableShows};
 }
@@ -1177,19 +1177,25 @@ function booking(){
   +'<div class="bk-ch">'+NOW.map((x,i)=>'<button class="'+(i==mi?'on':'')+'" onclick="bkSet(0,'+i+')">'+x+'</button>').join('')+'</div>'
   +'<div class="bk-ch">'+THEATER_SHOWS.map(s=>{
     const curState=getTheaterScheduleState();
-    const isPast=curState.curMin>=s.startMin;
+    const isPast=(s.id==='s4')?(curState.curMin>=(s.endMin-1440)&&curState.curMin<s.startMin):(curState.curMin>=s.endMin);
     const isSelected=s.time===tm;
     if(isPast){
      return '<button class="bk-time-off" disabled style="opacity:0.35;cursor:not-allowed;text-decoration:line-through;background:#2a1818;border-color:#553333;color:#999" title="Show Finished / Closed">'+s.time+' (Closed)</button>';
     }
-    return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')">'+s.time+'</button>';
+    const isLive=(s.id==='s4')?(curState.curMin>=s.startMin||curState.curMin<(s.endMin-1440)):(curState.curMin>=s.startMin&&curState.curMin<s.endMin);
+    return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')">'+s.time+(isLive?' 🟢':'')+'</button>';
    }).join('')+'</div>'
    +(function(){
     const curState=getTheaterScheduleState();
     const curS=THEATER_SHOWS.find(x=>x.time===tm)||THEATER_SHOWS[0];
+    const isCurLive=(curS.id==='s4')?(curState.curMin>=curS.startMin||curState.curMin<(curS.endMin-1440)):(curState.curMin>=curS.startMin&&curState.curMin<curS.endMin);
+    const isCurEnded=(curS.id==='s4')?(curState.curMin>=(curS.endMin-1440)&&curState.curMin<curS.startMin):(curState.curMin>=curS.endMin);
     const diff=Math.round(curS.startMin-curState.curMin);
     let timeInfo='';
-    if(diff>0){
+    if(isCurLive){
+     const elMin=Math.floor(curS.id==='s4'&&curState.curMin<60?(1440-curS.startMin)+curState.curMin:curState.curMin-curS.startMin);
+     timeInfo=' · <span style="color:#7dffa0">🎬 Now Playing ('+elMin+'-வது நிமிடம் ஓடிக்கொண்டிருக்கிறது / '+elMin+' mins running)</span>';
+    } else if(!isCurEnded){
      const h=Math.floor(diff/60),m=diff%60;
      const durTa=h>0?(h+' மணி '+(m?m+' நிமிடம்':'')):(m+' நிமிடம்');
      const durEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
