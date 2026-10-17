@@ -575,18 +575,21 @@ function walker(a,b,col,p,sp=.35){if(!CROWD)return;walkers.push({g:person(a[0],a
 
 /* ---------- OUTDOOR: Cheyyar bus stand + theatre ---------- */
 const OUT=new THREE.Group();S.add(OUT);window.OUT=OUT;
-box(300,.2,300,0x6b9a52,0,-.1,0,OUT);box(300,.1,14,0x333338,0,0,30,OUT);box(214,.1,14,0x333338,43,0,-38,OUT);
-for(let x=-54;x<60;x+=8)box(3,.12,.3,0xffffff,x,.06,-38,OUT);
-// Grand Pedestrian Temple Promenade (Sannadhi Street / Mada Veedhi - Strictly No Vehicles)
-box(76, .14, 56, 0xb8b0a0, -102, 0.05, -58, OUT);
-box(76, .16, 1.2, 0xdfd8c8, -102, 0.06, -30.4, OUT);
-box(76, .16, 1.2, 0xdfd8c8, -102, 0.06, -85.6, OUT);
-for(let bz = -46; bz <= -30; bz += 2.8){
-  cyl(0.28, 0.34, 0.9, 8, 0x3a3a40, -63.5, 0.45, bz, OUT);
-  sph(0.22, 0xd4af37, -63.5, 0.98, bz, OUT);
-  glow(0.25, 0.25, 0.25, 0xffd54f, -63.5, 1.0, bz, OUT);
-}
-sign('🛕 வேதபுரீஸ்வரர் கோயில் சன்னதி வீதி · பாதசாரிகள் மட்டும்', 13, 1.2, -63.5, 3.8, -38, -Math.PI/2, OUT, '#5a1214', '#ffd34d');
+box(300,.2,300,0x6b9a52,0,-.1,0,OUT);box(300,.1,14,0x333338,0,0,30,OUT);box(300,.1,14,0x333338,0,0,-38,OUT);
+for(let x=-140;x<=140;x+=8)box(3,.12,.3,0xffffff,x,.06,-38,OUT);
+// Grand Sannadhi Street connecting Main Road to the Temple (x: -108, z: -46 to -74)
+box(24, .08, 28, 0xd4c6a6, -108, 0.04, -60, OUT);
+box(0.6, .18, 28, 0xb9b1a2, -120, 0.09, -60, OUT);
+box(0.6, .18, 28, 0xb9b1a2, -96, 0.09, -60, OUT);
+// Ornamental brass temple lamp posts flanking Sannadhi Street entrance
+[-119.5, -96.5].forEach(lx => {
+  [-48, -58, -68].forEach(lz => {
+    cyl(0.18, 0.24, 0.6, 8, 0x3a3a40, lx, 0.3, lz, OUT);
+    cyl(0.08, 0.12, 3.2, 8, 0xd4af37, lx, 2.0, lz, OUT);
+    sph(0.18, 0xd4af37, lx, 3.7, lz, OUT);
+    glow(0.3, 0.3, 0.3, 0xffd54f, lx, 3.8, lz, OUT);
+  });
+});
 for(let x=-60;x<60;x+=8)box(3,.12,.3,0xffffff,x,.06,30,OUT);
 box(46,.4,20,0x9a9a9a,0,.2,-14,OUT);                         // platform
 box(48,.5,22,0xc0392b,0,6,-14,OUT);                           // roof
@@ -1890,7 +1893,7 @@ C.rotation.set(pitch,yaw,0);
 </script><script>
 /* ===== VEHICLES + BIGGER TOWN (south Cheyyar) ===== */
 (function(){
-Z.out.b=[-140,40.3,-75,140];
+Z.out.b=[-140,40.3,-125,140];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  /* ---- premium bus shell (shared by driveable/traffic bus and bay buses). front = fz*5 ---- */
  window.__tsign=function(t,w,h,x,y,z,ry,p,bg,fg){const c=document.createElement('canvas');c.width=1024;c.height=Math.max(16,Math.round(1024*h/w));const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);g.fillStyle=fg;g.textAlign='center';g.textBaseline='middle';let fs=c.height*.7;g.font='bold '+fs+'px sans-serif';while(g.measureText(t).width>c.width-40&&fs>8){fs-=2;g.font='bold '+fs+'px sans-serif'}g.fillText(t,c.width/2,c.height/2);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));m.position.set(x,y,z);m.rotation.y=ry||0;(p||S).add(m);return m};
@@ -2265,7 +2268,7 @@ window.vehTick=function(dt){
  px=clamp(px,b[0]+1,b[1]-1);
  pz=clamp(pz,b[2]+1,b[3]-1);
  
-  if(px < -63.5 && pz < -26 && pz > -90){
+  if(px < -77 && px > -139 && pz < -66 && pz > -114){
    px = v.g.position.x; pz = v.g.position.z; v.v = -v.v * 0.3;
    if(performance.now() > (v.lastTempleWarn || 0) + 3000){
     v.lastTempleWarn = performance.now();
@@ -3810,7 +3813,7 @@ function mkInfo(){const r=pick(routes),e=pick(r.entries);let from='Cheyyar',to=e
  return{no:e.bus,noTa:e.busTa||e.bus,from,to,short:to.split(' via ')[0],ta:e.destTa||'',route:r.name,bay:r.bay}}
 const TR=[];
 LANES.forEach((ln,li)=>{const types=['bus',li%2?'auto':'car','bike',li%2?'car':'auto'];
- const minX=(ln[0]<0)?-54:XMIN,maxX=li<2?XMAXB:XMAX,span=maxX-minX;
+ const minX=XMIN,maxX=li<2?XMAXB:XMAX,span=maxX-minX;
  types.forEach((t,i)=>{const g=VBUILD(t),o={g,t,dir:ln[1],sp:ln[2],z:ln[0],minX,maxX,span,x:minX+((i*span/4+li*11)%span),br:li<2,hl:HL[t],wd:WD[t],info:null,tg:null};
   g.position.set(o.x,0,o.z);g.rotation.y=o.dir>0?-Math.PI/2:Math.PI/2;
   if(t=='bike'){const r=person(0,.42,pick(RIDER),0,g,.28);r.children.filter(c=>c.geometry&&c.geometry.type=='CircleGeometry').forEach(c=>r.remove(c));r.ll.rotation.x=r.rl.rotation.x=.6;r.la.rotation.x=r.ra.rotation.x=1}
@@ -3907,7 +3910,7 @@ function applyTime(t){const h=t/3600,a=(h-6)*Math.PI/12,e=Math.sin(a),day=cl((e+
 
 /* ---------- 3. STREET LAYOUT + GOPURAM ---------- */
 try{
- box(300,.22,2.2,0xb9b1a2,0,.11,21.9,OUT);box(300,.22,2.2,0xb9b1a2,0,.11,38.1,OUT);box(300,.22,2.2,0xb9b1a2,0,.11,-29.9,OUT);
+ box(300,.22,2.2,0xb9b1a2,0,.11,21.9,OUT);box(300,.22,2.2,0xb9b1a2,0,.11,38.1,OUT);box(300,.22,2.2,0xb9b1a2,0,.11,-29.9,OUT);box(300,.22,2.2,0xb9b1a2,0,.11,-46.1,OUT);
  for(let x=-140;x<=140;x+=8)box(3,.12,.3,0xffffff,x,.06,-38,OUT);
  function lamp(x,z,d){box(.18,6.2,.18,0x333333,x,3.1,z,OUT);box(.14,.14,1.2,0x333333,x,6.2,z+d*.6,OUT);const m=new THREE.Mesh(new THREE.BoxGeometry(.3,.16,.5),lampM);m.position.set(x,6.1,z+d*1.1);OUT.add(m)}
  for(let x=-130;x<=34;x+=16){lamp(x,22.4,1);lamp(x+8,38.6,-1);lamp(x,-29.6,-1)}
@@ -3932,7 +3935,7 @@ try{
    ========================================================================= */
 
   // 1. GRAND TEMPLE STREET WELCOME ARCH (கோயில் முகப்பு அலங்கார வளைவு at x: -129, z: -43)
-  const archG = new THREE.Group(); archG.position.set(-129, 0, -43); OUT.add(archG);
+  const archG = new THREE.Group(); archG.position.set(-108, 0, -48); OUT.add(archG);
   // Left and Right Carved Granite Pillar Towers
   [-3.8, 3.8].forEach(px => {
     box(1.2, 0.6, 1.2, 0x3a3a40, px, 0.3, 0, archG); // base plinth
@@ -3961,7 +3964,7 @@ try{
   sign('TEMPLE STREET · பாடல் பெற்ற திருத்தலம் · WELCOME', 7.8, 0.85, 0, 6.5, -0.45, Math.PI, archG, '#0b3d91', '#ffffff');
 
   // 2. THE GRAND 7-TIER DRAVIDIAN RAJAGOPURAM (கிழக்கு ராஜகோபுரம் at x: -108, z: -48)
-  const gopG = new THREE.Group(); gopG.position.set(-108, 0, -46); OUT.add(gopG);
+  const gopG = new THREE.Group(); gopG.position.set(-108, 0, -74); OUT.add(gopG);
 
   // A. Carved Granite Base (அதிஷ்டானம் & நுழைவு வாயில்)
   // Left and Right Solid Gatehouse Wings leaving a wide 6.5m clear corridor at ground level (y=0)
@@ -4081,7 +4084,7 @@ try{
   tag(dStambh, '🪔 பித்தளை தீபஸ்தம்பம்');
 
   // H. Compound Wall with Sacred Thiruman Red & White Stripes
-  const cWallG = new THREE.Group(); OUT.add(cWallG);
+  const cWallG = new THREE.Group(); cWallG.position.set(0, 0, -28); OUT.add(cWallG);
   for (let wx = -138; wx <= -78; wx += 2.0) {
     if (wx >= -115 && wx <= -101) continue; // Keep walk-through gopuram open
     const c = (Math.abs(Math.round(wx / 2.0)) % 2 === 0) ? 0xcc2222 : 0xf4f4f4;
@@ -4099,13 +4102,13 @@ try{
   }
 
   // Solid perimeter colliders for sacred temple compound walls (stops vehicles & prevents walking through walls)
-  hit(-139, -112, -41.5, -38.5, 4.5, 'out');
-  hit(-104, -77, -41.5, -38.5, 4.5, 'out');
-  hit(-139, -77, -85.5, -82.5, 4.5, 'out');
-  hit(-139.5, -136.5, -85, -39, 4.5, 'out');
-  hit(-79.5, -76.5, -85, -39, 4.5, 'out');
-  hit(-122, -111.5, -52, -40, 8, 'out');
-  hit(-104.5, -94, -52, -40, 8, 'out');
+  hit(-139, -112, -69.5, -66.5, 4.5, 'out');
+  hit(-104, -77, -69.5, -66.5, 4.5, 'out');
+  hit(-139, -77, -113.5, -110.5, 4.5, 'out');
+  hit(-139.5, -136.5, -113, -67, 4.5, 'out');
+  hit(-79.5, -76.5, -113, -67, 4.5, 'out');
+  hit(-122, -111.5, -80, -68, 8, 'out');
+  hit(-104.5, -94, -80, -68, 8, 'out');
 
   // Interactive Temple Bell Ringing
   window.ringTempleBell = function() {
@@ -4136,7 +4139,7 @@ try{
   };
 
   // 3. INNER PRAKARAM COURTYARD & SANCTUARIES
-  const TG = new THREE.Group(); OUT.add(TG);
+  const TG = new THREE.Group(); TG.position.set(0, 0, -28); OUT.add(TG);
 
   // A. Flush Flagstone Paved Courtyard (y=0.03, flat and clean so character NEVER sinks!)
   box(64, 0.06, 44, 0xd4c6a6, -108, 0.03, -62, TG);
@@ -4226,7 +4229,7 @@ try{
   });
 
   // Solid building collision (stops at z=-72.2 so player stands freely in front of door at z=-70.5)
-  hit(-116, -100, -84, -72.5, 7.5, 'out');
+  hit(-116, -100, -112, -100.5, 7.5, 'out');
 
   // E. Goddess Ilamulai Nayagi Ambal Sannidhi at (-126, 0, -68)
   const ag = new THREE.Group(); ag.position.set(-126, 0, -68); TG.add(ag);
@@ -4333,8 +4336,8 @@ try{
   sph(0.24, GOLD_M, 0, 12.3, 0, tg);
   tag(tg, '🎪 அருள்மிகு வேதபுரீஸ்வரர் திருத்தேர்');
 
-  hit(-130, -120, -74, -62, 6.0, 'out');
-  hit(-140, -124, -76, -58, 2.0, 'out');
+  hit(-130, -120, -102, -90, 6.0, 'out');
+  hit(-140, -124, -104, -86, 2.0, 'out');
 
   /* ---------- GLOBAL TEMPLE RITUAL FUNCTIONS ---------- */
   window.enterGarbhagriha = function(){
@@ -4346,7 +4349,7 @@ try{
   window.exitGarbhagriha = function(){
     try{ doorSnd(); }catch(_){}
     goto('out');
-    P.set(-108, 1.6, -69.5);
+    P.set(-108, 1.6, -97.5);
     yaw = 0;
     toast('🚪 கோயில் வெளிப் பிரகாரத்திற்கு வந்தீர்கள் 🙏', 3500);
   };
@@ -4417,14 +4420,14 @@ try{
 
   // Outer Temple Interactions (Using arrow functions so they never suffer from hoisting/undefined issues!)
   I.push(
-    { z: 'out', x: -108, y: -46.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🔔 கோயில் மணி அடியுங்கள் (Ring Sacred Temple Bell)', f: () => window.ringTempleBell() },
-    { z: 'out', x: -108, y: -70.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🛕 கருவறைக்குள் செல்க (Enter Lord Shiva Sanctum Sanctorum)', f: () => window.enterGarbhagriha() },
-    { z: 'out', x: -126, y: -64.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: () => window.darshanAmbal() },
-    { z: 'out', x: -90, y: -55.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: () => window.worshipPalmTree() },
-    { z: 'out', x: -92, y: -67.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: () => window.pradakshinamNavagraha() },
-    { z: 'out', x: -128, y: -66.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌊 கோயில் குள புனித தீர்த்தம் (Sacred Theertham)', f: () => window.sprinkleTheertham() },
-    { z: 'out', x: -108, y: -38.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 தீபஸ்தம்ப வழிபாடு (Worship Deepasthambam)', f: () => window.lightTempleDeepam() },
-    { z: 'out', x: -128, y: -30.0, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: () => window.worshipChariot() }
+    { z: 'out', x: -108, y: -74.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🔔 கோயில் மணி அடியுங்கள் (Ring Sacred Temple Bell)', f: () => window.ringTempleBell() },
+    { z: 'out', x: -108, y: -98.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🛕 கருவறைக்குள் செல்க (Enter Lord Shiva Sanctum Sanctorum)', f: () => window.enterGarbhagriha() },
+    { z: 'out', x: -126, y: -92.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: () => window.darshanAmbal() },
+    { z: 'out', x: -90, y: -83.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: () => window.worshipPalmTree() },
+    { z: 'out', x: -92, y: -95.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: () => window.pradakshinamNavagraha() },
+    { z: 'out', x: -128, y: -94.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌊 கோயில் குள புனித தீர்த்தம் (Sacred Theertham)', f: () => window.sprinkleTheertham() },
+    { z: 'out', x: -108, y: -66.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 தீபஸ்தம்ப வழிபாடு (Worship Deepasthambam)', f: () => window.lightTempleDeepam() },
+    { z: 'out', x: -128, y: -58.0, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: () => window.worshipChariot() }
   );
 
   /* 4. SANCTUM SANCTORUM INTERIOR CHAMBER (GB Group) */
@@ -4621,7 +4624,7 @@ const cl=(v,a,b)=>Math.max(a,Math.min(b,v)),hemi=S.children.find(o=>o.isHemisphe
 const bridgeY=(x,z)=>{if(Math.abs(z-30)>7.2)return 0;if(x>=184&&x<200)return 4*(x-184)/16;if(x>=200&&x<=240)return 4;if(x>240&&x<=256)return 4*(256-x)/16;return 0};
 window.__extraY=bridgeY;
 const g0=window.gh;window.gh=function(){if(zone=='out'){const y=bridgeY(P.x,P.z);if(y>0)return y}return g0()};
-Z.out.b=[-140,300,-75,140];
+Z.out.b=[-140,300,-125,140];
 {const _vb=window.vehTick;window.vehTick=function(dt){_vb&&_vb(dt);const v=window.drv;if(v&&zone=='out'&&window.__extraY){const y=window.__extraY(v.g.position.x,v.g.position.z);v.g.position.y=y;if(v.spec.rd&&ME.visible)ME.position.y+=y}}}
 hit(43,69,-16,16,16,'out');
 
