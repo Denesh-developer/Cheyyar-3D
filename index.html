@@ -2972,64 +2972,61 @@ try{
   sign('TEMPLE STREET · பாடல் பெற்ற திருத்தலம் · WELCOME', 7.8, 0.85, 0, 6.5, -0.45, Math.PI, archG, '#0b3d91', '#ffffff');
 
   // 2. THE GRAND 7-TIER DRAVIDIAN RAJAGOPURAM (கிழக்கு ராஜகோபுரம் at x: -108, z: -48)
-  const gopG = new THREE.Group(); gopG.position.set(-108, 0, -48); OUT.add(gopG);
+  const gopG = new THREE.Group(); gopG.position.set(-108, 0, -46); OUT.add(gopG);
 
-  // A. Carved Granite Base (அதிஷ்டானம் & வாயில் அடித்தளம்)
-  box(24, 0.7, 13, 0x38383f, 0, 0.35, 0, gopG); // Upapeedam platform
-  box(22, 1.2, 12, 0x484852, 0, 1.3, 0, gopG);  // Moulded stone plinth
-  // Left and Right Solid Granite Gatehouse Wings
-  box(8.2, 6.8, 11, 0x545460, -7.2, 4.8, 0, gopG);
-  box(8.2, 6.8, 11, 0x545460, 7.2, 4.8, 0, gopG);
-  // Vaulted Arch Roof over Entrance
-  box(7.6, 1.8, 11, 0x484852, 0, 7.3, 0, gopG);
-  // Walk-through Portal (நுழைவு வாயில் - 4.8m wide opening player can walk through!)
-  // Left & right inner door jambs
-  box(0.5, 5.8, 10.8, 0x2e2e34, -2.8, 3.4, 0, gopG);
-  box(0.5, 5.8, 10.8, 0x2e2e34, 2.8, 3.4, 0, gopG);
-  // Grand Teakwood Temple Doors with Brass Lotus Studs (pinned back open)
-  box(0.18, 5.4, 2.2, 0x2b1810, -2.5, 3.2, -3.2, gopG);
-  box(0.18, 5.4, 2.2, 0x2b1810, 2.5, 3.2, -3.2, gopG);
-  // Brass studs on doors
-  for(let dy = 1.2; dy <= 5.0; dy += 0.9){
-    sph(0.08, 0xd4af37, -2.4, dy, -3.2, gopG);
-    sph(0.08, 0xd4af37, 2.4, dy, -3.2, gopG);
+  // A. Carved Granite Base (அதிஷ்டானம் & நுழைவு வாயில்)
+  // Left and Right Solid Gatehouse Wings leaving a wide 6.5m clear corridor at ground level (y=0)
+  box(8.5, 7.0, 12, 0x484852, -7.5, 3.5, 0, gopG); // Left wing
+  box(8.5, 7.0, 12, 0x484852, 7.5, 3.5, 0, gopG);  // Right wing
+  // Side plinths
+  box(8.8, 0.5, 12.5, 0x38383f, -7.5, 0.25, 0, gopG);
+  box(8.8, 0.5, 12.5, 0x38383f, 7.5, 0.25, 0, gopG);
+  // High overhead vaulted arch roof leaving 5.5m clear walking height
+  box(6.5, 1.8, 12, 0x484852, 0, 6.4, 0, gopG);
+  // Flat ground-level stone walkway (y=0.02, completely flush so player never sinks!)
+  box(6.2, 0.04, 12, 0xd4c6a6, 0, 0.02, 0, gopG);
+
+  // Grand Teakwood Temple Doors with Brass Lotus Studs (pinned back wide open)
+  box(0.18, 5.2, 2.4, 0x2b1810, -2.8, 2.6, -3.2, gopG);
+  box(0.18, 5.2, 2.4, 0x2b1810, 2.8, 2.6, -3.2, gopG);
+  for(let dy = 1.0; dy <= 4.8; dy += 0.95){
+    sph(0.08, 0xd4af37, -2.7, dy, -3.2, gopG);
+    sph(0.08, 0xd4af37, 2.7, dy, -3.2, gopG);
   }
-  // Twin Dwarapalakas guarding the gopuram entrance
-  [-3.8, 3.8].forEach((dx, di) => {
+
+  // Twin Dwarapalakas flanking the gopuram entrance
+  [-4.0, 4.0].forEach((dx, di) => {
     const dpG = new THREE.Group(); dpG.position.set(dx, 0, 5.6); gopG.add(dpG);
-    box(0.8, 0.4, 0.8, 0x222226, 0, 0.2, 0, dpG);
-    cyl(0.25, 0.22, 1.5, 8, 0x333338, 0, 1.15, 0, dpG); // body
-    sph(0.28, 0x333338, 0, 2.1, 0, dpG); // head
-    cyl(0.08, 0.26, 0.65, 8, GOLD_M, 0, 2.6, 0, dpG); // crown
-    cyl(0.06, 0.16, 2.0, 6, GOLD_M, di === 0 ? 0.45 : -0.45, 1.2, 0.1, dpG); // mace/trident
+    box(0.8, 0.35, 0.8, 0x222226, 0, 0.18, 0, dpG);
+    cyl(0.25, 0.22, 1.5, 8, 0x333338, 0, 1.15, 0, dpG);
+    sph(0.28, 0x333338, 0, 2.1, 0, dpG);
+    cyl(0.08, 0.26, 0.65, 8, GOLD_M, 0, 2.6, 0, dpG);
+    cyl(0.06, 0.16, 2.0, 6, GOLD_M, di === 0 ? 0.45 : -0.45, 1.2, 0.1, dpG);
     tag(dpG, di === 0 ? '🛡️ துவாரபாலகர்' : '🛡️ துவாரபாலகி');
   });
 
   // B. Grand Hanging Temple Bronze Bell (திருக்கோயில் மணி) inside Gopura Vasal
-  const bellG = new THREE.Group(); bellG.position.set(0, 5.8, 0); gopG.add(bellG);
-  cyl(0.06, 0.06, 1.2, 8, 0x222222, 0, 0.6, 0, bellG); // chain
-  cyl(0.12, 0.58, 0.95, 16, 0xd9ac3c, 0, 0, 0, bellG); // flared bell body
-  sph(0.20, 0x7a5a1a, 0, -0.45, 0, bellG); // clapper ball
+  const bellG = new THREE.Group(); bellG.position.set(0, 5.2, 0); gopG.add(bellG);
+  cyl(0.06, 0.06, 1.2, 8, 0x222222, 0, 0.6, 0, bellG);
+  cyl(0.12, 0.58, 0.95, 16, 0xd9ac3c, 0, 0, 0, bellG);
+  sph(0.20, 0x7a5a1a, 0, -0.45, 0, bellG);
   window.__templeBellG = bellG;
 
   // C. 7 Authentic Dravidian Tiers (Talas)
-  // Real temple stucco colors: soft ash/ivory granite with ochre & polychrome deity niches
-  const tierColor = 0xd5d1c6; // ash-white Dravidian stucco
-  const corniceColor = 0xb85238; // terracotta red-ochre moulding
+  const tierColor = 0xd5d1c6;
+  const corniceColor = 0xb85238;
   const deityCols = [0xd32f2f, 0x2e7d32, 0xfbc02d, 0x1976d2, 0xe65100, 0x6a1b9a, 0x00838f];
 
   for (let i = 0; i < 7; i++) {
     const tw = 20.5 - i * 2.1;
     const td = 10.5 - i * 1.0;
-    const ty = 8.2 + i * 3.6;
+    const ty = 7.3 + i * 3.6;
 
-    // Main tier body
     box(tw, 2.9, td, tierColor, 0, ty + 1.45, 0, gopG);
-    // Projected cornice moulding (Kapota with curved eaves)
     box(tw + 1.2, 0.5, td + 1.2, corniceColor, 0, ty + 3.15, 0, gopG);
     box(tw + 0.8, 0.2, td + 0.8, 0xf2ebdc, 0, ty + 3.4, 0, gopG);
 
-    // Corner miniature shrines (Karnakutas - கர்ணகூடங்கள்)
+    // Corner miniature shrines (Karnakutas)
     [-tw/2 + 0.5, tw/2 - 0.5].forEach(kx => {
       [-td/2 + 0.5, td/2 - 0.5].forEach(kz => {
         box(0.8, 1.2, 0.8, tierColor, kx, ty + 1.8, kz, gopG);
@@ -3037,65 +3034,54 @@ try{
       });
     });
 
-    // Sculpted deity niches along the tier faces (East & West)
+    // Sculpted deity niches along tier faces
     const numNiches = Math.max(3, Math.floor(tw / 3.0));
     for (let k = 0; k < numNiches; k++) {
       const sx = -tw / 2 + 1.6 + k * ((tw - 3.2) / (numNiches - 1 || 1));
       const dCol = deityCols[(i + k) % deityCols.length];
-
-      // East face (front) deity shrine
-      box(1.2, 2.0, 0.35, 0x484852, sx, ty + 1.3, td / 2 + 0.12, gopG); // alcove niche
-      cyl(0.22, 0.20, 1.1, 8, dCol, sx, ty + 1.1, td / 2 + 0.32, gopG); // deity murti
-      sph(0.20, 0xffd54f, sx, ty + 1.85, td / 2 + 0.32, gopG); // deity face / crown
-      cyl(0.05, 0.14, 0.45, 6, GOLD_M, sx, ty + 2.2, td / 2 + 0.32, gopG);
-
-      // West face (rear) deity shrine
+      // Front
+      box(1.2, 2.0, 0.35, 0x484852, sx, ty + 1.3, td / 2 + 0.12, gopG);
+      cyl(0.22, 0.20, 1.1, 8, dCol, sx, ty + 1.1, td / 2 + 0.32, gopG);
+      sph(0.20, 0xffd54f, sx, ty + 1.85, td / 2 + 0.32, gopG);
+      // Rear
       box(1.2, 2.0, 0.35, 0x484852, sx, ty + 1.3, -td / 2 - 0.12, gopG);
       cyl(0.22, 0.20, 1.1, 8, deityCols[(i + k + 2) % deityCols.length], sx, ty + 1.1, -td / 2 - 0.32, gopG);
       sph(0.20, 0xffd54f, sx, ty + 1.85, -td / 2 - 0.32, gopG);
     }
   }
 
-  // D. Barrel-Vaulted Sala Shikhara (கபோத சாலை சிகரம்) at top (height ~33.5m)
-  const topY = 8.2 + 7 * 3.6; // 33.4m
+  // D. Barrel-Vaulted Sala Shikhara at top
+  const topY = 7.3 + 7 * 3.6;
   box(6.2, 2.4, 4.2, tierColor, 0, topY + 1.2, 0, gopG);
-  // Curved barrel vault roof
   cyl(2.1, 2.1, 6.4, 16, corniceColor, 0, topY + 2.2, 0, gopG);
-  // Gable end ornamental arches (Koodu nasika)
   [-3.25, 3.25].forEach(gx => {
     cyl(1.3, 1.3, 0.4, 12, 0xf2ebdc, gx, topY + 2.2, 0, gopG);
     sph(0.3, 0xd4af37, gx, topY + 2.2, 0, gopG);
   });
 
-  // E. 7 GLEAMING GOLDEN KALASAMS (ஏழு தங்கக் கலசங்கள்) along the top crest!
+  // E. 7 GLEAMING GOLDEN KALASAMS
   const kalasamSpacing = 0.85;
   for (let ki = -3; ki <= 3; ki++) {
     const kx = ki * kalasamSpacing;
     const ky = topY + 3.2;
-    // Pot base (Kumbha)
     cyl(0.18, 0.38, 1.2, 10, GOLD_M, kx, ky + 0.6, 0, gopG);
-    // Spire needle
     cyl(0.04, 0.16, 0.9, 8, GOLD_M, kx, ky + 1.6, 0, gopG);
     sph(0.12, GOLD_M, kx, ky + 2.1, 0, gopG);
-    // Top Trishul Trident
     box(0.04, 0.35, 0.04, GOLD_M, kx, ky + 2.35, 0, gopG);
-    box(0.24, 0.04, 0.04, GOLD_M, kx, ky + 2.45, 0, gopG);
   }
 
-  // F. Authentic Temple Signboard over Entrance
-  sign('திருவோத்தூர் அருள்மிகு வேதபுரீஸ்வரர் திருக்கோயில்', 11.2, 1.2, 0, 7.8, 5.65, 0, gopG, '#5a1214', '#ffd34d');
-  sign('ஆண்பனை பெண்பனையான பாடல் பெற்ற சிவஸ்தலம் · செய்யாறு', 10.4, 0.65, 0, 6.7, 5.65, 0, gopG, '#3e1515', '#f5f5f5');
+  // F. Temple Signboard over Entrance
+  sign('திருவோத்தூர் அருள்மிகு வேதபுரீஸ்வரர் திருக்கோயில்', 11.2, 1.2, 0, 7.6, 5.65, 0, gopG, '#5a1214', '#ffd34d');
+  sign('ஆண்பனை பெண்பனையான பாடல் பெற்ற சிவஸ்தலம் · செய்யாறு', 10.4, 0.65, 0, 6.5, 5.65, 0, gopG, '#3e1515', '#f5f5f5');
 
-  // G. Deepasthambam (தீபஸ்தம்பம் - tall brass multi-tier lamp tower in front)
+  // G. Deepasthambam (தீபஸ்தம்பம்) in outer courtyard
   const dStambh = new THREE.Group(); dStambh.position.set(0, 0, 8.5); gopG.add(dStambh);
-  box(1.4, 0.5, 1.4, 0x38383f, 0, 0.25, 0, dStambh); // stone base
-  cyl(0.14, 0.22, 6.2, 10, 0xd4af37, 0, 3.4, 0, dStambh); // brass mast
-  // 5 multi-tiered circular oil lamp rings
+  box(1.4, 0.4, 1.4, 0x38383f, 0, 0.2, 0, dStambh);
+  cyl(0.14, 0.22, 6.2, 10, 0xd4af37, 0, 3.3, 0, dStambh);
   for (let ri = 0; ri < 5; ri++) {
     const ry = 1.6 + ri * 1.0;
     const rRad = 0.75 - ri * 0.08;
     cyl(rRad, rRad, 0.08, 14, 0xffd54f, 0, ry, 0, dStambh);
-    // Glowing lamp lights around ring
     for (let ai = 0; ai < 6; ai++) {
       const ang = (ai / 6) * Math.PI * 2;
       sph(0.04, 0xffaa22, Math.cos(ang) * (rRad - 0.05), ry + 0.08, Math.sin(ang) * (rRad - 0.05), dStambh);
@@ -3106,36 +3092,31 @@ try{
   tag(dStambh, '🪔 பித்தளை தீபஸ்தம்பம்');
 
   // H. Compound Wall with Sacred Thiruman Red & White Stripes
-  // Surrounding the complex from x: -138 to -78, z: -84 to -42
   const cWallG = new THREE.Group(); OUT.add(cWallG);
-  // South and North compound walls
   for (let wx = -138; wx <= -78; wx += 2.0) {
-    if (wx >= -120 && wx <= -96) continue; // Keep gopuram entrance open
+    if (wx >= -115 && wx <= -101) continue; // Keep walk-through gopuram open
     const c = (Math.abs(Math.round(wx / 2.0)) % 2 === 0) ? 0xcc2222 : 0xf4f4f4;
-    box(1.95, 3.4, 0.45, c, wx, 1.7, -42, cWallG); // front wall
-    box(1.95, 3.4, 0.45, c, wx, 1.7, -84, cWallG); // rear wall
-    // stone coping atop
-    box(2.0, 0.25, 0.65, 0x545460, wx, 3.5, -42, cWallG);
+    box(1.95, 3.4, 0.45, c, wx, 1.7, -40, cWallG);
+    box(1.95, 3.4, 0.45, c, wx, 1.7, -84, cWallG);
+    box(2.0, 0.25, 0.65, 0x545460, wx, 3.5, -40, cWallG);
     box(2.0, 0.25, 0.65, 0x545460, wx, 3.5, -84, cWallG);
   }
-  // West and East side walls
-  for (let wz = -84; wz <= -42; wz += 2.0) {
+  for (let wz = -84; wz <= -40; wz += 2.0) {
     const c = (Math.abs(Math.round(wz / 2.0)) % 2 === 0) ? 0xcc2222 : 0xf4f4f4;
-    box(0.45, 3.4, 1.95, c, -138, 1.7, wz, cWallG); // west wall
-    box(0.45, 3.4, 1.95, c, -78, 1.7, wz, cWallG);  // east wall
+    box(0.45, 3.4, 1.95, c, -138, 1.7, wz, cWallG);
+    box(0.45, 3.4, 1.95, c, -78, 1.7, wz, cWallG);
     box(0.65, 0.25, 2.0, 0x545460, -138, 3.5, wz, cWallG);
     box(0.65, 0.25, 2.0, 0x545460, -78, 3.5, wz, cWallG);
   }
 
-  // Passageway colliders: Allow walking through gopuram portal (x: -108, z: -48)
-  hit(-108 - 12, -108 - 3.0, -54, -42, 8, 'out');
-  hit(-108 + 3.0, -108 + 12, -54, -42, 8, 'out');
+  // Side colliders for the gopuram wings (leaving center x: -111 to -105 completely open)
+  hit(-122, -111.5, -52, -40, 8, 'out');
+  hit(-104.5, -94, -52, -40, 8, 'out');
 
-  // Interactive Temple Bell Ringing Function
-  function ringTempleBell() {
+  // Interactive Temple Bell Ringing
+  window.ringTempleBell = function() {
     const a = ac();
     if (a) {
-      // Rich layered bronze temple bell sound
       [440, 880, 1320, 1760, 2640, 3520].forEach((f, i) => {
         const o = a.createOscillator(), gn = a.createGain(), T = a.currentTime;
         o.type = i === 0 ? 'sine' : (i % 2 === 0 ? 'triangle' : 'sine');
@@ -3158,84 +3139,68 @@ try{
     addPts(15, 'Temple darshan bell toll');
     chingSnd();
     toast('🔔 ஓம் நமசிவாய! அருள்மிகு வேதபுரீஸ்வரர் ஆசிர்வாதம் (+15 pts & விபூதி பிரசாதம்)', 5000);
-  }
-  window.ringTempleBell = ringTempleBell;
+  };
 
-  I.push({
-    z: 'out', x: -108, y: -48, r: 4.8, when: () => !window.drv && zone == 'out',
-    l: '🔔 கோயில் மணி அடியுங்கள் (Ring Sacred Temple Bell)', f: ringTempleBell
-  });
-
-  // 3. INNER TEMPLE COMPLEX & PRAKARAM SANCTUARY (திருச்சுற்று & சன்னதிகள்)
+  // 3. INNER PRAKARAM COURTYARD & SANCTUARIES
   const TG = new THREE.Group(); OUT.add(TG);
 
-  // A. Paved Courtyard Floor (கருங்கல் தரை)
-  box(58, 0.22, 40, 0xd4c6a6, -108, 0.11, -63, TG); // Main inner courtyard
-  box(16, 0.24, 18, 0xe2d7bc, -108, 0.12, -49, TG); // Portal entrance pathway
+  // A. Flush Flagstone Paved Courtyard (y=0.03, flat and clean so character NEVER sinks!)
+  box(64, 0.06, 44, 0xd4c6a6, -108, 0.03, -62, TG);
 
-  // B. Dhwajasthambam (தங்கக் கொடிமரம்) & Bali Peedam at (-108, 0, -56)
-  const fg = new THREE.Group(); fg.position.set(-108, 0, -56); TG.add(fg);
-  box(2.4, 0.6, 2.4, 0x3a3a40, 0, 0.3, 0, fg); // stone pedestal
-  box(1.8, 0.4, 1.8, 0x222226, 0, 0.8, 0, fg);
-  cyl(0.75, 0.85, 0.45, 12, 0xd4af37, 0, 1.22, 0, fg);
-  cyl(0.18, 0.24, 13.5, 14, 0xd4af37, 0, 8.0, 0, fg); // tall mast
-  // 9 sacred gold rings
-  for (let ri = 0; ri < 9; ri++) cyl(0.25, 0.25, 0.08, 12, 0xffd54f, 0, 2.6 + ri * 1.3, 0, fg);
-  cyl(0.08, 0.38, 1.4, 8, 0xffd54f, 0, 14.8, 0, fg);
-  sph(0.24, 0xffd54f, 0, 15.6, 0, fg);
-  // Fluttering sacred saffron flag
-  box(0.06, 1.8, 3.2, 0xff6600, 0, 14.2, 1.65, fg);
+  // B. Dhwajasthambam (தங்கக் கொடிமரம்) at (-108, 0, -54)
+  const fg = new THREE.Group(); fg.position.set(-108, 0, -54); TG.add(fg);
+  box(2.2, 0.4, 2.2, 0x3a3a40, 0, 0.2, 0, fg);
+  cyl(0.7, 0.8, 0.35, 12, 0xd4af37, 0, 0.55, 0, fg);
+  cyl(0.18, 0.24, 13.5, 14, 0xd4af37, 0, 7.3, 0, fg);
+  for (let ri = 0; ri < 8; ri++) cyl(0.25, 0.25, 0.08, 12, 0xffd54f, 0, 2.4 + ri * 1.3, 0, fg);
+  cyl(0.08, 0.38, 1.4, 8, 0xffd54f, 0, 14.1, 0, fg);
+  sph(0.24, 0xffd54f, 0, 14.9, 0, fg);
+  box(0.06, 1.8, 3.2, 0xff6600, 0, 13.5, 1.65, fg);
   tag(fg, '🚩 தங்கக் கொடிமரம்');
 
-  // Bali Peedam (பலிபீடம்)
-  const bpG = new THREE.Group(); bpG.position.set(-108, 0, -54.2); TG.add(bpG);
-  box(1.6, 0.35, 1.6, 0x3a3a40, 0, 0.18, 0, bpG);
-  cyl(0.6, 0.75, 0.5, 12, 0x2e2e34, 0, 0.6, 0, bpG);
-  cyl(0.45, 0.55, 0.25, 12, 0xd4af37, 0, 0.98, 0, bpG);
-  sph(0.2, 0xd4af37, 0, 1.15, 0, bpG);
+  // Bali Peedam (பலிபீடம்) at (-108, 0, -56.5)
+  const bpG = new THREE.Group(); bpG.position.set(-108, 0, -56.5); TG.add(bpG);
+  box(1.5, 0.3, 1.5, 0x3a3a40, 0, 0.15, 0, bpG);
+  cyl(0.55, 0.7, 0.45, 12, 0x2e2e34, 0, 0.52, 0, bpG);
+  cyl(0.42, 0.52, 0.2, 12, 0xd4af37, 0, 0.85, 0, bpG);
+  sph(0.18, 0xd4af37, 0, 1.02, 0, bpG);
 
-  // Nandi Mandapam with Lord Nandi Bull gazing at Moolavar
+  // Nandi Mandapam with Lord Nandi at (-108, 0, -59.5)
   const ng = new THREE.Group(); ng.position.set(-108, 0, -59.5); TG.add(ng);
-  box(3.2, 0.5, 4.0, 0x3a3a40, 0, 0.25, 0, ng);
-  box(2.6, 0.3, 3.4, 0x222226, 0, 0.65, 0, ng);
-  // Nandi Bull in carved mirror-black stone
-  box(1.3, 0.95, 2.1, 0x1a1a1e, 0, 1.25, 0, ng);
-  sph(0.52, 0x1a1a1e, 0, 1.7, -0.75, ng);
-  // Nandi head & ears
-  const nh = new THREE.Group(); nh.position.set(0, 1.55, -1.05); ng.add(nh);
+  box(3.0, 0.4, 3.8, 0x3a3a40, 0, 0.2, 0, ng);
+  box(2.4, 0.25, 3.2, 0x222226, 0, 0.52, 0, ng);
+  box(1.3, 0.95, 2.1, 0x1a1a1e, 0, 1.12, 0, ng);
+  sph(0.52, 0x1a1a1e, 0, 1.55, -0.75, ng);
+  const nh = new THREE.Group(); nh.position.set(0, 1.42, -1.05); ng.add(nh);
   cyl(0.26, 0.2, 0.6, 8, 0x1a1a1e, 0, 0, 0, nh);
   [-0.24, 0.24].forEach(hx => {
-    cyl(0.04, 0.08, 0.38, 6, 0x2e2e32, hx, 0.28, 0.05, nh); // horns
-    sph(0.065, 0x1a1a1e, hx * 1.35, 0.12, 0.12, nh); // ears
+    cyl(0.04, 0.08, 0.38, 6, 0x2e2e32, hx, 0.28, 0.05, nh);
+    sph(0.065, 0x1a1a1e, hx * 1.35, 0.12, 0.12, nh);
   });
-  // Brass bell garland & vermilion pottu
   cyl(0.32, 0.32, 0.06, 12, 0xffd54f, 0, 0.05, 0.15, nh);
   sph(0.065, 0xffd54f, 0, -0.18, -0.05, nh);
-  sph(0.045, 0xcc1111, 0, 0.25, 0.22, nh); // red tilakam
+  sph(0.045, 0xcc1111, 0, 0.25, 0.22, nh);
   tag(ng, '🐃 நந்தி பகவான்');
 
-  // C. Maha Mandapam & Cloister Stone Pillars (-108, -63 to -70)
-  box(22, 0.5, 16, 0x54545e, -108, 5.0, -67, TG); // stone ceiling slab
+  // C. Grand Colonnade Pillars along Outer Walkways (Wide 16m central ceremonial aisle!)
   const pillarPos = [
-    [-116, -62], [-100, -62],
-    [-116, -66], [-100, -66],
-    [-116, -70], [-100, -70],
-    [-112, -64], [-104, -64]
+    [-118, -63], [-98, -63],
+    [-118, -67], [-98, -67],
+    [-118, -71], [-98, -71]
   ];
   pillarPos.forEach(([px, pz]) => {
-    box(1.0, 0.6, 1.0, 0x3a3a40, px, 0.3, pz, TG);
-    box(0.65, 4.0, 0.65, 0x4a4a52, px, 2.6, pz, TG); // carved pillar shaft
-    box(1.0, 0.45, 1.0, 0x3a3a40, px, 4.7, pz, TG);
-    // Brass wall bracket lamp
-    cyl(0.02, 0.02, 1.2, 6, 0x9a7a2a, px, 3.6, pz + 0.48, TG);
-    cyl(0.2, 0.15, 0.14, 8, 0xd9ac3c, px, 2.9, pz + 0.48, TG);
-    sph(0.07, 0xffaa22, px, 3.02, pz + 0.48, TG);
-    glow(0.3, 0.3, 0.3, 0xffaa22, px, 3.03, pz + 0.48, TG);
+    box(0.9, 0.4, 0.9, 0x3a3a40, px, 0.2, pz, TG);
+    box(0.6, 4.4, 0.6, 0x4a4a52, px, 2.6, pz, TG);
+    box(0.9, 0.4, 0.9, 0x3a3a40, px, 4.8, pz, TG);
+    cyl(0.02, 0.02, 1.2, 6, 0x9a7a2a, px, 3.6, pz + 0.45, TG);
+    cyl(0.2, 0.15, 0.14, 8, 0xd9ac3c, px, 2.9, pz + 0.45, TG);
+    sph(0.07, 0xffaa22, px, 3.02, pz + 0.45, TG);
+    glow(0.3, 0.3, 0.3, 0xffaa22, px, 3.03, pz + 0.45, TG);
   });
 
-  // D. Moolavar Sanctum Sanctorum (ஸ்ரீ வேதபுரீஸ்வரர் கருவறை) at (-108, 0, -75)
-  const sg = new THREE.Group(); sg.position.set(-108, 0, -75); TG.add(sg);
-  // Heavy stone Garbhagriha walls
+  // D. Outer Moolavar Sanctum Sanctorum Building at (-108, 0, -78)
+  const sg = new THREE.Group(); sg.position.set(-108, 0, -78); TG.add(sg);
+  // Outer granite structure
   box(14, 7.2, 12, 0x333338, 0, 3.6, 0, sg);
   // 14m Dravidian Vimanam rising above Sanctum
   for (let vi = 0; vi < 4; vi++) {
@@ -3243,113 +3208,75 @@ try{
     box(vw, 1.5, vw * 0.85, 0x5a4632, 0, vy + 0.75, 0, sg);
     glow(vw, 0.1, 0.1, 0xffd34d, 0, vy + 1.5, 0, sg);
   }
-  // Golden Vimana Stupi Kalasam
   cyl(0.14, 0.42, 1.6, 8, GOLD_M, 0, 14.4, 0, sg);
   sph(0.28, GOLD_M, 0, 15.3, 0, sg);
-  // Sanctum entrance portal
-  box(3.6, 4.6, 0.6, 0x1a0f08, 0, 2.3, 6.1, sg);
-  sign('மூலவர் ஸ்ரீ வேதபுரீஸ்வரர் சன்னதி', 8.2, 0.95, 0, 5.0, 6.45, 0, sg, '#5a1214', '#ffd34d');
 
-  // Sanctum Dwarapalakas
-  [-2.4, 2.4].forEach((dx, di) => {
+  // Front Entrance Portal of Sanctum at world z: -72.0 (-78 + 6.0)
+  box(3.8, 4.6, 0.5, 0x1a0f08, 0, 2.3, 6.0, sg);
+  // Golden Door Frame
+  box(4.2, 0.25, 0.6, 0xd4af37, 0, 4.65, 6.0, sg);
+  box(0.25, 4.6, 0.6, 0xd4af37, -2.0, 2.3, 6.0, sg);
+  box(0.25, 4.6, 0.6, 0xd4af37, 2.0, 2.3, 6.0, sg);
+  // Sanctum Signboard above door
+  sign('ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)', 8.8, 1.0, 0, 5.2, 6.35, 0, sg, '#5a1214', '#ffd34d');
+
+  // Twin Dwarapalakas at the sanctum door
+  [-2.8, 2.8].forEach((dx, di) => {
     const dp = new THREE.Group(); dp.position.set(dx, 0, 6.2); sg.add(dp);
-    box(0.7, 0.4, 0.7, 0x222226, 0, 0.2, 0, dp);
-    cyl(0.24, 0.2, 1.4, 8, 0x222228, 0, 1.1, 0, dp);
-    sph(0.26, 0x222228, 0, 1.9, 0, dp);
-    cyl(0.08, 0.24, 0.6, 6, 0xd4af37, 0, 2.4, 0, dp);
-    cyl(0.07, 0.16, 1.8, 6, 0xd4af37, di === 0 ? 0.35 : -0.35, 1.1, 0.1, dp);
+    box(0.7, 0.35, 0.7, 0x222226, 0, 0.18, 0, dp);
+    cyl(0.24, 0.2, 1.4, 8, 0x222228, 0, 1.05, 0, dp);
+    sph(0.26, 0x222228, 0, 1.85, 0, dp);
+    cyl(0.08, 0.24, 0.6, 6, 0xd4af37, 0, 2.35, 0, dp);
+    cyl(0.07, 0.16, 1.8, 6, 0xd4af37, di === 0 ? 0.35 : -0.35, 1.05, 0.1, dp);
     tag(dp, di === 0 ? '🛡️ துவாரபாலகர்' : '🛡️ துவாரபாலகி');
   });
 
-  // Moolavar Shiva Lingam & 5-Headed Golden Nagabharanam
-  cyl(1.3, 1.5, 0.65, 20, 0x1b1b1f, 0, 0.55, 1.5, sg); // Avudaiyar base
-  box(0.5, 0.4, 2.0, 0x1b1b1f, 1.1, 0.55, 1.5, sg); // Gomukhi water drain
-  cyl(0.5, 0.5, 1.1, 20, 0x0c0c0e, 0, 1.35, 1.5, sg); // Shiva Lingam body
-  sph(0.5, 0x0c0c0e, 0, 1.85, 1.5, sg); // Lingam crown dome
-  // 3 Sacred White Holy Ash Stripes (திருநீற்றுப் பட்டை) & Red Kumkum Tilakam
-  box(0.44, 0.045, 0.02, 0xffffff, 0, 1.76, 2.02, sg);
-  box(0.44, 0.045, 0.02, 0xffffff, 0, 1.66, 2.02, sg);
-  box(0.44, 0.045, 0.02, 0xffffff, 0, 1.56, 2.02, sg);
-  sph(0.05, 0xcc1111, 0, 1.66, 2.04, sg);
+  // Solid building collision (stops at z=-72.2 so player stands freely in front of door at z=-70.5)
+  hit(-116, -100, -84, -72.5, 7.5, 'out');
 
-  // 5-Headed Golden Nagabharanam (ஐந்து தலை நாகாபரணம்)
-  const nagaG = new THREE.Group(); nagaG.position.set(0, 1.35, 1.1); sg.add(nagaG);
-  cyl(0.14, 0.14, 1.3, 8, 0xffd54f, 0, 0.7, 0, nagaG);
-  [-0.28, -0.14, 0, 0.14, 0.28].forEach(nx => {
-    box(0.13, 0.38, 0.08, 0xffd54f, nx, 1.45, 0.32 - Math.abs(nx) * 0.18, nagaG);
-    sph(0.06, 0xffd54f, nx, 1.68, 0.32 - Math.abs(nx) * 0.18, nagaG);
-  });
-  // Fresh Green Bilva Garland & Jasmine Garland
-  cyl(0.55, 0.55, 0.16, 14, 0x2e7d32, 0, 1.12, 1.5, sg);
-  cyl(0.58, 0.58, 0.12, 14, 0xffffff, 0, 1.02, 1.5, sg);
-  // Glowing Camphor Arati Plate & Oil Deepam
-  cyl(0.18, 0.28, 0.7, 8, 0xd4af37, 0, 0.35, 3.0, sg);
-  sph(0.14, 0xffaa22, 0, 0.85, 3.0, sg);
-  glow(0.8, 0.8, 0.8, 0xffaa22, 0, 0.85, 3.0, sg);
-  tag(sg, '🕉️ மூலவர் ஸ்ரீ வேதபுரீஸ்வரர்');
-
-  // E. Goddess Ilamulai Nayagi Ambal Sannidhi (அருள்மிகு இளமுலை நாயகி அம்மன்) at (-124, 0, -68)
-  const ag = new THREE.Group(); ag.position.set(-124, 0, -68); TG.add(ag);
+  // E. Goddess Ilamulai Nayagi Ambal Sannidhi at (-126, 0, -68)
+  const ag = new THREE.Group(); ag.position.set(-126, 0, -68); TG.add(ag);
   box(10, 5.8, 10, 0x484850, 0, 2.9, 0, ag);
-  for (let vi = 0; vi < 3; vi++) {
-    box(9 - vi * 2.4, 1.4, 9 - vi * 2.4, 0x7a4b2c, 0, 5.8 + vi * 1.4 + 0.7, 0, ag);
-  }
+  for (let vi = 0; vi < 3; vi++) box(9 - vi * 2.4, 1.4, 9 - vi * 2.4, 0x7a4b2c, 0, 5.8 + vi * 1.4 + 0.7, 0, ag);
   cyl(0.14, 0.35, 1.4, 8, GOLD_M, 0, 10.4, 0, ag);
   sph(0.24, GOLD_M, 0, 11.2, 0, ag);
   box(3.0, 4.0, 0.55, 0x1a0f08, 0, 2.0, 5.1, ag);
   sign('அருள்மிகு இளமுலை நாயகி அம்மன் சன்னதி', 8.2, 0.9, 0, 4.6, 5.45, 0, ag, '#7b1113', '#ffd34d');
-  // Goddess Ambal idol draped in Crimson & Gold Silk Saree
   cyl(0.25, 0.3, 1.5, 8, 0xc0392b, 0, 1.25, 1.3, ag);
   sph(0.25, 0xffd54f, 0, 2.1, 1.3, ag);
-  cyl(0.09, 0.25, 0.65, 8, 0xffd54f, 0, 2.55, 1.3, ag); // golden crown
-  cyl(0.36, 0.36, 0.14, 10, 0xffffff, 0, 1.7, 1.3, ag); // lotus garland
-  [-1.4, 1.4].forEach(lx => {
-    cyl(0.06, 0.2, 1.2, 8, 0xd4af37, lx, 0.6, 1.5, ag);
-    sph(0.09, 0xffaa22, lx, 1.25, 1.5, ag);
-    glow(0.35, 0.35, 0.35, 0xffaa22, lx, 1.25, 1.5, ag);
-  });
+  cyl(0.09, 0.25, 0.65, 8, 0xffd54f, 0, 2.55, 1.3, ag);
+  cyl(0.36, 0.36, 0.14, 10, 0xffffff, 0, 1.7, 1.3, ag);
   tag(ag, '🌺 அருள்மிகு இளமுலை நாயகி அம்மன்');
 
-  // F. Sthala Vriksham: The Miraculous Male Palm Tree & Thiru Gnanasambandar at (-92, 0, -58)
-  const pg = new THREE.Group(); pg.position.set(-92, 0, -58); TG.add(pg);
-  box(7.2, 0.5, 7.2, 0x3a3a40, 0, 0.25, 0, pg); // Octagonal stone peedam
-  box(6.4, 0.3, 6.4, 0xd4c6a6, 0, 0.65, 0, pg);
-  // Miraculous Male Palm Tree (ஆண்பனை மரம்)
-  cyl(0.38, 0.48, 12.5, 8, 0x4a321a, 0, 6.4, 0, pg); // tall palm trunk
+  // F. Sthala Vriksham: Male Palm Tree & Sambandar at (-90, 0, -58)
+  const pg = new THREE.Group(); pg.position.set(-90, 0, -58); TG.add(pg);
+  box(7.2, 0.4, 7.2, 0x3a3a40, 0, 0.2, 0, pg);
+  box(6.4, 0.2, 6.4, 0xd4c6a6, 0, 0.5, 0, pg);
+  cyl(0.38, 0.48, 12.5, 8, 0x4a321a, 0, 6.4, 0, pg);
   for (let ri = 0; ri < 14; ri++) cyl(0.40, 0.40, 0.08, 8, 0x382210, 0, 1.4 + ri * 0.85, 0, pg);
-  // Fan-shaped palm fronds (பனையோலைகள்)
   for (let li = 0; li < 12; li++) {
     const ang = (li / 12) * Math.PI * 2;
     box(0.9, 0.09, 3.8, 0x1e6828, Math.cos(ang) * 1.7, 12.4, Math.sin(ang) * 1.7, pg);
   }
-  // Hanging clusters of ripe miraculous palm fruits (பனங்காய் குலைகள்)
   [-0.5, 0.5].forEach((px, pi) => {
     cyl(0.32, 0.2, 0.85, 8, 0x5a3010, px, 11.2, pi === 0 ? 0.4 : -0.4, pg);
-    for (let bi = 0; bi < 5; bi++) {
-      sph(0.15, 0x3d1f08, px + (bi % 2 ? 0.14 : -0.14), 10.8 - bi * 0.12, (pi === 0 ? 0.4 : -0.4), pg);
-    }
+    for (let bi = 0; bi < 5; bi++) sph(0.15, 0x3d1f08, px + (bi % 2 ? 0.14 : -0.14), 10.8 - bi * 0.12, (pi === 0 ? 0.4 : -0.4), pg);
   });
-
-  // Statue of Child-Saint Thiru Gnanasambandar (திருஞானசம்பந்தர்)
-  const sg_sam = new THREE.Group(); sg_sam.position.set(1.8, 0.65, 1.5); pg.add(sg_sam);
-  box(0.9, 0.35, 0.9, 0x3a3a40, 0, 0.18, 0, sg_sam);
-  cyl(0.2, 0.18, 1.0, 8, 0x9a6a38, 0, 0.85, 0, sg_sam);
-  sph(0.18, 0x9a6a38, 0, 1.45, 0, sg_sam);
-  sph(0.09, 0x14100c, 0, 1.68, -0.04, sg_sam);
-  box(0.4, 0.06, 0.18, 0xe2d7bc, 0, 0.95, 0.25, sg_sam); // palm leaf manuscript (ஏடு)
-  // Marble stone plaque with 7th-century Thevaram hymn
-  sign('ஆண்பனை பெண்பனையான அற்புதத் தலம் · திருஞானசம்பந்தர்', 6.2, 0.75, 0, 2.4, 1.5, 0, pg, '#3e2723', '#ffd54f');
+  const sg_sam = new THREE.Group(); sg_sam.position.set(1.8, 0.55, 1.5); pg.add(sg_sam);
+  box(0.9, 0.3, 0.9, 0x3a3a40, 0, 0.15, 0, sg_sam);
+  cyl(0.2, 0.18, 1.0, 8, 0x9a6a38, 0, 0.8, 0, sg_sam);
+  sph(0.18, 0x9a6a38, 0, 1.4, 0, sg_sam);
+  box(0.4, 0.06, 0.18, 0xe2d7bc, 0, 0.9, 0.25, sg_sam);
+  sign('ஆண்பனை பெண்பனையான அற்புதத் தலம் · திருஞானசம்பந்தர்', 6.2, 0.75, 0, 2.3, 1.5, 0, pg, '#3e2723', '#ffd54f');
   tag(pg, '🌴 தல விருட்சம் ஆண் பனை & திருஞானசம்பந்தர்');
 
-  // G. Navagraha Mandapam at (-94, 0, -70)
-  const nvg = new THREE.Group(); nvg.position.set(-94, 0, -70); TG.add(nvg);
-  box(7.5, 0.8, 7.5, 0x222226, 0, 0.4, 0, nvg);
-  box(6.8, 0.25, 6.8, 0x1a1a1d, 0, 0.92, 0, nvg);
-  [[-3.1, -3.1], [3.1, -3.1], [-3.1, 3.1], [3.1, 3.1]].forEach(([cx, cz]) => {
-    cyl(0.2, 0.24, 3.6, 8, 0x3a3a40, cx, 2.7, cz, nvg);
-  });
-  box(7.8, 0.45, 7.8, 0x4a4a50, 0, 4.6, 0, nvg);
-  cyl(0.12, 0.35, 0.9, 8, GOLD_M, 0, 5.25, 0, nvg);
+  // G. Navagraha Mandapam at (-92, 0, -70)
+  const nvg = new THREE.Group(); nvg.position.set(-92, 0, -70); TG.add(nvg);
+  box(7.5, 0.6, 7.5, 0x222226, 0, 0.3, 0, nvg);
+  box(6.8, 0.2, 6.8, 0x1a1a1d, 0, 0.7, 0, nvg);
+  [[-3.1, -3.1], [3.1, -3.1], [-3.1, 3.1], [3.1, 3.1]].forEach(([cx, cz]) => cyl(0.2, 0.24, 3.6, 8, 0x3a3a40, cx, 2.6, cz, nvg));
+  box(7.8, 0.45, 7.8, 0x4a4a50, 0, 4.5, 0, nvg);
+  cyl(0.12, 0.35, 0.9, 8, GOLD_M, 0, 5.15, 0, nvg);
   const grahas = [
     { n: 'சூரியன்', x: 0, z: 0, c: 0xc0392b },
     { n: 'சந்திரன்', x: 0, z: 2.0, c: 0xffffff },
@@ -3362,66 +3289,46 @@ try{
     { n: 'கேது', x: 2.0, z: -2.0, c: 0x5d4037 }
   ];
   grahas.forEach(gr => {
-    cyl(0.26, 0.3, 0.28, 8, 0x2a2a2e, gr.x, 1.15, gr.z, nvg);
-    cyl(0.15, 0.15, 0.95, 8, 0x111114, gr.x, 1.7, gr.z, nvg);
-    sph(0.14, 0x111114, gr.x, 2.25, gr.z, nvg);
-    cyl(0.18, 0.18, 0.35, 8, gr.c, gr.x, 1.5, gr.z, nvg);
-    cyl(0.09, 0.07, 0.09, 6, 0x111111, gr.x, 1.25, gr.z + 0.38, nvg);
-    sph(0.04, 0xffaa22, gr.x, 1.32, gr.z + 0.38, nvg);
+    cyl(0.26, 0.3, 0.28, 8, 0x2a2a2e, gr.x, 0.95, gr.z, nvg);
+    cyl(0.15, 0.15, 0.95, 8, 0x111114, gr.x, 1.5, gr.z, nvg);
+    sph(0.14, 0x111114, gr.x, 2.05, gr.z, nvg);
+    cyl(0.18, 0.18, 0.35, 8, gr.c, gr.x, 1.3, gr.z, nvg);
   });
   tag(nvg, '🪐 நவகிரக சன்னதி');
 
-  // H. Kalyani Pushkarini Temple Tank at (-132, 0, -66)
-  const kg = new THREE.Group(); kg.position.set(-132, 0, -66); TG.add(kg);
-  box(24, 0.55, 22, 0x4a4a50, 0, 0.28, 0, kg);
-  for (let si = 0; si < 4; si++) {
-    const sw = 20.5 - si * 1.8, sd = 18.5 - si * 1.8, sy = 0.12 - si * 0.48;
-    box(sw, 0.48, sd, 0x3a3a40, 0, sy, 0, kg);
-  }
+  // H. Kalyani Pushkarini Temple Tank at (-134, 0, -66)
+  const kg = new THREE.Group(); kg.position.set(-134, 0, -66); TG.add(kg);
+  box(24, 0.5, 22, 0x4a4a50, 0, 0.25, 0, kg);
+  for (let si = 0; si < 4; si++) box(20.5 - si * 1.8, 0.45, 18.5 - si * 1.8, 0x3a3a40, 0, 0.1 - si * 0.45, 0, kg);
   const tkWater = new THREE.Mesh(new THREE.PlaneGeometry(14, 12), new THREE.MeshLambertMaterial({color: 0x1f7a68, transparent: true, opacity: 0.88, emissive: 0x082b24}));
   tkWater.rotation.x = -Math.PI / 2;
-  tkWater.position.set(0, -1.35, 0);
+  tkWater.position.set(0, -1.3, 0);
   kg.add(tkWater);
   window.__templeTankWater = tkWater;
-
-  const nzm = new THREE.Group(); nzm.position.set(0, -1.3, 0); kg.add(nzm);
-  box(3.4, 0.65, 3.4, 0x3a3a40, 0, 0.32, 0, nzm);
-  [[-1.3, -1.3], [1.3, -1.3], [-1.3, 1.3], [1.3, 1.3]].forEach(([px, pz]) => {
-    cyl(0.13, 0.15, 2.4, 6, 0x5a5a62, px, 1.8, pz, nzm);
-  });
-  box(3.6, 0.35, 3.6, 0x5a5a62, 0, 3.1, 0, nzm);
-  cyl(0.09, 0.24, 0.9, 8, GOLD_M, 0, 3.7, 0, nzm);
-  sph(0.16, GOLD_M, 0, 4.25, 0, nzm);
-
-  [[-3.8, -2], [3.0, -3.2], [-2.2, 3.2], [3.5, 2.8], [0, -4.0]].forEach(([lx, lz], li) => {
-    cyl(0.28, 0.28, 0.02, 8, 0x2e7d32, lx, -1.33, lz, kg);
-    sph(0.1, li % 2 ? 0xff69b4 : 0xffffff, lx, -1.27, lz, kg);
-  });
+  const nzm = new THREE.Group(); nzm.position.set(0, -1.25, 0); kg.add(nzm);
+  box(3.4, 0.6, 3.4, 0x3a3a40, 0, 0.3, 0, nzm);
+  [[-1.3, -1.3], [1.3, -1.3], [-1.3, 1.3], [1.3, 1.3]].forEach(([px, pz]) => cyl(0.13, 0.15, 2.4, 6, 0x5a5a62, px, 1.7, pz, nzm));
+  box(3.6, 0.35, 3.6, 0x5a5a62, 0, 3.0, 0, nzm);
+  cyl(0.09, 0.24, 0.9, 8, GOLD_M, 0, 3.6, 0, nzm);
+  sph(0.16, GOLD_M, 0, 4.15, 0, nzm);
   tag(kg, '🌊 கல்யாணி திருக்குளம் (தீர்த்தம்)');
 
-  // I. Brahmotsavam Grand Wooden Chariot & Shed (வேதபுரீஸ்வரர் திருத்தேர் & தேர் கூடம்) at (-126, 0, -32)
-  const tg = new THREE.Group(); tg.position.set(-126, 0, -32); TG.add(tg);
-  // Protective Chariot Shed (தேர் நிலை)
-  box(7.5, 0.4, 7.5, 0x44444a, 0, 0.2, 0, tg);
-  [[-3.2, -3.2], [3.2, -3.2], [-3.2, 3.2], [3.2, 3.2]].forEach(([sx, sz]) => {
-    cyl(0.22, 0.26, 12.0, 8, 0x555560, sx, 6.2, sz, tg);
-  });
+  // I. Brahmotsavam Grand Wooden Chariot at (-128, 0, -32)
+  const tg = new THREE.Group(); tg.position.set(-128, 0, -32); TG.add(tg);
+  box(7.5, 0.3, 7.5, 0x44444a, 0, 0.15, 0, tg);
+  [[-3.2, -3.2], [3.2, -3.2], [-3.2, 3.2], [3.2, 3.2]].forEach(([sx, sz]) => cyl(0.22, 0.26, 12.0, 8, 0x555560, sx, 6.2, sz, tg));
   box(7.8, 0.45, 7.8, 0x666672, 0, 12.2, 0, tg);
-  // The Historic Wooden Chariot (தேர்)
   const wm = mat(0x5a3818);
   [[-2.0, -1.8], [2.0, -1.8], [-2.0, 1.8], [2.0, 1.8]].forEach(([wx, wz]) => {
     const wheel = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.5, 16), wm);
     wheel.position.set(wx, 1.4, wz);
     wheel.rotation.z = Math.PI / 2;
     tg.add(wheel);
-    cyl(0.32, 0.32, 0.75, 12, 0x222222, wx, 1.4, wz, tg); // heavy axle
+    cyl(0.32, 0.32, 0.75, 12, 0x222222, wx, 1.4, wz, tg);
   });
-  box(4.6, 0.55, 5.0, 0x4a2a10, 0, 1.6, 0, tg); // carved base
+  box(4.6, 0.55, 5.0, 0x4a2a10, 0, 1.6, 0, tg);
   box(4.2, 0.85, 4.6, 0x5a3416, 0, 2.3, 0, tg);
   box(3.7, 0.75, 4.1, 0x6a3e1c, 0, 3.1, 0, tg);
-  [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]].forEach(([px, pz]) => {
-    cyl(0.15, 0.17, 2.6, 8, 0x8a5224, px, 4.8, pz, tg);
-  });
   const canopyCols = [0xd32f2f, 0xfbc02d, 0x1976d2, 0x388e3c];
   for (let ci = 0; ci < 4; ci++) {
     const cw = 3.9 - ci * 0.8, cy = 6.1 + ci * 1.2;
@@ -3432,35 +3339,41 @@ try{
   sph(0.24, GOLD_M, 0, 12.3, 0, tg);
   tag(tg, '🎪 அருள்மிகு வேதபுரீஸ்வரர் திருத்தேர்');
 
-  hit(-114, -102, -80, -70, 7.5, 'out');
-  hit(-129, -119, -74, -62, 6.0, 'out');
+  hit(-130, -120, -74, -62, 6.0, 'out');
   hit(-140, -124, -76, -58, 2.0, 'out');
 
-  /* ---------- TEMPLE INTERACTIVE RITUALS & DEVOTIONAL AUDIO ---------- */
-  window.darshanMoolavar = function(){
+  /* ---------- GLOBAL TEMPLE RITUAL FUNCTIONS ---------- */
+  window.enterGarbhagriha = function(){
+    try{ doorSnd(); }catch(_){}
+    goto('garbha');
+    toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் கருவறைக்குள் நுழைந்தீர்கள்! "நமசிவாய வாழ்க நாதன் தாள் வாழ்க"', 5500);
+  };
+
+  window.exitGarbhagriha = function(){
+    try{ doorSnd(); }catch(_){}
+    goto('out');
+    P.set(-108, 1.6, -69.5);
+    yaw = 0;
+    toast('🚪 கோயில் வெளிப் பிரகாரத்திற்கு வந்தீர்கள் 🙏', 3500);
+  };
+
+  window.offerSanctumArati = function(){
     const a = ac();
     if (a) {
-      [130, 260, 390, 520, 880].forEach((f, i) => {
-        const o = a.createOscillator(), gn = a.createGain(), T = a.currentTime;
-        o.type = i < 2 ? 'sine' : 'triangle';
-        o.frequency.value = f;
-        gn.gain.setValueAtTime(0.2 / (i + 1), T);
-        gn.gain.exponentialRampToValueAtTime(0.0001, T + 3.5);
-        o.connect(gn); gn.connect(a.destination);
-        o.start(T); o.stop(T + 3.5);
+      [523, 659, 784, 1046, 1318].forEach((f, i) => {
+        setTimeout(() => sTone(f, f * 0.995, 1.2, 0.18 / (i + 1), 'sine'), i * 180);
       });
+      setTimeout(() => sTone(220, 240, 2.5, 0.22, 'triangle'), 600);
     }
-    addPts(25, 'Moolavar Vedapureeswarar darshan complete');
+    addPts(30, 'Lord Shiva sanctum camphor arati');
     chingSnd();
-    toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் திருவருள்! "நமசிவாய வாழ்க நாதன் தாள் வாழ்க" (+25 pts & திருநீறு பிரசாதம்)', 5500);
+    toast('🕉️ "நமசிவாய வாழ்க நாதன் தாள் வாழ்க" · மூலவர் வேதபுரீஸ்வரர் பரிபூரண திருவருள்! (+30 pts & விபூதி பிரசாதம்)', 6000);
   };
 
   window.darshanAmbal = function(){
     const a = ac();
     if (a) {
-      [1046, 1318, 1567, 2093].forEach((f, i) => {
-        setTimeout(() => sTone(f, f * 0.99, 1.4, 0.16 / (i + 1), 'sine'), i * 140);
-      });
+      [1046, 1318, 1567, 2093].forEach((f, i) => setTimeout(() => sTone(f, f * 0.99, 1.4, 0.16 / (i + 1), 'sine'), i * 140));
     }
     addPts(15, 'Ambal darshan complete');
     chingSnd();
@@ -3470,9 +3383,7 @@ try{
   window.worshipPalmTree = function(){
     try {
       const hymn = [330, 370, 415, 440, 494, 554, 494, 440, 415, 370, 330];
-      hymn.forEach((f, i) => {
-        setTimeout(() => sTone(f, f * 1.005, 0.45, 0.18, 'sine'), i * 280);
-      });
+      hymn.forEach((f, i) => setTimeout(() => sTone(f, f * 1.005, 0.45, 0.18, 'sine'), i * 280));
     } catch(e) {}
     addPts(15, 'Sthala Vriksham miracle palm worship');
     chingSnd();
@@ -3482,9 +3393,7 @@ try{
   window.pradakshinamNavagraha = function(){
     const a = ac();
     if (a) {
-      for (let i = 0; i < 9; i++) {
-        setTimeout(() => sTone(660 + i * 55, 655 + i * 55, 0.35, 0.14, 'triangle'), i * 160);
-      }
+      for (let i = 0; i < 9; i++) setTimeout(() => sTone(660 + i * 55, 655 + i * 55, 0.35, 0.14, 'triangle'), i * 160);
     }
     addPts(20, 'Navagraha 9 pradakshinams complete');
     chingSnd();
@@ -3492,172 +3401,115 @@ try{
   };
 
   window.sprinkleTheertham = function(){
-    try {
-      sNoise(0.35, 0.22, 600);
-      sTone(520, 260, 0.25, 0.2, 'sine');
-    } catch(e) {}
+    try { sNoise(0.35, 0.22, 600); sTone(520, 260, 0.25, 0.2, 'sine'); } catch(e) {}
     addPts(10, 'Sacred theertham purification');
     chingSnd();
     toast('🌊 சேயாறு கோயில் திருக்குள புனித தீர்த்தம்! உடல் & மன அமைதி (+10 pts)', 4500);
   };
 
   window.lightTempleDeepam = function(){
-    try {
-      sNoise(0.08, 0.18, 1200);
-      setTimeout(() => sTone(880, 1100, 0.6, 0.15, 'sine'), 100);
-    } catch(e) {}
+    try { sNoise(0.08, 0.18, 1200); setTimeout(() => sTone(880, 1100, 0.6, 0.15, 'sine'), 100); } catch(e) {}
     addPts(10, 'Light temple deepam');
     chingSnd();
     toast('🪔 நெய் தீப ஜோதி வழிபாடு! இருள் நீங்கி ஞான ஒளி பெருகட்டும் (+10 pts)', 4500);
   };
 
   window.worshipChariot = function(){
-    try {
-      sTone(240, 360, 1.8, 0.22, 'sawtooth');
-      setTimeout(() => sTone(360, 350, 1.4, 0.18, 'sine'), 400);
-    } catch(e) {}
+    try { sTone(240, 360, 1.8, 0.22, 'sawtooth'); setTimeout(() => sTone(360, 350, 1.4, 0.18, 'sine'), 400); } catch(e) {}
     addPts(10, 'Temple chariot darshan');
     chingSnd();
     toast('🎪 பிரம்மோற்சவ அருள்மிகு வேதபுரீஸ்வரர் திருத்தேர் தரிசனம்! (+10 pts)', 4500);
   };
 
+  // Outer Temple Interactions (Using arrow functions so they never suffer from hoisting/undefined issues!)
   I.push(
-    { z: 'out', x: -108, y: -72.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🛕 கருவறைக்குள் செல்க (Enter Lord Shiva Sanctum Sanctorum)', f: window.enterGarbhagriha },
-    { z: 'out', x: -124, y: -64.5, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: window.darshanAmbal },
-    { z: 'out', x: -92, y: -55.5, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: window.worshipPalmTree },
-    { z: 'out', x: -94, y: -66.8, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: window.pradakshinamNavagraha },
-    { z: 'out', x: -124, y: -66, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌊 கோயில் குள புனித தீர்த்தம் (Sacred Theertham)', f: window.sprinkleTheertham },
-    { z: 'out', x: -108, y: -50, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 அகல் விளக்கு ஏற்றுங்கள் (Light Deepam)', f: window.lightTempleDeepam },
-    { z: 'out', x: -126, y: -30, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: window.worshipChariot }
+    { z: 'out', x: -108, y: -46.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🔔 கோயில் மணி அடியுங்கள் (Ring Sacred Temple Bell)', f: () => window.ringTempleBell() },
+    { z: 'out', x: -108, y: -70.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🛕 கருவறைக்குள் செல்க (Enter Lord Shiva Sanctum Sanctorum)', f: () => window.enterGarbhagriha() },
+    { z: 'out', x: -126, y: -64.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: () => window.darshanAmbal() },
+    { z: 'out', x: -90, y: -55.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: () => window.worshipPalmTree() },
+    { z: 'out', x: -92, y: -67.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: () => window.pradakshinamNavagraha() },
+    { z: 'out', x: -128, y: -66.0, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌊 கோயில் குள புனித தீர்த்தம் (Sacred Theertham)', f: () => window.sprinkleTheertham() },
+    { z: 'out', x: -108, y: -38.0, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 தீபஸ்தம்ப வழிபாடு (Worship Deepasthambam)', f: () => window.lightTempleDeepam() },
+    { z: 'out', x: -128, y: -30.0, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: () => window.worshipChariot() }
   );
 
+  /* 4. SANCTUM SANCTORUM INTERIOR CHAMBER (GB Group) */
+  (function(){
+    if(!window.GB) return;
 
-/* =========================================================================
-   SANCTUM SANCTORUM CHAMBER (ஸ்ரீ வேதபுரீஸ்வரர் கருவறை உள் அறை)
-   Modeled with exact Lord Shiva idol from uploaded image:
-   - Polished Avudaiyar black granite pedestal
-   - High-definition sacred idol panel (assets/lord_shiva_cheyyar.png)
-   - Ornate Golden Prabhavali arch (திருவாச்சி)
-   - 3D Broken Coconut halves with white kernel
-   - 3D Sacred White Conch Shell (வெண்சங்கு) with marigold petals
-   - 3D Burning Camphor Arati plate (கற்பூர ஜோதி)
-   - Traditional brass Kuthuvilakku lamps with warm glow
-   - Authentic Vedic chanting, temple bells & exit door back to courtyard
-   ========================================================================= */
-(function(){
-  if(!window.GB) return;
+    // Chamber Walls, Floor & Ceiling
+    box(16, 0.4, 18, 0x18181c, 0, -0.2, -800, GB); // floor slabs
+    box(16.5, 0.5, 18.5, 0x141416, 0, 6.2, -800, GB); // ceiling slab
+    box(16, 6.2, 0.6, 0x222228, 0, 3.1, -808, GB); // South wall
+    box(0.6, 6.2, 18, 0x222228, -8, 3.1, -800, GB); // West wall
+    box(0.6, 6.2, 18, 0x222228, 8, 3.1, -800, GB);  // East wall
+    // Front North Wall with Entrance Doorway (z: -792)
+    box(6.2, 6.2, 0.6, 0x222228, -4.9, 3.1, -792, GB);
+    box(6.2, 6.2, 0.6, 0x222228, 4.9, 3.1, -792, GB);
+    box(3.6, 1.8, 0.6, 0x222228, 0, 5.3, -792, GB);
+    box(3.6, 0.25, 1.2, 0x38383f, 0, 0.12, -792, GB);
+    sign('ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)', 7.6, 0.9, 0, 4.6, -792.4, Math.PI, GB, '#5a1214', '#ffd34d');
 
-  // A. Ancient Granite Chamber Walls, Floor & Ceiling
-  box(16, 0.4, 18, 0x18181c, 0, -0.2, -800, GB); // floor slabs
-  box(16.5, 0.5, 18.5, 0x141416, 0, 6.2, -800, GB); // ceiling slab
-  // Back Wall (South)
-  box(16, 6.2, 0.6, 0x222228, 0, 3.1, -808, GB);
-  // Left Wall (West)
-  box(0.6, 6.2, 18, 0x222228, -8, 3.1, -800, GB);
-  // Right Wall (East)
-  box(0.6, 6.2, 18, 0x222228, 8, 3.1, -800, GB);
-  // Front Wall with Entrance Portal (North, z: -792)
-  box(6.2, 6.2, 0.6, 0x222228, -4.9, 3.1, -792, GB);
-  box(6.2, 6.2, 0.6, 0x222228, 4.9, 3.1, -792, GB);
-  box(3.6, 1.8, 0.6, 0x222228, 0, 5.3, -792, GB);
+    // Central Sacred Altar (Lord Shiva Peedam at z: -804)
+    box(7.2, 0.6, 4.8, 0x141416, 0, 0.3, -804, GB);
+    box(6.2, 0.4, 4.0, 0x202024, 0, 0.8, -804, GB);
 
-  // Entrance door frame & threshold
-  box(3.6, 0.25, 1.2, 0x38383f, 0, 0.12, -792, GB);
-  sign('ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)', 7.6, 0.9, 0, 4.6, -792.4, Math.PI, GB, '#5a1214', '#ffd34d');
+    // Golden / Brass Prabhavali (திருவாச்சி arch)
+    box(4.8, 6.0, 0.2, 0xd4af37, 0, 3.8, -804.8, GB);
+    cyl(0.18, 0.18, 5.6, 12, 0xffd54f, -2.3, 3.6, -804.6, GB);
+    cyl(0.18, 0.18, 5.6, 12, 0xffd54f, 2.3, 3.6, -804.6, GB);
+    cyl(2.4, 2.4, 0.35, 16, 0xffd54f, 0, 6.3, -804.6, GB);
+    sph(0.35, 0xd4af37, 0, 7.5, -804.6, GB);
 
-  // B. The Central Sacred Altar (Lord Shiva Peedam at z: -804)
-  box(7.2, 0.6, 4.8, 0x141416, 0, 0.3, -804, GB);
-  box(6.2, 0.4, 4.0, 0x202024, 0, 0.8, -804, GB);
+    // High-Definition Lord Shiva Idol Texture (matching user photo #3)
+    const shivaTex = new THREE.TextureLoader().load('assets/lord_shiva_cheyyar.png', () => {
+      shivaTex.needsUpdate = true;
+    });
+    const shivaMat = new THREE.MeshLambertMaterial({
+      map: shivaTex,
+      transparent: true,
+      emissive: 0x221508
+    });
+    const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.6), shivaMat);
+    shivaMesh.position.set(0, 3.3, -804.4);
+    GB.add(shivaMesh);
 
-  // Golden / Brass Prabhavali (திருவாச்சி arch)
-  box(4.8, 6.0, 0.2, 0xd4af37, 0, 3.8, -804.8, GB);
-  cyl(0.18, 0.18, 5.6, 12, 0xffd54f, -2.3, 3.6, -804.6, GB);
-  cyl(0.18, 0.18, 5.6, 12, 0xffd54f, 2.3, 3.6, -804.6, GB);
-  cyl(2.4, 2.4, 0.35, 16, 0xffd54f, 0, 6.3, -804.6, GB);
-  sph(0.35, 0xd4af37, 0, 7.5, -804.6, GB); // Kirtimukha crest
+    // 3D Ritual Offerings sculpted directly in front of the idol:
+    // 1. Two Fresh Broken Coconut Halves (தேங்காய் மூடிகள் with white kernel)
+    [-0.85, 0.85].forEach(cx => {
+      sph(0.24, 0x3d1f08, cx, 1.05, -803.2, GB);
+      const cc = new THREE.Mesh(new THREE.CircleGeometry(0.21, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
+      cc.position.set(cx, 1.05, -802.97);
+      GB.add(cc);
+    });
 
-  // High-Definition Lord Shiva Idol Texture (matching user photo #3)
-  const shivaTex = new THREE.TextureLoader().load('assets/lord_shiva_cheyyar.png', () => {
-    shivaTex.needsUpdate = true;
-  });
-  const shivaMat = new THREE.MeshLambertMaterial({
-    map: shivaTex,
-    transparent: true,
-    emissive: 0x221508
-  });
-  const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.6), shivaMat);
-  shivaMesh.position.set(0, 3.3, -804.4);
-  GB.add(shivaMesh);
+    // 2. Sacred White Conch Shell (புனித வெண்சங்கு)
+    cyl(0.18, 0.22, 0.12, 8, 0xd4af37, 0, 1.06, -802.8, GB);
+    sph(0.22, 0xfcfcfa, 0, 1.18, -802.8, GB, 1.3);
+    cyl(0.02, 0.12, 0.45, 8, 0xffffff, 0, 1.18, -802.55, GB);
+    sph(0.08, 0xffd54f, 0, 1.25, -802.8, GB);
 
-  // C. 3D Ritual Offerings sculpted directly in front of the idol:
-  // 1. Two Fresh Broken Coconut Halves (தேங்காய் மூடிகள் with pure white interior)
-  [-0.85, 0.85].forEach(cx => {
-    // Outer fibrous shell
-    sph(0.24, 0x3d1f08, cx, 1.05, -803.2, GB);
-    // Pure white coconut kernel facing player
-    const cc = new THREE.Mesh(new THREE.CircleGeometry(0.21, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
-    cc.position.set(cx, 1.05, -802.97);
-    GB.add(cc);
-  });
+    // 3. Camphor Arati Plate with Burning Flame (கற்பூர ஜோதி)
+    cyl(0.35, 0.42, 0.08, 12, 0xd4af37, 0, 1.08, -802.1, GB);
+    sph(0.12, 0xffaa22, 0, 1.22, -802.1, GB);
+    sph(0.06, 0xffffff, 0, 1.26, -802.1, GB);
+    glow(0.9, 0.9, 0.9, 0xffaa22, 0, 1.22, -802.1, GB);
 
-  // 2. Sacred White Conch Shell (புனித வெண்சங்கு) on brass tripod
-  cyl(0.18, 0.22, 0.12, 8, 0xd4af37, 0, 1.06, -802.8, GB); // tripod
-  sph(0.22, 0xfcfcfa, 0, 1.18, -802.8, GB, 1.3); // conch body
-  cyl(0.02, 0.12, 0.45, 8, 0xffffff, 0, 1.18, -802.55, GB); // conch tip
-  sph(0.08, 0xffd54f, 0, 1.25, -802.8, GB); // marigold flower
+    // 4. Traditional Brass Kuthuvilakku Lamps on Left & Right
+    [-2.4, 2.4].forEach(lx => {
+      cyl(0.42, 0.52, 0.16, 12, 0xd4af37, lx, 0.1, -802.6, GB);
+      cyl(0.12, 0.16, 2.2, 10, 0xd4af37, lx, 1.2, -802.6, GB);
+      cyl(0.58, 0.58, 0.08, 14, 0xffd54f, lx, 2.3, -802.6, GB);
+      sph(0.14, 0xffaa22, lx, 2.44, -802.6, GB);
+      glow(0.8, 0.8, 0.8, 0xffaa22, lx, 2.44, -802.6, GB);
+    });
 
-  // 3. Camphor Arati Plate with Burning Flame (கற்பூர ஜோதி)
-  cyl(0.35, 0.42, 0.08, 12, 0xd4af37, 0, 1.08, -802.1, GB);
-  const flame1 = sph(0.12, 0xffaa22, 0, 1.22, -802.1, GB);
-  const flame2 = sph(0.06, 0xffffff, 0, 1.26, -802.1, GB);
-  glow(0.9, 0.9, 0.9, 0xffaa22, 0, 1.22, -802.1, GB);
-
-  // 4. Traditional Brass Kuthuvilakku Lamps on Left & Right
-  [-2.4, 2.4].forEach(lx => {
-    cyl(0.42, 0.52, 0.16, 12, 0xd4af37, lx, 0.1, -802.6, GB);
-    cyl(0.12, 0.16, 2.2, 10, 0xd4af37, lx, 1.2, -802.6, GB);
-    cyl(0.58, 0.58, 0.08, 14, 0xffd54f, lx, 2.3, -802.6, GB);
-    sph(0.14, 0xffaa22, lx, 2.44, -802.6, GB);
-    glow(0.8, 0.8, 0.8, 0xffaa22, lx, 2.44, -802.6, GB);
-  });
-
-  // D. Functions to Enter and Exit Sanctum
-  window.enterGarbhagriha = function(){
-    doorSnd();
-    goto('garbha');
-    toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் கருவறைக்குள் நுழைந்தீர்கள்! "நமசிவாய வாழ்க நாதன் தாள் வாழ்க"', 5500);
-  };
-
-  window.exitGarbhagriha = function(){
-    doorSnd();
-    goto('out');
-    P.set(-108, 1.6, -71.5);
-    yaw = 0;
-    toast('🚪 கோயில் வெளிப் பிரகாரத்திற்கு வந்தீர்கள் 🙏', 3500);
-  };
-
-  // E. Sanctum Camphor Arati Prayer Ritual
-  window.offerSanctumArati = function(){
-    const a = ac();
-    if (a) {
-      // Bell chimes and divine Shiva chants
-      [523, 659, 784, 1046, 1318].forEach((f, i) => {
-        setTimeout(() => sTone(f, f * 0.995, 1.2, 0.18 / (i + 1), 'sine'), i * 180);
-      });
-      // Resonant conch sound
-      setTimeout(() => sTone(220, 240, 2.5, 0.22, 'triangle'), 600);
-    }
-    addPts(30, 'Lord Shiva sanctum camphor arati');
-    chingSnd();
-    toast('🕉️ "நமசிவாய வாழ்க நாதன் தாள் வாழ்க" · மூலவர் வேதபுரீஸ்வரர் பரிபூரண திருவருள்! (+30 pts & விபூதி பிரசாதம்)', 6000);
-  };
-
-  // Add Sanctum Chamber Interactions
-  I.push(
-    { z: 'garbha', x: 0, y: -801.5, r: 4.5, l: '🪔 கற்பூர தீபாராதனை வழிபாடு (Offer Camphor Arati & Prayers)', f: window.offerSanctumArati },
-    { z: 'garbha', x: 0, y: -793.5, r: 4.2, l: '🚪 கருவறையிலிருந்து வெளியேறுக (Exit Sanctum to Temple)', f: window.exitGarbhagriha }
-  );
-})();
+    // Add Sanctum Chamber Interactions
+    I.push(
+      { z: 'garbha', x: 0, y: -801.5, r: 4.5, l: '🪔 கற்பூர தீபாராதனை வழிபாடு (Offer Camphor Arati & Prayers)', f: () => window.offerSanctumArati() },
+      { z: 'garbha', x: 0, y: -793.5, r: 4.2, l: '🚪 கருவறையிலிருந்து வெளியேறுக (Exit Sanctum to Temple)', f: () => window.exitGarbhagriha() }
+    );
+  })();
 
 }catch(e){console.warn('street/gopuram',e)}
 
