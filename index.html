@@ -209,7 +209,7 @@ setTimeout(()=>{if(!done){sp.classList.add('out');setTimeout(()=>sp.remove(),950
 <div id="modal" onclick="if(event.target===this)closeModal()"><div id="box"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>if(!window.THREE)document.write('<script src="lib/three.min.js"><\/script>')</script>
-<script src="images.js?v=shiva3" onerror="void 0"></script>
+<script src="images.js?v=shiva5" onerror="void 0"></script>
 <script>if(!window.MOB){var _b='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';['shaders/CopyShader','shaders/LuminosityHighPassShader','postprocessing/EffectComposer','postprocessing/MaskPass','postprocessing/ShaderPass','postprocessing/RenderPass','postprocessing/UnrealBloomPass'].forEach(function(f){document.write('<script src="'+_b+f+'.js"><\/script>')})}</script>
 <script>if(!window.THREE){document.write('<div style="padding:40px;font:18px system-ui;color:#fff;background:#0b0d12;height:100vh">⚠ Internet connection venum — three.js load aagala. Connect pannitu refresh pannunga.</div>')}</script>
 <script>
@@ -575,7 +575,18 @@ function walker(a,b,col,p,sp=.35){if(!CROWD)return;walkers.push({g:person(a[0],a
 
 /* ---------- OUTDOOR: Cheyyar bus stand + theatre ---------- */
 const OUT=new THREE.Group();S.add(OUT);window.OUT=OUT;
-box(300,.2,300,0x6b9a52,0,-.1,0,OUT);box(300,.1,14,0x333338,0,0,30,OUT);box(300,.1,14,0x333338,0,0,-38,OUT);
+box(300,.2,300,0x6b9a52,0,-.1,0,OUT);box(300,.1,14,0x333338,0,0,30,OUT);box(214,.1,14,0x333338,43,0,-38,OUT);
+for(let x=-54;x<60;x+=8)box(3,.12,.3,0xffffff,x,.06,-38,OUT);
+// Grand Pedestrian Temple Promenade (Sannadhi Street / Mada Veedhi - Strictly No Vehicles)
+box(76, .14, 56, 0xb8b0a0, -102, 0.05, -58, OUT);
+box(76, .16, 1.2, 0xdfd8c8, -102, 0.06, -30.4, OUT);
+box(76, .16, 1.2, 0xdfd8c8, -102, 0.06, -85.6, OUT);
+for(let bz = -46; bz <= -30; bz += 2.8){
+  cyl(0.28, 0.34, 0.9, 8, 0x3a3a40, -63.5, 0.45, bz, OUT);
+  sph(0.22, 0xd4af37, -63.5, 0.98, bz, OUT);
+  glow(0.25, 0.25, 0.25, 0xffd54f, -63.5, 1.0, bz, OUT);
+}
+sign('🛕 வேதபுரீஸ்வரர் கோயில் சன்னதி வீதி · பாதசாரிகள் மட்டும்', 13, 1.2, -63.5, 3.8, -38, -Math.PI/2, OUT, '#5a1214', '#ffd34d');
 for(let x=-60;x<60;x+=8)box(3,.12,.3,0xffffff,x,.06,30,OUT);
 box(46,.4,20,0x9a9a9a,0,.2,-14,OUT);                         // platform
 box(48,.5,22,0xc0392b,0,6,-14,OUT);                           // roof
@@ -729,7 +740,7 @@ const COL=[];
 [[-6,-390,1.05],[6,-390,1.05],[-6,-408,1.05],[6,-408,1.05],[8,-388,.8],[11.5,-388.5,.8],[-8,-388,.8],[-11.5,-388.5,.8],[-13,-384,.6],[13,-384,.6],[-13,-416,.6],[13,-416,.6],[-3.5,-396,.6],[3.5,-396,.6]].forEach(a=>COL.push({x:a[0],y:a[1],r:a[2],z:'lobby'}));
 [-18,-10.8,-3.6,3.6,10.8,18].forEach(x=>COL.push({x0:x-1.7,x1:x+1.7,z0:-22.2,z1:-11.8,h:4,z:'out'}));
 [[-75,100,-100,-45.4,99],[38.3,39.7,-10.7,-9.3,3],[-23.5,-18.5,-9.5,-6.5,3]].forEach(a=>COL.push({x0:a[0],x1:a[1],z0:a[2],z1:a[3],h:a[4],z:'out'}));
-function collide(){const R0=zone=='aud'?.3:.45;for(const w of walkers){const zn=w.g.parent===OUT?'out':w.g.parent===LB?'lobby':'';if(zn!=zone)continue;const q=w.g.position,dx=P.x-q.x,dz=P.z-q.z,d=Math.hypot(dx,dz),m=.5+R0;if(d<m&&d>.001){P.x=q.x+dx/d*m;P.z=q.z+dz/d*m}}for(const c of COL){if(c.z!=zone)continue;if(c.r){const dx=P.x-c.x,dz=P.z-c.y,d=Math.hypot(dx,dz),m=c.r+R0;if(d<m&&d>0){P.x=c.x+dx/d*m;P.z=c.y+dz/d*m}}else{const nx=Math.max(c.x0,Math.min(P.x,c.x1)),nz=Math.max(c.z0,Math.min(P.z,c.z1)),dx=P.x-nx,dz=P.z-nz,d=Math.hypot(dx,dz);if(d<R0){if(d>0){P.x=nx+dx/d*R0;P.z=nz+dz/d*R0}else{const ex=Math.min(P.x-c.x0,c.x1-P.x),ez=Math.min(P.z-c.z0,c.z1-P.z);if(ex<ez)P.x=(P.x-c.x0<c.x1-P.x)?c.x0-R0:c.x1+R0;else P.z=(P.z-c.z0<c.z1-P.z)?c.z0-R0:c.z1+R0}}}}}
+function collide(){const R0=zone=='aud'?.3:.45;for(const w of walkers){const zn=w.g.parent===OUT?'out':w.g.parent===LB?'lobby':'';if(zn!=zone)continue;const q=w.g.position,dx=P.x-q.x,dz=P.z-q.z,d=Math.hypot(dx,dz),m=.5+R0;if(d<m&&d>.001){P.x=q.x+dx/d*m;P.z=q.z+dz/d*m}}for(const c of COL){if(c.z!=zone)continue;if(c.isRiver&&(window.isSwimming||window.boatDrv))continue;if(c.r){const dx=P.x-c.x,dz=P.z-c.y,d=Math.hypot(dx,dz),m=c.r+R0;if(d<m&&d>0){P.x=c.x+dx/d*m;P.z=c.y+dz/d*m}}else{const nx=Math.max(c.x0,Math.min(P.x,c.x1)),nz=Math.max(c.z0,Math.min(P.z,c.z1)),dx=P.x-nx,dz=P.z-nz,d=Math.hypot(dx,dz);if(d<R0){if(d>0){P.x=nx+dx/d*R0;P.z=nz+dz/d*R0}else{const ex=Math.min(P.x-c.x0,c.x1-P.x),ez=Math.min(P.z-c.z0,c.z1-P.z);if(ex<ez)P.x=(P.x-c.x0<c.x1-P.x)?c.x0-R0:c.x1+R0;else P.z=(P.z-c.z0<c.z1-P.z)?c.z0-R0:c.z1+R0}}}}}
 function sitChair(){const zs=[-412.5,-410.3,-408.1,-405.9],cz=zs.reduce((a,b)=>Math.abs(b-P.z)<Math.abs(a-P.z)?b:a);seated=true;massage=true;seatYaw=-Math.PI/2;seatY=-.05;P.set(-12.3,seatY+1.55,cz);yaw=-Math.PI/2;pitch=.15;$('msUI').style.display='block';$('msInfo').textContent='Select Head or Body';msMode='';msPaid=false;$('msFill').style.width='0';clearInterval(window.msTick);$('prompt').style.display='none';toast('💆 Massage chair — Head or Body select pannunga',4000);clearTimeout(window.mt)}
 window.msStart=m=>{if(!massage)return;if(!msPaid){if(!spend(PT(50),'Massage'))return;msPaid=true}const h=m=='head';msMode=m;msEnd=Date.now()+30000;humOn();toast('💆 '+(h?'Head':'Body')+' massage started · 30 s',4000);clearTimeout(window.mt);window.mt=setTimeout(()=>{if(massage)stand()},30000);clearInterval(window.msTick);const tk=()=>{const left=Math.max(0,msEnd-Date.now());$('msInfo').textContent=(h?'🧠 Head':'🪑 Body')+' massage · '+Math.ceil(left/1000)+' s left';$('msFill').style.width=(100-left/300)+'%'};tk();window.msTick=setInterval(tk,250)};
 const msBob=t=>msMode=='body'?Math.sin(t/70)*.022:msMode=='head'?Math.sin(t/400)*.006:Math.sin(t/90)*.01,msTilt=t=>msMode=='head'?Math.sin(t/450)*.08:msMode=='body'?Math.sin(t/160)*.03:0,msRoll=t=>msMode=='head'?Math.sin(t/900)*.06:0;
@@ -881,7 +892,7 @@ function spend(n,what){if(n>pts){
 window.topUp=()=>toast('🪙 Coins collect panni points sambaadhiunga · 1 coin = 5 points',3000);
 let Q=true,pts=0;setTimeout(walletShow,0);function addPts(n,t){pts+=n;walletShow();if(t)$('task').textContent=t}
 let moving=0,vy=0,jy=0,ph=0,amp=0,seatY=0,seatYaw=0,massage=false,msMode='',msEnd=0,em='',emT=0;
-function gh(){if(zone=='out')return(Math.abs(P.x)<23&&P.z<-4&&P.z>-24)?.4:0;if(zone!='aud')return 0;const r=Math.round((P.z+632)/2.1);return r<0?0:.35*Math.min(r,11)+.35}
+function gh(){if(zone=='out'){if(window.isSwimming)return -0.75+Math.sin(performance.now()*0.0035)*0.06;return(Math.abs(P.x)<23&&P.z<-4&&P.z>-24)?.4:0;}if(zone!='aud')return 0;const r=Math.round((P.z+632)/2.1);return r<0?0:.35*Math.min(r,11)+.35}
 
 /* ---------- RESTROOM (offset z=-700) ---------- */
 const GB=new THREE.Group();S.add(GB);GB.visible=false;window.GB=GB;
@@ -1307,7 +1318,7 @@ setTimeout(()=>{if(gfx=='low'){if(window.MOB){SEATDET.forEach(o=>o.visible=false
 let sndOn=true;try{if(localStorage.getItem('cyr3d_snd')=='0')sndOn=false}catch(e){}
 function sNoise(d,v,f){const a=ac();if(!sndOn||!a)return;const n=a.sampleRate*d|0,b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*(1-i/n);const r=a.createBufferSource(),g=a.createGain(),fl=a.createBiquadFilter();fl.type='lowpass';fl.frequency.value=f;g.gain.value=v;r.buffer=b;r.connect(fl);fl.connect(g);g.connect(a.destination);r.start()}
 function sTone(f1,f2,d,v,type='sine',delay=0){const a=ac();if(!sndOn||!a)return;const o=a.createOscillator(),g=a.createGain(),T=a.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f1,T);if(f2!==f1)o.frequency.exponentialRampToValueAtTime(f2,T+d);g.gain.setValueAtTime(v,T);g.gain.exponentialRampToValueAtTime(.0001,T+d);o.connect(g);g.connect(a.destination);o.start(T);o.stop(T+d+.02)}
-const stepSnd=()=>sNoise(.06,.05,zone=='out'?900:zone=='aud'?500:1400);
+const stepSnd=()=>{if(window.isSwimming){sNoise(.12,.14,350);return}sNoise(.06,.05,zone=='out'?900:zone=='aud'?500:1400);};
 const doorSnd=()=>{sTone(110,55,.45,.05,'sawtooth');sNoise(.4,.04,700)};
 const chingSnd=()=>{sTone(1320,1320,.25,.06);sTone(1760,1760,.45,.06,'sine',.09)};
 const chimeSnd=()=>[784,988,1175].forEach((f,i)=>sTone(f,f,.5,.05,'sine',i*.18));
@@ -1469,6 +1480,7 @@ function ctex(c,rx,ry){const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.
 function flat(w,h,m,x,y,z,rx,ry,p){const o=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);o.receiveShadow=true;p.add(o);return o}
 const GOLD_M=new THREE.MeshLambertMaterial({color:0xc9a24a,emissive:0x3a2a08});
 function hit(x0,x1,z0,z1,h,zn){COL.push({x0,x1,z0,z1,h,z:zn,nc:true})}
+function hitRiver(x0,x1,z0,z1,h,zn){COL.push({x0,x1,z0,z1,h,z:zn,nc:true,isRiver:true})}
 function pole(x,z,r,zn){COL.push({x,y:z,r,z:zn,nc:true})}
 
 /* ---------- EXTERIOR ---------- */
@@ -1606,9 +1618,9 @@ let dr=null;R.domElement.onpointerdown=e=>dr=[e.clientX,e.clientY];addEventListe
 addEventListener('pointermove',e=>{if(!dr)return;yaw-=(e.clientX-dr[0])*.005;pitch=Math.max(-1.2,Math.min(1.2,pitch-(e.clientY-dr[1])*.005));dr=[e.clientX,e.clientY]});
 goto('out');let last=performance.now();
 (function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.05);last=t;
- if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(K.shift?9:5)*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}
+ if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?9:5))*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
  cur=null;if(!seated&&!lock)for(const o of I)if(o.z==zone&&Math.hypot(o.x-P.x,o.y-P.z)<(o.r||4)&&(!o.when||o.when())){cur=o;break}
- const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent='[E] '+cur.l}else p.style.display='none';
+ const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent='[E] '+(typeof cur.l=='function'?cur.l():cur.l)}else p.style.display='none';
  if(seated||lock||$('modal').style.display=='flex')moving=0;
 if(jy>0||vy>0){
   const prevVy=vy;
@@ -1676,6 +1688,11 @@ if(jy>0||vy>0){
    if(jy>0){
     ME.ll.rotation.x=-.25;ME.rl.rotation.x=-.25;
     ME.la.rotation.set(.35,0,-.20);ME.ra.rotation.set(.35,0,.20);
+   }else if(window.isSwimming){
+    const sw=Math.sin(performance.now()*0.007);
+    ME.ll.rotation.x=sw*0.65;ME.rl.rotation.x=-sw*0.65;
+    ME.la.rotation.set(1.1+sw*0.35,0,-0.55);
+    ME.ra.rotation.set(1.1-sw*0.35,0,0.55);
    }else{
     ME.ll.rotation.x=s;ME.rl.rotation.x=-s;
     if(isSprint){
@@ -2073,7 +2090,7 @@ window.vehTick=function(dt){
  px=clamp(px,b[0]+1,b[1]-1);
  pz=clamp(pz,b[2]+1,b[3]-1);
  
-  if(px < -78 && px > -138 && pz < -42 && pz > -84){
+  if(px < -63.5 && pz < -26 && pz > -90){
    px = v.g.position.x; pz = v.g.position.z; v.v = -v.v * 0.3;
    if(performance.now() > (v.lastTempleWarn || 0) + 3000){
     v.lastTempleWarn = performance.now();
@@ -2877,7 +2894,7 @@ function mkInfo(){const r=pick(routes),e=pick(r.entries);let from='Cheyyar',to=e
  return{no:e.bus,noTa:e.busTa||e.bus,from,to,short:to.split(' via ')[0],ta:e.destTa||'',route:r.name,bay:r.bay}}
 const TR=[];
 LANES.forEach((ln,li)=>{const types=['bus',li%2?'auto':'car','bike',li%2?'car':'auto'];
- const minX=(ln[0]<0)?-72:XMIN,maxX=li<2?XMAXB:XMAX,span=maxX-minX;
+ const minX=(ln[0]<0)?-54:XMIN,maxX=li<2?XMAXB:XMAX,span=maxX-minX;
  types.forEach((t,i)=>{const g=VBUILD(t),o={g,t,dir:ln[1],sp:ln[2],z:ln[0],minX,maxX,span,x:minX+((i*span/4+li*11)%span),br:li<2,hl:HL[t],wd:WD[t],info:null,tg:null};
   g.position.set(o.x,0,o.z);g.rotation.y=o.dir>0?-Math.PI/2:Math.PI/2;
   if(t=='bike'){const r=person(0,.42,pick(RIDER),0,g,.28);r.children.filter(c=>c.geometry&&c.geometry.type=='CircleGeometry').forEach(c=>r.remove(c));r.ll.rotation.x=r.rl.rotation.x=.6;r.la.rotation.x=r.ra.rotation.x=1}
@@ -3531,8 +3548,8 @@ try{
       map: shivaTex,
       side: THREE.FrontSide
     });
-    const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.85, 4.6), shivaMat);
-    shivaMesh.position.set(0, 3.4, -804.3);
+    const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 4.08), shivaMat);
+    shivaMesh.position.set(0, 3.25, -804.3);
     GB.add(shivaMesh);
     // Soft Atmospheric Sanctum Ceiling Light (placed high to avoid harsh hot-spots or glares)
     const gLight = new THREE.PointLight(0xffecc0, 0.75, 14);
@@ -3767,7 +3784,200 @@ box(60,.25,300,0xd8c690,220,.02,0,OUT);
 const wt=new THREE.MeshLambertMaterial({color:0x2a7fb0,transparent:true,opacity:.82,emissive:0x0a2a40});const wat=new THREE.Mesh(new THREE.BoxGeometry(46,.2,300),wt);wat.position.set(220,.1,0);OUT.add(wat);window.__riverWat=wat;
 [-12,10,50,72].forEach(bz=>{box(1.8,.42,.7,0x4a3a2a,194.2,.22,bz,OUT);box(1.8,.55,.14,0x4a3a2a,193.8,.7,bz,OUT);
  I.push({z:'out',x:194.2,y:bz,r:3.5,when:()=>!window.drv&&zone=='out'&&!seated,l:'🪑 ஆற்றுக்காற்று வாங்க உட்காருங்கள் (Sit by River)',f:()=>{seated=true;seatYaw=-Math.PI/2;P.set(194.2,.55,bz);seatY=.3;toast('🌊 செய்யாறு ஆற்றுக்காற்று… அமைதியான சூழல்!',3500)}})});
-hit(197,243,-150,22,2,'out');hit(197,243,38,150,2,'out');
+hitRiver(197,243,-150,22,2,'out');hitRiver(197,243,38,150,2,'out');
+
+/* ===== CHEYYAR RIVER ENHANCEMENTS: BOAT RIDE, SWIMMING & FISHING ===== */
+
+// 1. CHEYYAR RIVER COUNTRY BOAT & MOORING JETTY (நாட்டுப் படகு & படகுத்துறை)
+const boatG=new THREE.Group();boatG.position.set(204,0.12,12);OUT.add(boatG);window.__boatG=boatG;
+box(2.4,0.55,6.2,0x5a361c,0,0.28,0,boatG);
+box(1.8,0.65,1.6,0x4a2a14,0,0.38,-3.2,boatG);
+box(2.0,0.65,1.4,0x4a2a14,0,0.38,3.2,boatG);
+box(2.2,0.1,0.6,0x7a4e28,0,0.45,-1.2,boatG);
+box(2.2,0.1,0.6,0x7a4e28,0,0.45,1.2,boatG);
+box(0.15,0.4,6.4,0x3d2210,-1.2,0.55,0,boatG);
+box(0.15,0.4,6.4,0x3d2210,1.2,0.55,0,boatG);
+const oarL=cyl(0.05,0.05,3.2,6,0x8a5a2a,-1.35,0.75,0.2,boatG);
+const oarR=cyl(0.05,0.05,3.2,6,0x8a5a2a,1.35,0.75,0.2,boatG);
+box(0.35,0.04,0.8,0x6e451e,-1.85,0.25,1.4,boatG);
+box(0.35,0.04,0.8,0x6e451e,1.85,0.25,1.4,boatG);
+cyl(0.04,0.04,0.9,6,0x222222,0,0.9,-3.7,boatG);
+box(0.24,0.35,0.24,0xd4af37,0,0.9,-3.7,boatG);
+glow(0.35,0.35,0.35,0xffd54f,0,0.9,-3.7,boatG);
+cyl(0.35,0.35,0.12,12,0xd32f2f,0.9,0.58,2.4,boatG);
+sign('செய்யாறு பரிசல் · CHEYYAR BOAT',2.8,0.45,1.28,0.45,0,Math.PI/2,boatG,'#1a3a5a','#ffd34d');
+
+// Wooden Pier / Jetty for Boat
+box(5.0,0.22,3.5,0x6e4e32,197.5,0.3,12,OUT);
+[196,199.5].forEach(jx=>[10.5,13.5].forEach(jz=>cyl(0.14,0.16,1.2,8,0x3e2718,jx,-0.1,jz,OUT)));
+cyl(0.16,0.18,1.1,8,0x3e2718,199.8,0.6,10.2,OUT);
+cyl(0.16,0.18,1.1,8,0x3e2718,199.8,0.6,13.8,OUT);
+sign('🚣 செய்யாறு படகுத்துறை · BOAT DOCK',6.2,0.75,194.8,2.6,12,-Math.PI/2,OUT,'#0b3d91','#ffd34d');
+
+let boatV=0,boatYaw=0;
+window.boatDrv=false;
+window.startBoatRide=function(){
+ if(window.boatDrv||window.isSwimming)return;
+ window.boatDrv=true;boatV=0;boatYaw=boatG.rotation.y;
+ try{sNoise(0.2,0.3,320);sTone(330,440,0.35,0.1,'sine');}catch(e){}
+ addPts(15,'River boat ride');
+ chingSnd();
+ toast('🚣 செய்யாறு நாட்டுப் படகு சவாரி ஆரம்பம்! [WASD] - படகை ஓட்டுங்கள், [E] - இறங்குங்கள் (+15 pts)',4500);
+};
+
+window.dismountBoat=function(){
+ if(!window.boatDrv)return;
+ if(boatG.position.x<=201.5){
+  window.boatDrv=false;
+  P.set(195.8,1.6,boatG.position.z);
+  try{sTone(440,330,0.25,0.08,'sine');}catch(e){}
+  toast('🚶 படகிலிருந்து இறங்கி பாதுகாப்பாக கரைக்கு வந்துவிட்டீர்கள்!',3200);
+ }else{
+  window.boatDrv=false;
+  window.isSwimming=true;
+  P.set(boatG.position.x+1.2,0.0,boatG.position.z);
+  try{sNoise(0.25,0.35,300);}catch(e){}
+  toast('🏊 படகிலிருந்து ஆற்றில் குதித்து நீந்துகிறீர்கள்! WASD - நீச்சல், கரைக்கு செல்லுங்கள்',3500);
+ }
+};
+
+window.boatTick=function(dt){
+ if(!window.boatDrv)return;
+ const gas=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0);
+ const st=(K.a||K.arrowleft?1:0)-(K.d||K.arrowright?1:0);
+ boatV+=gas*5.2*dt;
+ boatV*=Math.max(0,1-0.8*dt);
+ boatYaw+=st*1.55*dt;
+ boatG.position.x+=-Math.sin(boatYaw)*boatV*dt;
+ boatG.position.z+=-Math.cos(boatYaw)*boatV*dt;
+ boatG.position.x=Math.max(199.5,Math.min(240.5,boatG.position.x));
+ boatG.position.z=Math.max(-142.0,Math.min(142.0,boatG.position.z));
+ const bt=performance.now()*0.003;
+ boatG.position.y=0.10+Math.sin(bt*2.2)*0.045+Math.abs(boatV)*0.02;
+ boatG.rotation.y=boatYaw;
+ boatG.rotation.z=Math.sin(bt*1.8)*0.035-st*0.08;
+ boatG.rotation.x=Math.sin(bt*1.5)*0.025+(boatV>0?-0.04:0.03);
+ if(Math.abs(boatV)>0.1){
+  const oarSwing=Math.sin(bt*8.0)*0.35;
+  oarL.rotation.z=-0.3+oarSwing;
+  oarR.rotation.z=0.3-oarSwing;
+ }
+ P.x=boatG.position.x;P.z=boatG.position.z;P.y=1.0;
+ ME.position.set(P.x,boatG.position.y+0.45,P.z);
+ ME.rotation.y=boatYaw;
+};
+
+// 2. CHEYYAR RIVER SACRED BATHING GHAT & SWIMMING (புனித படித்துறை & நீச்சல்)
+for(let si=0;si<5;si++){box(0.8,0.15,8.0,0x7c7c84,195.2+si*0.7,0.4-si*0.12,-2,OUT);}
+[-6,2].forEach(gz=>{
+ box(3.8,0.9,0.35,0x5a5a62,196.8,0.35,gz,OUT);
+ cyl(0.2,0.25,1.8,8,0x3a3a40,195.2,0.9,gz,OUT);
+ sph(0.18,0xd4af37,195.2,1.85,gz,OUT);
+ glow(0.35,0.35,0.35,0xffd54f,195.2,1.88,gz,OUT);
+});
+sign('🌊 செய்யாறு புனித படித்துறை · CHEYYAR BATHING GHAT',7.5,0.85,194.8,2.8,-2,-Math.PI/2,OUT,'#0e4a7a','#ffd34d');
+
+window.isSwimming=false;
+window.startRiverSwim=function(){
+ if(window.isSwimming||window.boatDrv)return;
+ window.isSwimming=true;
+ P.set(199.5,0.0,-2);
+ try{sNoise(0.25,0.35,320);sTone(440,660,0.3,0.1,'sine');}catch(e){}
+ addPts(10,'River holy dip & swim');
+ chingSnd();
+ toast('🏊 செய்யாறு ஆற்று நீரில் நீந்துகிறீர்கள்! WASD - நீச்சல், [E] - கரையேறு (+10 pts)',4500);
+};
+
+window.exitRiverSwim=function(){
+ if(!window.isSwimming)return;
+ window.isSwimming=false;
+ P.set(195.5,1.6,-2);
+ try{sNoise(0.12,0.18,450);}catch(e){}
+ toast('🚶 படித்துறை வழியே புத்துணர்ச்சியுடன் கரையேறிவிட்டீர்கள்!',3500);
+};
+
+// 3. CHEYYAR RIVER FISHING DECK & MINIGAME (மீன்பிடி தளம் & தூண்டில் மீன்பிடித்தல்)
+box(5.0,0.25,4.0,0x5a3e26,197.5,0.35,46,OUT);
+[196,199.5].forEach(fx=>[44.2,47.8].forEach(fz=>cyl(0.12,0.12,1.2,6,0x3d2817,fx,-0.1,fz,OUT)));
+box(0.12,0.8,4.0,0x4a321e,199.8,0.75,46,OUT);
+cyl(0.04,0.04,1.4,6,0x222222,199.8,1.0,44.5,OUT);
+glow(0.25,0.25,0.25,0xffd54f,199.8,1.5,44.5,OUT);
+cyl(0.22,0.18,0.45,10,0x1976d2,196.8,0.6,44.8,OUT);
+sign('🎣 செய்யாறு மீன்பிடி தளம் · CHEYYAR FISHING DECK',6.8,0.8,195.0,2.6,46,-Math.PI/2,OUT,'#1a4a2a','#ffd34d');
+
+const fishG=new THREE.Group();fishG.position.set(199.8,0.8,46);OUT.add(fishG);fishG.visible=false;window.__fishG=fishG;
+const rod=cyl(0.03,0.015,3.8,6,0x8d6e63,1.5,0.6,0,fishG);rod.rotation.z=-0.55;
+const bobber=sph(0.15,0xd32f2f,4.2,-0.65,0,fishG);
+const bobberWhite=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,8),new THREE.MeshBasicMaterial({color:0xffffff}));bobberWhite.position.set(4.2,-0.73,0);fishG.add(bobberWhite);
+
+const FISH_TYPES=[
+ {name:'நாட்டு கெண்டை (Kendai)',wt:'1.8 kg',pts:30,coins:20,icon:'🐟'},
+ {name:'ஆற்று விரால் (Viral - River Murrel)',wt:'2.6 kg',pts:45,coins:35,icon:'🐟'},
+ {name:'சிலேபி / ஜிலேபி (Tilapia)',wt:'1.4 kg',pts:25,coins:15,icon:'🐟'},
+ {name:'கெளுத்தி மீன் (Catfish)',wt:'3.2 kg',pts:50,coins:40,icon:'🐟'},
+ {name:'அயிரை மீன் (Ayirai)',wt:'0.9 kg',pts:20,coins:15,icon:'🐟'},
+ {name:'தங்க மீன் (Rare Golden Mahseer)',wt:'4.5 kg',pts:80,coins:75,icon:'⭐'}
+];
+
+let fishingState='idle';
+let biteTimeout=null,biteWindowTimeout=null;
+window.startFishing=function(){
+ if(fishingState!=='idle')return;
+ fishingState='waiting';
+ window.isFishing=true;
+ fishG.visible=true;
+ P.set(198.5,1.6,46);
+ yaw=-Math.PI/2;
+ try{sTone(440,880,0.35,0.1,'sine');}catch(e){}
+ toast('🎣 தூண்டில் ஆற்றில் போடப்பட்டது! மீன் கொத்தும் வரை காத்திருங்கள்...',3500);
+ const waitMs=2600+Math.random()*3200;
+ clearTimeout(biteTimeout);
+ biteTimeout=setTimeout(()=>{
+  if(fishingState!=='waiting')return;
+  fishingState='bite';
+  try{sNoise(0.2,0.3,500);sTone(880,1100,0.35,0.25,'triangle');}catch(e){}
+  toast('🐟 மீன் கடித்தது! உடனே [E] அழுத்துங்கள்! (REEL IN NOW!)',3500);
+  let jerkT=0;
+  const jerkIv=setInterval(()=>{
+   jerkT+=0.2;
+   bobber.position.y=-0.65-Math.abs(Math.sin(jerkT*12))*0.28;
+   bobberWhite.position.y=-0.73-Math.abs(Math.sin(jerkT*12))*0.28;
+   if(jerkT>3.2||fishingState!=='bite'){clearInterval(jerkIv);bobber.position.y=-0.65;bobberWhite.position.y=-0.73;}
+  },40);
+  clearTimeout(biteWindowTimeout);
+  biteWindowTimeout=setTimeout(()=>{
+   if(fishingState==='bite'){
+    fishingState='idle';window.isFishing=false;fishG.visible=false;
+    toast('💨 அய்யோ! மீன் தப்பித்துவிட்டது! மீண்டும் முயற்சிக்கவும்',3200);
+   }
+  },3500);
+ },waitMs);
+};
+
+window.reelInFish=function(){
+ if(fishingState==='bite'){
+  clearTimeout(biteWindowTimeout);
+  fishingState='idle';window.isFishing=false;fishG.visible=false;
+  const f=FISH_TYPES[Math.floor(Math.random()*FISH_TYPES.length)];
+  addPts(f.pts,'Cheyyar fishing: '+f.name);
+  chingSnd();
+  window.fishCaught=(window.fishCaught||0)+1;
+  toast(f.icon+' பிரமாதம்! பெரிய '+f.name+' ('+f.wt+') பிடித்தீர்கள்! +'+f.pts+' pts (+'+f.coins+' coins) · Total: '+window.fishCaught+' மீன்கள்',5500);
+ }else if(fishingState==='waiting'){
+  clearTimeout(biteTimeout);
+  fishingState='idle';window.isFishing=false;fishG.visible=false;
+  toast('🎣 தூண்டிலை திரும்ப எடுத்துவிட்டீர்கள்',2200);
+ }
+};
+
+// River Interactions (Boat, Swimming, Fishing)
+I.push(
+ {z:'out',x:198,y:12,r:4.5,when:()=>!window.drv&&!window.boatDrv&&!window.isSwimming&&!window.isFishing&&zone=='out',l:'🚣 படகில் ஏறு (Ride Cheyyar River Boat)',f:()=>window.startBoatRide()},
+ {z:'out',x:204,y:12,r:8.0,when:()=>window.boatDrv&&zone=='out',l:'🚶 படகிலிருந்து இறங்கு (Dismount Boat to Bank)',f:()=>window.dismountBoat()},
+ {z:'out',x:196.8,y:-2,r:3.8,when:()=>!window.drv&&!window.boatDrv&&!window.isSwimming&&!window.isFishing&&zone=='out',l:'🏊 ஆற்றில் இறங்கி நீச்சல் அடி (Swim in River)',f:()=>window.startRiverSwim()},
+ {z:'out',x:199.0,y:-2,r:5.5,when:()=>window.isSwimming&&zone=='out',l:'🚶 படித்துறையில் கரையேறு (Exit River to Ghat)',f:()=>window.exitRiverSwim()},
+ {z:'out',x:198.5,y:46,r:3.8,when:()=>!window.drv&&!window.boatDrv&&!window.isSwimming&&zone=='out',l:()=>(fishingState==='bite'?'🎣 மீனை உடனே மேலே இழு! (REEL IN!)':(fishingState==='waiting'?'🎣 தூண்டிலை எடு (Pull Rod)':'🎣 தூண்டில் போட்டு மீன் பிடி (Go Fishing)')),f:()=>(fishingState==='idle'?window.startFishing():window.reelInFish())}
+);
 for(let z=-120;z<=120;z+=26)if(Math.abs(z-30)>14)[193,247].forEach(x=>{box(.4,3,.4,0x5a3b1e,x,1.5,z,OUT);const t=new THREE.Mesh(new THREE.SphereGeometry(2.2,9,7),mat(0x2e7d32));t.position.set(x,4.4,z);OUT.add(t)});
 [[192,2,184,200,.2450],[248,2,240,256,-.2450]].forEach(r=>{const m=new THREE.Mesh(new THREE.BoxGeometry(16.5,.6,14),mat(0x3a3a40));m.position.set(r[0],1.75,30);m.rotation.z=r[4]>0?.245:-.245;OUT.add(m)});
 box(44,.6,14,0x3a3a40,220,3.7,30,OUT);for(let x=202;x<=238;x+=6)box(2.4,.05,.3,0xffffff,x,4.02,30,OUT);
