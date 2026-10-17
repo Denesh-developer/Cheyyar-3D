@@ -728,7 +728,7 @@ const COL=[];
 [[9.4,12.6,-403.3,-392.7,3.8],[-12.6,-9.4,-403.3,-392.7,3.8],[-13.6,-11,-413.6,-405,2],[-9,-7,-412.6,-407.4,1],[7,9,-412.6,-407.4,1]].forEach(a=>COL.push({x0:a[0],x1:a[1],z0:a[2],z1:a[3],h:a[4],z:'lobby'}));
 [[-6,-390,1.05],[6,-390,1.05],[-6,-408,1.05],[6,-408,1.05],[8,-388,.8],[11.5,-388.5,.8],[-8,-388,.8],[-11.5,-388.5,.8],[-13,-384,.6],[13,-384,.6],[-13,-416,.6],[13,-416,.6],[-3.5,-396,.6],[3.5,-396,.6]].forEach(a=>COL.push({x:a[0],y:a[1],r:a[2],z:'lobby'}));
 [-18,-10.8,-3.6,3.6,10.8,18].forEach(x=>COL.push({x0:x-1.7,x1:x+1.7,z0:-22.2,z1:-11.8,h:4,z:'out'}));
-[[-100,100,-100,-45.4,99],[38.3,39.7,-10.7,-9.3,3],[-23.5,-18.5,-9.5,-6.5,3]].forEach(a=>COL.push({x0:a[0],x1:a[1],z0:a[2],z1:a[3],h:a[4],z:'out'}));
+[[-75,100,-100,-45.4,99],[38.3,39.7,-10.7,-9.3,3],[-23.5,-18.5,-9.5,-6.5,3]].forEach(a=>COL.push({x0:a[0],x1:a[1],z0:a[2],z1:a[3],h:a[4],z:'out'}));
 function collide(){const R0=zone=='aud'?.3:.45;for(const w of walkers){const zn=w.g.parent===OUT?'out':w.g.parent===LB?'lobby':'';if(zn!=zone)continue;const q=w.g.position,dx=P.x-q.x,dz=P.z-q.z,d=Math.hypot(dx,dz),m=.5+R0;if(d<m&&d>.001){P.x=q.x+dx/d*m;P.z=q.z+dz/d*m}}for(const c of COL){if(c.z!=zone)continue;if(c.r){const dx=P.x-c.x,dz=P.z-c.y,d=Math.hypot(dx,dz),m=c.r+R0;if(d<m&&d>0){P.x=c.x+dx/d*m;P.z=c.y+dz/d*m}}else{const nx=Math.max(c.x0,Math.min(P.x,c.x1)),nz=Math.max(c.z0,Math.min(P.z,c.z1)),dx=P.x-nx,dz=P.z-nz,d=Math.hypot(dx,dz);if(d<R0){if(d>0){P.x=nx+dx/d*R0;P.z=nz+dz/d*R0}else{const ex=Math.min(P.x-c.x0,c.x1-P.x),ez=Math.min(P.z-c.z0,c.z1-P.z);if(ex<ez)P.x=(P.x-c.x0<c.x1-P.x)?c.x0-R0:c.x1+R0;else P.z=(P.z-c.z0<c.z1-P.z)?c.z0-R0:c.z1+R0}}}}}
 function sitChair(){const zs=[-412.5,-410.3,-408.1,-405.9],cz=zs.reduce((a,b)=>Math.abs(b-P.z)<Math.abs(a-P.z)?b:a);seated=true;massage=true;seatYaw=-Math.PI/2;seatY=-.05;P.set(-12.3,seatY+1.55,cz);yaw=-Math.PI/2;pitch=.15;$('msUI').style.display='block';$('msInfo').textContent='Select Head or Body';msMode='';msPaid=false;$('msFill').style.width='0';clearInterval(window.msTick);$('prompt').style.display='none';toast('💆 Massage chair — Head or Body select pannunga',4000);clearTimeout(window.mt)}
 window.msStart=m=>{if(!massage)return;if(!msPaid){if(!spend(PT(50),'Massage'))return;msPaid=true}const h=m=='head';msMode=m;msEnd=Date.now()+30000;humOn();toast('💆 '+(h?'Head':'Body')+' massage started · 30 s',4000);clearTimeout(window.mt);window.mt=setTimeout(()=>{if(massage)stand()},30000);clearInterval(window.msTick);const tk=()=>{const left=Math.max(0,msEnd-Date.now());$('msInfo').textContent=(h?'🧠 Head':'🪑 Body')+' massage · '+Math.ceil(left/1000)+' s left';$('msFill').style.width=(100-left/300)+'%'};tk();window.msTick=setInterval(tk,250)};
@@ -856,6 +856,7 @@ let moving=0,vy=0,jy=0,ph=0,amp=0,seatY=0,seatYaw=0,massage=false,msMode='',msEn
 function gh(){if(zone=='out')return(Math.abs(P.x)<23&&P.z<-4&&P.z>-24)?.4:0;if(zone!='aud')return 0;const r=Math.round((P.z+632)/2.1);return r<0?0:.35*Math.min(r,11)+.35}
 
 /* ---------- RESTROOM (offset z=-700) ---------- */
+const GB=new THREE.Group();S.add(GB);GB.visible=false;window.GB=GB;
 const RR=new THREE.Group();S.add(RR);RR.visible=false;const rrW={st:[],tap:{},uf:[],man:null,dry:null,doorM:new THREE.MeshLambertMaterial({color:0x2f7f78}),accM:new THREE.MeshLambertMaterial({color:0x1565c0})};
 {
  const tileMat=(bg,gr,rx,ry)=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle=gr;g.fillRect(0,0,64,64);g.fillStyle=bg;g.fillRect(2,2,60,60);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return new THREE.MeshLambertMaterial({map:t})};
@@ -965,8 +966,41 @@ function getShowPlaybackOffset(){
 }
 window.getShowPlaybackOffset=getShowPlaybackOffset;
 
-const Z={out:{g:OUT,b:[-90,40.3,-75,60],sp:[0,34],y:0},lobby:{g:LB,b:[-14,14,-419,-381],sp:[0,-384],y:Math.PI*0},aud:{g:AU,b:[-13,13,-644,-597],sp:[0,-599],y:0},rest:{g:RR,b:[-6.2,6.2,-709.3,-691.5],sp:[0,-693.5],y:0}};
-function goto(z){if(started&&zone!==z)doorSnd();zone=z;sun.visible=z=='out';OUT.visible=z=='out';LB.visible=z=='lobby';AU.visible=z=='aud';RR.visible=z=='rest';rrAmb(z=='rest');S.background=new THREE.Color(z=='out'?0x10142a:0x08080c);S.fog.color=S.background;S.fog.near=z=='out'?60:20;S.fog.far=z=='out'?220:90;P.set(Z[z].sp[0],1.6,Z[z].sp[1]);yaw=0;pitch=0;$('zone').innerHTML='<b>'+{out:'📍 Cheyyar Bus Stand',lobby:'🎬 Cheyyar I-MAX Lobby',aud:'🍿 Screen 1',rest:'🚻 Restroom'}[z]+'</b>';$('lobbybar').style.display=z=='lobby'?'flex':'none';Gs=gh()}
+const Z={out:{g:OUT,b:[-160,60,-96,60],sp:[0,34],y:0},lobby:{g:LB,b:[-14,14,-419,-381],sp:[0,-384],y:Math.PI*0},aud:{g:AU,b:[-13,13,-644,-597],sp:[0,-599],y:0},rest:{g:RR,b:[-6.2,6.2,-709.3,-691.5],sp:[0,-693.5],y:0},garbha:{g:GB,b:[-9,9,-812,-791],sp:[0,-795],y:0}};
+let sanctumDrone=null;
+function sanctumAmb(on){
+  const a=ac();
+  if(on&&!sanctumDrone&&a){
+    const o=a.createOscillator(),g=a.createGain(),fl=a.createBiquadFilter();
+    o.type='sine';o.frequency.value=108; // Divine 108Hz Om resonance
+    g.gain.value=0.035;fl.type='lowpass';fl.frequency.value=280;
+    o.connect(fl);fl.connect(g);g.connect(a.destination);
+    o.start();sanctumDrone={o,g};
+  }else if(!on&&sanctumDrone){
+    try{sanctumDrone.o.stop()}catch(_){}sanctumDrone=null;
+  }
+}
+function goto(z){
+  if(started&&zone!==z)doorSnd();
+  zone=z;
+  sun.visible=z=='out';
+  OUT.visible=z=='out';
+  LB.visible=z=='lobby';
+  AU.visible=z=='aud';
+  RR.visible=z=='rest';
+  if(window.GB)GB.visible=z=='garbha';
+  rrAmb(z=='rest');
+  sanctumAmb(z=='garbha');
+  S.background=new THREE.Color(z=='out'?0x10142a:z=='garbha'?0x070404:0x08080c);
+  S.fog.color=S.background;
+  S.fog.near=z=='out'?60:z=='garbha'?16:20;
+  S.fog.far=z=='out'?220:z=='garbha'?50:90;
+  P.set(Z[z].sp[0],1.6,Z[z].sp[1]);
+  yaw=Z[z].y||0;pitch=0;
+  $('zone').innerHTML='<b>'+{out:'📍 Cheyyar Bus Stand',lobby:'🎬 Cheyyar I-MAX Lobby',aud:'🍿 Screen 1',rest:'🚻 Restroom',garbha:'🕉️ மூலவர் ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)'}[z]+'</b>';
+  $('lobbybar').style.display=z=='lobby'?'flex':'none';
+  Gs=gh();
+}
 function toast(t,ms=3500){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ms)}
 const I=[
  {z:'out',x:41,y:0,l:'🚪 Enter theatre',f:()=>{toast('🎬 Welcome to Cheyyar I-MAX!');addPts(5,'Book a ticket at the box office');setTimeout(()=>goto('lobby'),500)}},
@@ -3488,7 +3522,7 @@ try{
   };
 
   I.push(
-    { z: 'out', x: -108, y: -68.5, r: 4.8, when: () => !window.drv && zone == 'out', l: '🕉️ மூலவர் வேதபுரீஸ்வரர் தரிசனம் (Lord Shiva Darshan)', f: window.darshanMoolavar },
+    { z: 'out', x: -108, y: -72.0, r: 4.8, when: () => !window.drv && zone == 'out', l: '🛕 கருவறைக்குள் செல்க (Enter Lord Shiva Sanctum Sanctorum)', f: window.enterGarbhagriha },
     { z: 'out', x: -124, y: -64.5, r: 4.5, when: () => !window.drv && zone == 'out', l: '🌺 இளமுலை நாயகி அம்மன் தரிசனம் (Ambal Darshan)', f: window.darshanAmbal },
     { z: 'out', x: -92, y: -55.5, r: 4.8, when: () => !window.drv && zone == 'out', l: '🌴 தல விருட்ச ஆண் பனைமரம் & தேவாரம் (The Miracle Palm Tree)', f: window.worshipPalmTree },
     { z: 'out', x: -94, y: -66.8, r: 4.5, when: () => !window.drv && zone == 'out', l: '🪐 நவகிரக பிரதக்ஷிணம் (Navagraha Pradakshinam)', f: window.pradakshinamNavagraha },
@@ -3496,6 +3530,134 @@ try{
     { z: 'out', x: -108, y: -50, r: 4.2, when: () => !window.drv && zone == 'out', l: '🪔 அகல் விளக்கு ஏற்றுங்கள் (Light Deepam)', f: window.lightTempleDeepam },
     { z: 'out', x: -126, y: -30, r: 5.5, when: () => !window.drv && zone == 'out', l: '🎪 வேதபுரீஸ்வரர் திருத்தேர் வழிபாடு (Worship Chariot)', f: window.worshipChariot }
   );
+
+
+/* =========================================================================
+   SANCTUM SANCTORUM CHAMBER (ஸ்ரீ வேதபுரீஸ்வரர் கருவறை உள் அறை)
+   Modeled with exact Lord Shiva idol from uploaded image:
+   - Polished Avudaiyar black granite pedestal
+   - High-definition sacred idol panel (assets/lord_shiva_cheyyar.png)
+   - Ornate Golden Prabhavali arch (திருவாச்சி)
+   - 3D Broken Coconut halves with white kernel
+   - 3D Sacred White Conch Shell (வெண்சங்கு) with marigold petals
+   - 3D Burning Camphor Arati plate (கற்பூர ஜோதி)
+   - Traditional brass Kuthuvilakku lamps with warm glow
+   - Authentic Vedic chanting, temple bells & exit door back to courtyard
+   ========================================================================= */
+(function(){
+  if(!window.GB) return;
+
+  // A. Ancient Granite Chamber Walls, Floor & Ceiling
+  box(16, 0.4, 18, 0x18181c, 0, -0.2, -800, GB); // floor slabs
+  box(16.5, 0.5, 18.5, 0x141416, 0, 6.2, -800, GB); // ceiling slab
+  // Back Wall (South)
+  box(16, 6.2, 0.6, 0x222228, 0, 3.1, -808, GB);
+  // Left Wall (West)
+  box(0.6, 6.2, 18, 0x222228, -8, 3.1, -800, GB);
+  // Right Wall (East)
+  box(0.6, 6.2, 18, 0x222228, 8, 3.1, -800, GB);
+  // Front Wall with Entrance Portal (North, z: -792)
+  box(6.2, 6.2, 0.6, 0x222228, -4.9, 3.1, -792, GB);
+  box(6.2, 6.2, 0.6, 0x222228, 4.9, 3.1, -792, GB);
+  box(3.6, 1.8, 0.6, 0x222228, 0, 5.3, -792, GB);
+
+  // Entrance door frame & threshold
+  box(3.6, 0.25, 1.2, 0x38383f, 0, 0.12, -792, GB);
+  sign('ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)', 7.6, 0.9, 0, 4.6, -792.4, Math.PI, GB, '#5a1214', '#ffd34d');
+
+  // B. The Central Sacred Altar (Lord Shiva Peedam at z: -804)
+  box(7.2, 0.6, 4.8, 0x141416, 0, 0.3, -804, GB);
+  box(6.2, 0.4, 4.0, 0x202024, 0, 0.8, -804, GB);
+
+  // Golden / Brass Prabhavali (திருவாச்சி arch)
+  box(4.8, 6.0, 0.2, 0xd4af37, 0, 3.8, -804.8, GB);
+  cyl(0.18, 0.18, 5.6, 12, 0xffd54f, -2.3, 3.6, -804.6, GB);
+  cyl(0.18, 0.18, 5.6, 12, 0xffd54f, 2.3, 3.6, -804.6, GB);
+  cyl(2.4, 2.4, 0.35, 16, 0xffd54f, 0, 6.3, -804.6, GB);
+  sph(0.35, 0xd4af37, 0, 7.5, -804.6, GB); // Kirtimukha crest
+
+  // High-Definition Lord Shiva Idol Texture (matching user photo #3)
+  const shivaTex = new THREE.TextureLoader().load('assets/lord_shiva_cheyyar.png', () => {
+    shivaTex.needsUpdate = true;
+  });
+  const shivaMat = new THREE.MeshLambertMaterial({
+    map: shivaTex,
+    transparent: true,
+    emissive: 0x221508
+  });
+  const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.6), shivaMat);
+  shivaMesh.position.set(0, 3.3, -804.4);
+  GB.add(shivaMesh);
+
+  // C. 3D Ritual Offerings sculpted directly in front of the idol:
+  // 1. Two Fresh Broken Coconut Halves (தேங்காய் மூடிகள் with pure white interior)
+  [-0.85, 0.85].forEach(cx => {
+    // Outer fibrous shell
+    sph(0.24, 0x3d1f08, cx, 1.05, -803.2, GB);
+    // Pure white coconut kernel facing player
+    const cc = new THREE.Mesh(new THREE.CircleGeometry(0.21, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
+    cc.position.set(cx, 1.05, -802.97);
+    GB.add(cc);
+  });
+
+  // 2. Sacred White Conch Shell (புனித வெண்சங்கு) on brass tripod
+  cyl(0.18, 0.22, 0.12, 8, 0xd4af37, 0, 1.06, -802.8, GB); // tripod
+  sph(0.22, 0xfcfcfa, 0, 1.18, -802.8, GB, 1.3); // conch body
+  cyl(0.02, 0.12, 0.45, 8, 0xffffff, 0, 1.18, -802.55, GB); // conch tip
+  sph(0.08, 0xffd54f, 0, 1.25, -802.8, GB); // marigold flower
+
+  // 3. Camphor Arati Plate with Burning Flame (கற்பூர ஜோதி)
+  cyl(0.35, 0.42, 0.08, 12, 0xd4af37, 0, 1.08, -802.1, GB);
+  const flame1 = sph(0.12, 0xffaa22, 0, 1.22, -802.1, GB);
+  const flame2 = sph(0.06, 0xffffff, 0, 1.26, -802.1, GB);
+  glow(0.9, 0.9, 0.9, 0xffaa22, 0, 1.22, -802.1, GB);
+
+  // 4. Traditional Brass Kuthuvilakku Lamps on Left & Right
+  [-2.4, 2.4].forEach(lx => {
+    cyl(0.42, 0.52, 0.16, 12, 0xd4af37, lx, 0.1, -802.6, GB);
+    cyl(0.12, 0.16, 2.2, 10, 0xd4af37, lx, 1.2, -802.6, GB);
+    cyl(0.58, 0.58, 0.08, 14, 0xffd54f, lx, 2.3, -802.6, GB);
+    sph(0.14, 0xffaa22, lx, 2.44, -802.6, GB);
+    glow(0.8, 0.8, 0.8, 0xffaa22, lx, 2.44, -802.6, GB);
+  });
+
+  // D. Functions to Enter and Exit Sanctum
+  window.enterGarbhagriha = function(){
+    doorSnd();
+    goto('garbha');
+    toast('🕉️ அருள்மிகு வேதபுரீஸ்வரர் கருவறைக்குள் நுழைந்தீர்கள்! "நமசிவாய வாழ்க நாதன் தாள் வாழ்க"', 5500);
+  };
+
+  window.exitGarbhagriha = function(){
+    doorSnd();
+    goto('out');
+    P.set(-108, 1.6, -71.5);
+    yaw = 0;
+    toast('🚪 கோயில் வெளிப் பிரகாரத்திற்கு வந்தீர்கள் 🙏', 3500);
+  };
+
+  // E. Sanctum Camphor Arati Prayer Ritual
+  window.offerSanctumArati = function(){
+    const a = ac();
+    if (a) {
+      // Bell chimes and divine Shiva chants
+      [523, 659, 784, 1046, 1318].forEach((f, i) => {
+        setTimeout(() => sTone(f, f * 0.995, 1.2, 0.18 / (i + 1), 'sine'), i * 180);
+      });
+      // Resonant conch sound
+      setTimeout(() => sTone(220, 240, 2.5, 0.22, 'triangle'), 600);
+    }
+    addPts(30, 'Lord Shiva sanctum camphor arati');
+    chingSnd();
+    toast('🕉️ "நமசிவாய வாழ்க நாதன் தாள் வாழ்க" · மூலவர் வேதபுரீஸ்வரர் பரிபூரண திருவருள்! (+30 pts & விபூதி பிரசாதம்)', 6000);
+  };
+
+  // Add Sanctum Chamber Interactions
+  I.push(
+    { z: 'garbha', x: 0, y: -801.5, r: 4.5, l: '🪔 கற்பூர தீபாராதனை வழிபாடு (Offer Camphor Arati & Prayers)', f: window.offerSanctumArati },
+    { z: 'garbha', x: 0, y: -793.5, r: 4.2, l: '🚪 கருவறையிலிருந்து வெளியேறுக (Exit Sanctum to Temple)', f: window.exitGarbhagriha }
+  );
+})();
 
 }catch(e){console.warn('street/gopuram',e)}
 
