@@ -209,7 +209,7 @@ setTimeout(()=>{if(!done){sp.classList.add('out');setTimeout(()=>sp.remove(),950
 <div id="modal" onclick="if(event.target===this)closeModal()"><div id="box"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>if(!window.THREE)document.write('<script src="lib/three.min.js"><\/script>')</script>
-<script src="images.js" onerror="void 0"></script>
+<script src="images.js?v=shiva3" onerror="void 0"></script>
 <script>if(!window.MOB){var _b='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';['shaders/CopyShader','shaders/LuminosityHighPassShader','postprocessing/EffectComposer','postprocessing/MaskPass','postprocessing/ShaderPass','postprocessing/RenderPass','postprocessing/UnrealBloomPass'].forEach(function(f){document.write('<script src="'+_b+f+'.js"><\/script>')})}</script>
 <script>if(!window.THREE){document.write('<div style="padding:40px;font:18px system-ui;color:#fff;background:#0b0d12;height:100vh">⚠ Internet connection venum — three.js load aagala. Connect pannitu refresh pannunga.</div>')}</script>
 <script>
@@ -3523,16 +3523,15 @@ try{
     });
     const shivaMat = new THREE.MeshBasicMaterial({
       map: shivaTex,
-      transparent: true,
-      side: THREE.DoubleSide
+      side: THREE.FrontSide
     });
-    const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 4.6), shivaMat);
-    shivaMesh.position.set(0, 3.3, -804.4);
+    const shivaMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.85, 4.6), shivaMat);
+    shivaMesh.position.set(0, 3.4, -804.3);
     GB.add(shivaMesh);
-    // Devotional Golden Aura Sanctum Illumination
-    const shivaLight = new THREE.PointLight(0xffdf88, 1.4, 18);
-    shivaLight.position.set(0, 3.5, -802.8);
-    GB.add(shivaLight);
+    // Soft Atmospheric Sanctum Ceiling Light (placed high to avoid harsh hot-spots or glares)
+    const gLight = new THREE.PointLight(0xffecc0, 0.75, 14);
+    gLight.position.set(0, 5.0, -799);
+    GB.add(gLight);
 
     // 3D Ritual Offerings sculpted directly in front of the idol:
     // 1. Two Fresh Broken Coconut Halves (தேங்காய் மூடிகள் with white kernel)

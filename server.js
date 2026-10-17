@@ -24,6 +24,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   if (req.method === 'OPTIONS') { res.statusCode = 204; res.end(); return; }
 
   let reqPath = decodeURI(req.url.split('?')[0]);
