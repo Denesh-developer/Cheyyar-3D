@@ -905,18 +905,14 @@ box(26,.5,1.2,0x2a1810,0,.25,-638.2,AU);
 const fr=0xc9a24a;box(23.4,.3,.3,fr,0,10.9,-644.75,AU);box(23.4,.3,.3,fr,0,1.2,-644.75,AU);[-11.6,11.6].forEach(x=>box(.3,9.9,.3,fr,x,6.05,-644.75,AU));
 [-14.7,14.7].forEach(x=>glow(.1,.5,1.2,0x22cc66,x,3,-600,AU));
 setInterval(()=>{if(zone=='aud')AN.forEach((g,i)=>{if(Math.random()<.12){const e=i%2;g.ra.rotation.set(e?0:1.3,0,e?2.6:-.3);g.la.rotation.set(e?0:1.3,0,e?-2.6:.3);setTimeout(()=>{g.la.rotation.set(.5,0,0);g.ra.rotation.set(.5,0,0)},1400)}})},1500);
-function paintScreen(t){if(window.__audVideoActive)return;const offSec=typeof getShowPlaybackOffset==='function'?getShowPlaybackOffset():0;const k=offSec>0?offSec:(t/1000),W=512,H=216;sg.setTransform(2,0,0,2,0,0);const gr=sg.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#1b2a5a');gr.addColorStop(.6,'#ff9a4a');gr.addColorStop(1,'#ffd28a');sg.fillStyle=gr;sg.fillRect(0,0,W,H);
-sg.fillStyle='#ffe9a8';sg.beginPath();sg.arc(380,95,26,0,7);sg.fill();
-[[.15,'#3b2a4a',120,60],[.4,'#2a1c33',140,45]].forEach(([s,c,b,a],i)=>{sg.fillStyle=c;sg.beginPath();sg.moveTo(0,H);for(let x=0;x<=W;x+=16)sg.lineTo(x,b+Math.sin((x+k*s*200)/40+i)*a*.5+Math.sin((x+k*s*200)/17)*8);sg.lineTo(W,H);sg.fill()});
-sg.fillStyle='#14101a';sg.fillRect(0,170,W,46);sg.fillStyle='#ffd34d';for(let x=-((k*160)%60);x<W;x+=60)sg.fillRect(x,192,30,4);
-const rx=150+Math.sin(k*.6)*60,ph=k*10;sg.fillStyle='#000';sg.beginPath();sg.arc(rx,128,9,0,7);sg.fill();sg.fillRect(rx-6,137,12,22);[1,-1].forEach(d=>{sg.save();sg.translate(rx,158);sg.rotate(Math.sin(ph)*.6*d);sg.fillRect(-3,0,6,18);sg.restore()});
-sg.fillStyle='#000';sg.fillRect(0,0,W,22);sg.fillRect(0,H-22,W,22);
-const subs=['Inga vaa da!','Nee yaaru?','Naan thaan Vel.','Nillu!','Ennai pidikka mudiyaadhu.'];sg.fillStyle='#fff';sg.font='bold 15px sans-serif';sg.textAlign='center';sg.fillText(subs[Math.floor(k/3)%subs.length],W/2,H-6);
-if(k%40<4){sg.fillStyle='#000c';sg.fillRect(0,0,W,H);sg.fillStyle='#ffd34d';sg.font='bold 34px sans-serif';sg.fillText(curMovie.toUpperCase(),W/2,H/2)}
-sg.fillStyle='#fff8';sg.font='10px sans-serif';sg.textAlign='right';sg.fillText('CHEYYAR I-MAX · SCREEN 1',W-8,14);
-stx.needsUpdate=true}
-function paintScreen_old(t){const k=t/1000;const gr=sg.createLinearGradient(0,0,512,216);gr.addColorStop(0,`hsl(${(k*20)%360},70%,35%)`);gr.addColorStop(1,`hsl(${(k*20+120)%360},70%,15%)`);sg.fillStyle=gr;sg.fillRect(0,0,512,216);sg.fillStyle='#fff3';sg.beginPath();sg.arc(256+Math.sin(k)*150,108+Math.cos(k*1.3)*50,40,0,7);sg.fill();sg.fillStyle='#fff';sg.font='bold 28px sans-serif';sg.textAlign='center';sg.fillText(curMovie.toUpperCase(),256,110);sg.font='14px sans-serif';sg.fillText('▶ NOW PLAYING · CHEYYAR I-MAX SCREEN 1',256,190);stx.needsUpdate=true}
-
+function paintScreen(t){
+ if(window.__paintedClean)return;
+ window.__paintedClean=true;
+ sg.setTransform(1,0,0,1,0,0);
+ sg.fillStyle='#040407';
+ sg.fillRect(0,0,1024,432);
+ stx.needsUpdate=true;
+}
 /* ---------- STATE / ZONES ---------- */
 let zone='out',yaw=0,pitch=0,seated=false,curMovie=NOW[0];
 let myName='Player',myGender='male',myOutfit=0,started=false,Gs=0;
@@ -4528,6 +4524,7 @@ function build(){
   }catch(e){console.warn('[theatre] VideoTexture init:',e);}
  }
 
+ setTimeout(()=>{if(!wrap)build();},800);
  if(ITEMS.some(i=>i.t=='yt')){
   if(window.YT&&YT.Player)makePlayer();else{window.onYouTubeIframeAPIReady=makePlayer;const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';document.head.appendChild(sc)}
  }else ready=true;
@@ -4550,7 +4547,7 @@ function quad(p){ // unit square -> quad homography
  if(Math.abs(dx3)<1e-6&&Math.abs(dy3)<1e-6){a=x1-x0;b=y1-y0;c=x3-x0;d=y3-y0}
  else{const den=dx1*dy2-dx2*dy1;g=(dx3*dy2-dx2*dy3)/den;h=(dx1*dy3-dx3*dy1)/den;a=x1-x0+g*x1;b=y1-y0+g*y1;c=x3-x0+h*x3;d=y3-y0+h*y3}
  return 'matrix3d('+[a/VW,b/VW,0,g/VW,c/VH,d/VH,0,h/VH,0,0,1,0,x0,y0,0,1].join(',')+')'}
-const setHole=b=>{const it=ITEMS[idx];const isPlaying=(it&&it.t=='v')||(ready&&yt&&typeof yt.getPlayerState==='function'&&yt.getPlayerState()===1);const showHole=b&&isPlaying;scr.visible=showHole;const f=AU.getObjectByName('csFB');if(f)f.visible=!showHole;};
+const setHole=b=>{scr.visible=b;const f=AU.getObjectByName('csFB');if(f)f.visible=!b;};
 window.vidTick=function(){
  if(zone!='aud'){
   if(vbB.style.display!=='none')vbB.style.display='none';
