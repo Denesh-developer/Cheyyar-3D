@@ -778,31 +778,111 @@ function hallCount(){
 const rows='ABCDEFGHIJKL';
 for(let r=0;r<12;r++)for(let c=1;c<=20;c++){const id=rows[r]+c,x=c<=4?-12.2+(c-1)*1.15:c<=16?-6.33+(c-5)*1.15:8.75+(c-17)*1.15,z=-632+r*2.1,y=r*.35;
  const _n0=AU.children.length;box(.6,.4,.6,0x101014,x,y+.2,z+.1,AU);const s=box(.92,.34,.98,0x3a0812,x,y+.58,z,AU);const bk=box(.92,1.0,.28,0x28060c,x,y+1.2,z+.5,AU);bk.rotation.x=-.14;const hr=box(.62,.3,.2,0x440a16,x,y+1.85,z+.6,AU);hr.rotation.x=-.14;[-.55,.55].forEach(d=>{box(.1,.3,.95,0x18181c,x+d,y+.92,z,AU);box(.12,.03,.95,0x6a4e22,x+d,y+1.08,z,AU)});const ch=cyl(.07,.06,.1,10,0x111111,x+.55,y+1.13,z-.15,AU);SEATDET.push(ch);seats[id]={m:s,bk,hr,x,y,z};if(CROWD&&Math.random()<.12){taken.add(id);colorSeat(id,'taken');sitP(person(x,z+.05,[0x3498db,0xe67e22,0x9b59b6,0x1abc9c][r%4],0,AU,y))}}
-function restoreLocalTicketsAndSeats(){
+window.getAllMyTickets=function(){
+  let tkts={};
+  try{tkts=JSON.parse(localStorage.getItem('cyr3d_mytickets')||'{}')||{}}catch(e){}
   try{
-    const occ=JSON.parse(localStorage.getItem('cyr3d_occupied_seats')||'{}');
-    Object.keys(occ).forEach(sid=>{
-      if(seats[sid]){
-        taken.add(sid);
-        if(!RS.has(sid))RS.set(sid,occ[sid]);
-        colorSeat(sid,'taken');
-      }
-    });
     const raw=localStorage.getItem('cyr3d_myticket');
     if(raw){
       const t=JSON.parse(raw);
-      if(t&&Array.isArray(t.seats)&&t.seats.length){
-        window.myTicket=t;
-        window.lastTicket=t;
-        t.seats.forEach(sid=>{
-          if(seats[sid]){
-            mine.add(sid);
-            taken.delete(sid);
-            colorSeat(sid,'mine');
-          }
-        });
+      if(t&&t.showTime&&!tkts[t.showTime]){
+        tkts[t.showTime]=t;
+        localStorage.setItem('cyr3d_mytickets',JSON.stringify(tkts));
       }
     }
+  }catch(e){}
+  return tkts;
+};
+window.getMyTicketForShow=function(st){if(!st)return null;const tkts=window.getAllMyTickets();return tkts[st]||null};
+window.saveMyTicketForShow=function(st,tObj){
+  const tkts=window.getAllMyTickets();tkts[st]=tObj;
+  try{
+    localStorage.setItem('cyr3d_mytickets',JSON.stringify(tkts));
+    window.myTicket=tObj;window.lastTicket=tObj;
+    localStorage.setItem('cyr3d_myticket',JSON.stringify(tObj));
+  }catch(e){}
+  window.updateTicketPill&&window.updateTicketPill();
+};
+window.getOccupiedSeatsForShow=function(st){
+  if(!st)return {};
+  try{
+    const all=JSON.parse(localStorage.getItem('cyr3d_occupied_seats_by_show')||'{}');
+    if(!all[st]){
+      const sSeats={},hash=st.split('').reduce((a,c)=>a+c.charCodeAt(0),0),RL='ABCDEFGHIJKL';
+      for(let r=0;r<12;r++)for(let c=1;c<=20;c++){
+        const sid=RL[r]+c;
+        if(((r*23+c*17+hash)%19)===0)sSeats[sid]={u:'system',n:'Guest',showTime:st,t:Date.now()};
+      }
+      all[st]=sSeats;localStorage.setItem('cyr3d_occupied_seats_by_show',JSON.stringify(all));
+    }
+    return all[st]||{};
+  }catch(e){return {};}
+};
+window.saveOccupiedSeatForShow=function(st,sid,d){
+  try{
+    const all=JSON.parse(localStorage.getItem('cyr3d_occupied_seats_by_show')||'{}');
+    if(!all[st])all[st]={};all[st][sid]=d;
+    localStorage.setItem('cyr3d_occupied_seats_by_show',JSON.stringify(all));
+  }catch(e){}
+};
+window.colorAllSeatsForShow=function(st){
+  if(!st)return;
+  const myTkt=window.getMyTicketForShow(st);
+  const mySeats=new Set((myTkt&&myTkt.seats)||[]);
+  const occ=window.getOccupiedSeatsForShow(st);
+  const takenSeats=new Set(Object.keys(occ));
+  if(window.CY_SHOW_SEATS&&window.CY_SHOW_SEATS[st]){
+    Object.keys(window.CY_SHOW_SEATS[st]).forEach(sid=>{
+      const d=window.CY_SHOW_SEATS[st][sid];
+      if(d&&(typeof uid!=='undefined'&&d.u===uid))mySeats.add(sid);
+      else takenSeats.add(sid);
+    });
+  }
+  mine.clear();mySeats.forEach(sid=>mine.add(sid));
+  taken.clear();takenSeats.forEach(sid=>{if(!mine.has(sid))taken.add(sid)});
+  const RL='ABCDEFGHIJKL';
+  for(let r=0;r<12;r++)for(let c=1;c<=20;c++){
+    const id=RL[r]+c;
+    if(mine.has(id))colorSeat(id,'mine');
+    else if(taken.has(id))colorSeat(id,'taken');
+    else colorSeat(id,'free');
+  }
+};
+window.updateTicketPill=function(){
+  const tkts=Object.values(window.getAllMyTickets());
+  const pill=$('tktPill'),tktSpan=$('tkt');
+  if(!pill||!tktSpan)return;
+  if(!tkts.length){pill.style.display='none';return}
+  pill.style.display='block';
+  tktSpan.textContent=tkts.map(t=>t.seats.join(',')+' ('+t.showTime+')').join(' · ');
+  pill.title='Click to view all booked tickets';
+  pill.onclick=window.showAllTicketsModal;
+};
+window.showAllTicketsModal=function(){
+  const tkts=Object.values(window.getAllMyTickets());
+  if(!tkts.length){toast('🎟 உங்களிடம் எந்த டிக்கெட்டும் இல்லை — கவுண்டரில் டிக்கெட் எடுக்கவும்',3000);return}
+  const curState=typeof getTheaterScheduleState==='function'?getTheaterScheduleState():null;
+  const list=tkts.map(t=>{
+    const isLive=curState&&curState.activeShow&&curState.activeShow.time===t.showTime;
+    return '<div style="background:#1e1418;border:1px solid #4a2830;border-radius:10px;padding:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;">'
+      +'<div><b style="font-size:16px;color:#ffd34d">'+t.showTime+(isLive?' 🟢 Now Playing':'')+'</b>'
+      +'<div style="color:#aaa;font-size:13px;margin-top:3px">'+t.movie+' · Screen 1</div>'
+      +'<div style="color:#7dffa0;font-size:14px;margin-top:4px">Seat: <b>'+t.seats.join(', ')+'</b> · Ticket: <b style="letter-spacing:1px">'+t.code+'</b></div>'
+      +'</div><div style="text-align:right"><span style="background:#186832;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700">CONFIRMED</span></div></div>';
+  }).join('');
+  modal('<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #44222a;padding-bottom:10px;margin-bottom:12px">'
+    +'<h2 style="margin:0;font-size:20px;color:#fff">🎟️ உங்கள் திரைப்பட டிக்கெட்டுகள் (Your Booked Tickets)</h2>'
+    +'<button class="bk-x" onclick="closeModal()" aria-label="Close">✕</button></div>'
+    +'<div style="max-height:360px;overflow-y:auto">'+list+'</div>'
+    +'<p style="color:#aaa;font-size:12px;margin-top:12px">குறிப்பு: காட்சி தொடங்கும் போது திரையரங்கு கதவு திறக்கப்படும். அந்த காட்சிக்குரிய டிக்கெட் இருந்தால் மட்டுமே உள்ளே செல்ல முடியும்.</p>'
+    +'<button class="btn" onclick="closeModal()" style="margin-top:10px;width:100%">OK</button>');
+};
+function restoreLocalTicketsAndSeats(){
+  try{
+    const st=typeof getTheaterScheduleState==='function'?getTheaterScheduleState():null;
+    const curShow=st&&(st.activeShow?st.activeShow.time:(st.nextShow?st.nextShow.time:'10:30 AM'))||'10:30 AM';
+    colorAllSeatsForShow(curShow);
+    updateTicketPill();
   }catch(e){console.warn('Seat restore err:',e)}
 }
 setTimeout(restoreLocalTicketsAndSeats,50);
@@ -1163,12 +1243,6 @@ function modal(h){$('box').style.maxWidth='';$('box').innerHTML=h;$('modal').sty
 let bkTimer=null,ticketPending=false,lastTicket=null;
 function closeModal(){clearInterval(bkTimer);$('modal').style.display='none';if(ticketPending){ticketPending=false;afterTicket()}}
 function booking(){
- if(mine.size>=1){
-  const userTicket=window.myTicket||lastTicket||JSON.parse(localStorage.getItem('cyr3d_myticket')||'null');
-  const stName=userTicket?userTicket.showTime:'this';
-  toast('🎟️ You already booked a ticket for '+stName+' show! (ஒருவருக்கு 1 டிக்கெட் மட்டுமே அனுமதிக்கப்படும்)',4500);
-  return;
- }
  if(pts<30&&(window.CY_GUEST||(typeof guest!=='undefined'&&guest))){
   pts+=100;walletShow();
   toast('🎁 Guest Bonus: +100 points credited! Choose your seat 🎬',3500);
@@ -1183,21 +1257,25 @@ function booking(){
  const schedInit=getTheaterScheduleState();
  const firstAvail=schedInit.availableShows[0];
  let mi=0,tm=firstAvail?firstAvail.time:SHOWS[0];const sel=new Set();
- const head=()=>{const n=NOW[mi],m=MV[n]||['Drama','Tamil','Now showing'];
+ const head=()=>{
+  const n=NOW[mi],m=MV[n]||['Drama','Tamil','Now showing'];
+  const curState=getTheaterScheduleState();
+  const myTktThis=getMyTicketForShow(tm);
   $('bkHead').innerHTML='<div class="bk-top"><img src="'+poster(n,mi)+'"><div class="bk-ti"><h2>'+n+'</h2><div class="g">'+m[0]+'</div><small>'+m[1]+'<br>'+m[2]+'</small></div><button class="bk-x" onclick="closeModal()" aria-label="Close">✕</button></div>'
   +'<div class="bk-ch">'+NOW.map((x,i)=>'<button class="'+(i==mi?'on':'')+'" onclick="bkSet(0,'+i+')">'+x+'</button>').join('')+'</div>'
   +'<div class="bk-ch">'+THEATER_SHOWS.map(s=>{
     const curState=getTheaterScheduleState();
     const isPast=(s.id==='s4')?(curState.curMin>=(s.endMin-1440)&&curState.curMin<s.startMin):(curState.curMin>=s.endMin);
     const isSelected=s.time===tm;
+    const hasT=getMyTicketForShow(s.time);
+    const tIcon=hasT?' 🎟️':'';
     if(isPast){
-     return '<button class="bk-time-off" disabled style="opacity:0.35;cursor:not-allowed;text-decoration:line-through;background:#2a1818;border-color:#553333;color:#999" title="Show Finished / Closed">'+s.time+' (Closed)</button>';
+     return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')" style="opacity:0.85;border-style:dashed" title="Next Day Show Booking">'+s.time+' (Next Day)'+tIcon+'</button>';
     }
     const isLive=(s.id==='s4')?(curState.curMin>=s.startMin||curState.curMin<(s.endMin-1440)):(curState.curMin>=s.startMin&&curState.curMin<s.endMin);
-    return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')">'+s.time+(isLive?' 🟢':'')+'</button>';
+    return '<button class="'+(isSelected?'on':'')+'" onclick="bkSet(1,\''+s.time+'\')">'+s.time+(isLive?' 🟢':'')+tIcon+'</button>';
    }).join('')+'</div>'
    +(function(){
-    const curState=getTheaterScheduleState();
     const curS=THEATER_SHOWS.find(x=>x.time===tm)||THEATER_SHOWS[0];
     const isCurLive=(curS.id==='s4')?(curState.curMin>=curS.startMin||curState.curMin<(curS.endMin-1440)):(curState.curMin>=curS.startMin&&curState.curMin<curS.endMin);
     const isCurEnded=(curS.id==='s4')?(curState.curMin>=(curS.endMin-1440)&&curState.curMin<curS.startMin):(curState.curMin>=curS.endMin);
@@ -1212,34 +1290,123 @@ function booking(){
      const durEn=h>0?(h+(m?'.'+String(m).padStart(2,'0'):'')+' hours'):(m+' mins');
      timeInfo=' · <span style="color:#ffd34d">Starts in '+durEn+' ('+durTa+'ல் தொடங்கும்)</span>';
     } else {
-     timeInfo=' · <span style="color:#ff7777">காட்சி முடிந்தது (Closed)</span>';
+     timeInfo=' · <span style="color:#80d8ff">நாளைக்கான முன்பதிவு (Advance Booking)</span>';
     }
-    return '<div class="bk-in">🎬 Show <b>'+tm+'</b>'+timeInfo+' · 👥 '+hallCount()+' in the hall</div>';
+    let tktBanner = '';
+    const myTktThis=getMyTicketForShow(tm);
+    if(myTktThis){
+     tktBanner = '<div style="background:#13331c;border:1px solid #2e7d32;color:#a5d6a7;padding:6px 12px;border-radius:8px;margin-top:6px;font-size:13px">🎟️ இந்த <b>'+tm+'</b> காட்சிக்கு உங்களிடம் டிக்கெட் உள்ளது: <b>Seat '+myTktThis.seats.join(', ')+'</b> (Ticket: <b>'+myTktThis.code+'</b>)</div>';
+    }
+    return '<div class="bk-in">🎬 Show <b>'+tm+'</b>'+timeInfo+' · 👥 '+hallCount()+' in the hall</div>' + tktBanner;
    })()};
- window.bkSet=(k,v)=>{if(k)tm=v;else mi=v;head()};
- let g='';for(let r=11;r>=0;r--){g+='<div class="bk-r"><b>'+RL[r]+'</b>';for(let c=1;c<=20;c++){const id=RL[r]+c,isM=mine.has(id),isT=taken.has(id),cl=isM?'m':isT?'t':'';const hld=isM?'Your seat':isT?((RS.get(id)&&RS.get(id).n)?('Booked by '+RS.get(id).n):'Booked'):(price(id)+' pts');g+=(c==5||c==17?'<i></i>':'')+'<button data-id="'+id+'" class="'+cl+'"'+(cl?' disabled':'')+' title="'+id+' · '+hld+'"></button>'}g+='<b>'+RL[r]+'</b></div>'}
+ window.bkSet=(k,v)=>{
+   if(k){ tm=v; sel.clear(); }
+   else mi=v;
+   head();
+   window.bkRefresh&&window.bkRefresh();
+ };
+ let g='';for(let r=11;r>=0;r--){g+='<div class="bk-r"><b>'+RL[r]+'</b>';for(let c=1;c<=20;c++){const id=RL[r]+c;g+=(c==5||c==17?'<i></i>':'')+'<button data-id="'+id+'" class="" title="'+id+'"></button>'}g+='<b>'+RL[r]+'</b></div>'}
  modal('<style>.bk-top{display:flex;gap:14px;align-items:flex-start}.bk-top img{width:92px;height:128px;border-radius:8px;flex:none}.bk-ti h2{margin:0;font-size:24px;color:#fff}.bk-ti .g{color:var(--ac);font-weight:700;margin:2px 0 4px}.bk-ti small{opacity:.75;line-height:1.5}.bk-x{margin-left:auto;background:#fff2;color:#fff;border:0;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;flex:none}.bk-ch{display:flex;gap:6px;overflow-x:auto;padding:8px 0 0}.bk-ch button{white-space:nowrap;border:1px solid #fff3;background:#fff1;color:#fff;border-radius:18px;padding:6px 12px;cursor:pointer;font-weight:600}.bk-ch button.on{background:var(--ac);color:#000;border-color:var(--ac)}.bk-in{color:#7dffa0;margin:10px 0 2px;font-size:13px}.bk-h{font-weight:800;color:var(--ac);margin:12px 0 6px}.bk-map{background:#1a0d0d;border-radius:12px;padding:12px 8px;overflow-x:auto}.bk-r{display:flex;align-items:center;justify-content:center;gap:3px;margin:3px 0;min-width:max-content}.bk-r b{width:14px;font-size:10px;text-align:center;opacity:.8}.bk-r i{width:16px}.bk-r button{width:22px;height:22px;border:0;border-radius:5px;background:#a52a2a;cursor:pointer;padding:0}.bk-r button:hover:not(:disabled){filter:brightness(1.3)}.bk-r button.s{background:#ffc94d}.bk-r button.t{background:#4a4a4a;cursor:not-allowed}.bk-r button.m{background:#22cc66;cursor:not-allowed}.bk-scr{height:16px;border-top:3px solid #b9c3e8;border-radius:50% 50% 0 0/100% 100% 0 0;margin:10px 40px 0;text-align:center;font-size:10px;letter-spacing:4px;padding-top:6px;opacity:.9}.bk-lg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;margin-top:10px;opacity:.9}.bk-lg span:before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}.bk-f{position:sticky;bottom:-16px;margin:12px -16px -16px;padding:12px 16px;background:var(--pn);border-top:1px solid #fff2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bk-f .tt{flex:1;min-width:140px;font-size:13px}</style><div id="bkHead"></div><div class="bk-h">Pick your seat</div><div class="bk-map"><div id="sg">'+g+'</div><div class="bk-scr">SCREEN</div></div>'
   +'<div class="bk-lg"><span style="--c:#a52a2a">Available</span><span style="--c:#ffc94d">Selected</span><span style="--c:#4a4a4a">Booked</span><span style="--c:#22cc66">Your seats</span><span style="opacity:.7">Every ticket = 30 points</span></div>'
   +'<div class="bk-f"><div class="tt" id="bkSum">Tap seats to select</div><button class="btn g" onclick="closeModal()">Cancel</button><button class="btn" id="cf">Confirm &amp; Pay</button></div>');
  $('box').style.maxWidth='780px';head();
  bkTimer=setInterval(()=>{const e=$('bkCd');if(!e){clearInterval(bkTimer);return}e.textContent=fmt(showDate(tm)-new Date())},1000);
- const upd=()=>{const a=[...sel],t=a.reduce((x,i)=>x+price(i),0);$('bkSum').innerHTML=a.length?'<b>'+a.join(', ')+'</b><br>'+a.length+' seat(s) = '+t+' pts':'Tap seats to select'};
- $('sg').onclick=e=>{const b=e.target.closest('button[data-id]');if(!b||b.disabled)return;const id=b.dataset.id;if(sel.has(id)){sel.delete(id);b.className='';}else{if(sel.size>=1){toast('⚠️ Only 1 ticket allowed per user! (ஒருவருக்கு 1 டிக்கெட் மட்டுமே எடுக்க முடியும்)',2500);return}sel.add(id);b.className='s'}upd()};
- $('cf').onclick=()=>{if(!sel.size)return toast('Choose a seat first');const n=NOW[mi],a=[...sel],t=a.reduce((x,i)=>x+price(i),0);if(!spend(t,'Ticket'))return;clearInterval(bkTimer);curMovie=n;a.forEach(i=>{mine.add(i);colorSeat(i,'mine')});$('task').textContent='Go to the Screen 1 door & show your ticket';ticketPending=true;const code='CYR'+Math.floor(Math.random()*90000+10000);lastTicket={seats:a,movie:n,showTime:tm,code,date:new Date().toDateString(),ts:Date.now()};window.myTicket=lastTicket;try{localStorage.setItem('cyr3d_myticket',JSON.stringify(lastTicket));const occ=JSON.parse(localStorage.getItem('cyr3d_occupied_seats')||'{}');a.forEach(sid=>{occ[sid]={u:typeof uid!=='undefined'?uid:'local',n:typeof myName!=='undefined'?myName:'Player',showTime:tm,code,t:Date.now()}});localStorage.setItem('cyr3d_occupied_seats',JSON.stringify(occ))}catch(e){}
-  modal('<div class="bk-top"><img src="'+poster(n,mi)+'" style="width:80px;height:112px;border-radius:8px"><div class="bk-ti"><h2 style="font-size:20px">✅ You bought a ticket!</h2><div class="g">'+n+'</div><small>'+tm+' · Screen 1<br>Seats: <b>'+a.join(', ')+'</b><br>Paid: '+t+' pts<br>Ticket: <b>'+code+'</b></small></div></div><p style="opacity:.8">Screen 1 door-kitta poi ticket kaattunga — usher ulla anuppuvaar.</p><button class="btn" onclick="closeModal()">✔ OK</button>')};
- window.bkRefresh=()=>{const sg=$('sg');if(!sg||!$('bkHead'))return;sg.querySelectorAll('button[data-id]').forEach(b=>{const id=b.dataset.id;if(mine.has(id)){b.className='m';b.disabled=true;b.title=id+' · Your seat';return}if(taken.has(id)){b.className='t';b.disabled=true;sel.delete(id);const hld=(RS.get(id)&&RS.get(id).n)?('Booked by '+RS.get(id).n):'Booked';b.title=id+' · '+hld}else if(b.className==='t'){b.className='';b.disabled=false;b.title=id+' · '+price(id)+' pts'}});upd();head()};
- {const _cf=$('cf').onclick;let busy=false;$('cf').onclick=async()=>{
+ const upd=()=>{
+   const myTkt=getMyTicketForShow(tm);
+   const cf=$('cf');
+   if(myTkt){
+     $('bkSum').innerHTML='<span style="color:#7dffa0">✔ Booked for this show: <b>Seat '+myTkt.seats.join(', ')+'</b></span><br><small style="opacity:0.8">Ticket: '+myTkt.code+' · Screen 1</small>';
+     if(cf){cf.disabled=true;cf.textContent='Already Booked ✔';cf.style.opacity='0.6';cf.style.cursor='default';}
+     return;
+   }
+   const a=[...sel],t=a.reduce((x,i)=>x+price(i),0);
+   if(cf){
+     cf.disabled=!sel.size;
+     cf.textContent='Confirm & Pay';
+     cf.style.opacity=sel.size?'1':'0.5';
+     cf.style.cursor=sel.size?'pointer':'not-allowed';
+   }
+   $('bkSum').innerHTML=a.length?'<b>Seat '+a.join(', ')+'</b><br>'+a.length+' seat = '+t+' pts':'Tap a seat to select for '+tm+' show (30 pts)';
+ };
+ window.bkRefresh=()=>{
+   const sg=$('sg');
+   if(!sg)return;
+   const myTkt=getMyTicketForShow(tm);
+   const mySeatsForThis=new Set((myTkt&&myTkt.seats)||[]);
+   const occForThis=getOccupiedSeatsForShow(tm);
+   sg.querySelectorAll('button[data-id]').forEach(b=>{
+     const id=b.dataset.id;
+     if(mySeatsForThis.has(id)){
+       b.className='m';b.disabled=true;b.title=id+' · Your seat for this show ('+myTkt.code+')';
+     }else if(occForThis[id]){
+       b.className='t';b.disabled=true;sel.delete(id);
+       const hld=occForThis[id].n?('Booked by '+occForThis[id].n):'Booked';
+       b.title=id+' · '+hld;
+     }else if(sel.has(id)){
+       b.className='s';b.disabled=false;b.title=id+' · Selected';
+     }else{
+       b.className='';b.disabled=false;b.title=id+' · '+price(id)+' pts';
+     }
+   });
+   upd();
+ };
+ window.bkRefresh();
+ $('sg').onclick=e=>{
+   const b=e.target.closest('button[data-id]');
+   if(!b||b.disabled)return;
+   const myTkt=getMyTicketForShow(tm);
+   if(myTkt){
+     toast('🎟️ You already booked seat '+myTkt.seats.join(', ')+' for this '+tm+' show! (இந்த காட்சிக்கு ஏற்கனவே டிக்கெட் வாங்கியுள்ளீர்கள்)',3500);
+     return;
+   }
+   const id=b.dataset.id;
+   if(sel.has(id)){
+     sel.delete(id);b.className='';
+   }else{
+     sel.forEach(oldId=>{
+       const oldBtn=$('sg').querySelector('button[data-id="'+oldId+'"]');
+       if(oldBtn&&oldBtn.className==='s')oldBtn.className='';
+     });
+     sel.clear();
+     sel.add(id);b.className='s';
+   }
+   upd();
+ };
+ const doConfirm=async()=>{
+   if(!sel.size)return toast('Choose a seat first');
+   const myTkt=getMyTicketForShow(tm);
+   if(myTkt){toast('You already booked this show!',3000);return}
+   const n=NOW[mi],a=[...sel],t=a.reduce((x,i)=>x+price(i),0);
+   if(!spend(t,'Ticket '+tm))return;
+   clearInterval(bkTimer);curMovie=n;
+   const code='CYR'+Math.floor(Math.random()*90000+10000);
+   const newTkt={seats:a,movie:n,showTime:tm,code,date:new Date().toDateString(),ts:Date.now()};
+   saveMyTicketForShow(tm,newTkt);
+   saveOccupiedSeatForShow(tm,a[0],{u:typeof uid!=='undefined'?uid:'local',n:typeof myName!=='undefined'?myName:'Player',showTime:tm,code,t:Date.now()});
+   if(window.CY_SEATCLAIM){
+     try{await CY_SEATCLAIM(a,tm)}catch(e){}
+   }
+   const curSt=getTheaterScheduleState();
+   if(curSt.activeShow&&curSt.activeShow.time===tm){
+     colorAllSeatsForShow(tm);
+   }
+   $('task').textContent='Go to the Screen 1 door & show your ticket';
+   ticketPending=true;
+   modal('<div class="bk-top"><img src="'+poster(n,mi)+'" style="width:80px;height:112px;border-radius:8px"><div class="bk-ti"><h2 style="font-size:20px">✅ Ticket Booked for '+tm+' Show!</h2><div class="g">'+n+'</div><small>Show Time: <b>'+tm+'</b> · Screen 1<br>Seat: <b>'+a.join(', ')+'</b><br>Paid: '+t+' pts<br>Ticket: <b>'+code+'</b></small></div></div><p style="opacity:.85;margin-top:10px">இந்த '+tm+' காட்சி தொடங்கும் போது Screen 1 கதவுக்குச் செல்லவும். மற்ற காட்சிகளுக்கும் டிக்கெட் தேவைப்பட்டால் கவுண்டரில் டிக்கெட் எடுக்கலாம்!</p><button class="btn" onclick="closeModal()">✔ OK</button>');
+ };
+ let busy=false;
+ $('cf').onclick=async()=>{
   if(busy)return;if(!sel.size)return toast('Choose a seat first');
-  const a=[...sel];if(pts<a.length*price(a[0])){_cf();return}
+  const a=[...sel];if(pts<a.length*price(a[0])){doConfirm();return}
   busy=true;let r={ok:true,bad:[]};
   if(window.CY_SEATCLAIM){
-    try{r=await CY_SEATCLAIM(a)}catch(e){r={ok:false,bad:a,err:'error'}}
+    try{r=await CY_SEATCLAIM(a,tm)}catch(e){r={ok:false,bad:a,err:'error'}}
    }
    busy=false;
   if(!r.ok){r.bad.forEach(i=>sel.delete(i));window.bkRefresh&&bkRefresh();
    toast(r.err&&r.err!=='guest'?'⚠ Seat book aagala ('+r.err+') — database.rules.json publish pannunga':'❌ Seat '+r.bad.join(', ')+' vera oruthar already book pannitaanga — vera seat select pannunga',5000);return}
-  _cf();
-  if(!a.some(i=>mine.has(i))&&window.CY_SEATREL)CY_SEATREL(a)}}
+  doConfirm();
+  if(!a.some(i=>mine.has(i))&&window.CY_SEATREL)CY_SEATREL(a)};
 }
 function snacks(){
  const MENU={
@@ -1266,25 +1433,37 @@ function snacks(){
 }
 let curSeat=null;
 function enterScreen(){
- if(!mine.size){toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket!"',4000);return}
  const st=window.getTheaterScheduleState?window.getTheaterScheduleState():{isDoorUnlocked:true};
- if(!st.isDoorUnlocked){
+ const admittingShow=st.activeShow?st.activeShow.time:(st.diffMin<=15&&st.nextShow?st.nextShow.time:null);
+ 
+ if(!st.isDoorUnlocked||!admittingShow){
   try{sTone(120,80,.22,.28,'sawtooth');sNoise(.08,.2,180)}catch(e){}
   toast('🔒 திரையரங்கு கதவு பூட்டப்பட்டுள்ளது! அடுத்த காட்சி '+st.nextShow.time+' மணிக்கு தொடங்கும் ('+st.countdownTa+'ல் தொடங்கும் / Next show in '+st.countdownEn+')',5000);
   return;
  }
- const userTicket=window.myTicket||lastTicket||JSON.parse(localStorage.getItem('cyr3d_myticket')||'null');
- const allowedShow=userTicket&&userTicket.showTime;
- const runningShow=st.activeShow?st.activeShow.time:(st.diffMin<=15&&st.nextShow?st.nextShow.time:null);
- if(allowedShow&&runningShow&&allowedShow!==runningShow){
+
+ const myTkt=getMyTicketForShow(admittingShow);
+ if(!myTkt){
   try{sTone(140,90,.25,.25,'sawtooth')}catch(e){}
-  toast('🎟️ You bought ticket for '+allowedShow+' show. Not able to watch '+runningShow+' show! (உங்களின் டிக்கெட் '+allowedShow+' காட்சிக்குரியது — '+runningShow+' காட்சிக்குள் நுழைய முடியாது!)',6000);
+  const allTkts=Object.values(getAllMyTickets());
+  if(allTkts.length>0){
+   const otherShows=allTkts.map(t=>t.showTime).join(', ');
+   toast('🎟️ உங்களின் டிக்கெட் '+otherShows+' காட்சிக்குரியது — இப்போது ஓடும் '+admittingShow+' காட்சிக்குள் நுழைய முடியாது! தயவுசெய்து கவுண்டரில் '+admittingShow+' டிக்கெட் வாங்கவும்.',6500);
+  }else{
+   toast('🎟 Usher: "Ticket illa — Go to the box counter and buy a ticket for '+admittingShow+' show!"',4500);
+  }
   return;
  }
- goto('aud');usherGuide([...mine][0]);
+
+ curSeatId=myTkt.seats[0];
+ window.myTicket=myTkt;
+ window.lastTicket=myTkt;
+ colorAllSeatsForShow(admittingShow);
+
+ goto('aud');usherGuide(curSeatId);
  if(st.activeShow){
   const elMin=Math.floor((typeof getShowPlaybackOffset==='function'?getShowPlaybackOffset():0)/60);
-  toast('🎬 Leo (Screen 1) · '+st.activeShow.time+' காட்சி ('+elMin+'-வது நிமிடம் இயங்குகிறது / Playing at '+elMin+' mins)',5000);
+  toast('🎬 Leo (Screen 1) · '+admittingShow+' காட்சி ('+elMin+'-வது நிமிடம் இயங்குகிறது / Playing at '+elMin+' mins)',5000);
  }
 }
 async function usherGuide(id){if(lock)return;const st=seats[id];if(!st){sit();return}lock=true;moving=0;pose={};const ax=st.x<0?-7.5:7.5,fz=st.z-1.05;
@@ -1583,7 +1762,7 @@ function enterQueue(){_eq()}
 function afterTicket(){
  const s=lastTicket?lastTicket.seats.join(', '):'';
  toast('🎟 You bought a ticket!  Seat '+s+' · Screen 1 door-ku nadakkureenga…',3500);
- $('tkt').textContent=s+(lastTicket?' · '+lastTicket.movie:'');$('tktPill').style.display='block';
+ updateTicketPill();$('tkt').textContent=s+(lastTicket?' · '+lastTicket.movie:'');$('tktPill').style.display='block';
  rr(async()=>{if(zone!='lobby')return;if(P.x>-9.4&&P.x<-3&&P.z>-399&&P.z<-393.6){const lz=P.z<-396.3?-398:-394.6;await walkTo(P.x,lz,2.2);await walkTo(-2.8,lz,2.6)}await walkTo(0,-414.5,3);await face(0,400);toast('🎬 Screen 1 door kitta vandhuteenga — E press panni ulla ponga',4500)})();
 }
 
@@ -4352,7 +4531,7 @@ function quad(p){ // unit square -> quad homography
  if(Math.abs(dx3)<1e-6&&Math.abs(dy3)<1e-6){a=x1-x0;b=y1-y0;c=x3-x0;d=y3-y0}
  else{const den=dx1*dy2-dx2*dy1;g=(dx3*dy2-dx2*dy3)/den;h=(dx1*dy3-dx3*dy1)/den;a=x1-x0+g*x1;b=y1-y0+g*y1;c=x3-x0+h*x3;d=y3-y0+h*y3}
  return 'matrix3d('+[a/VW,b/VW,0,g/VW,c/VH,d/VH,0,h/VH,0,0,1,0,x0,y0,0,1].join(',')+')'}
-const setHole=b=>{scr.visible=b;const f=AU.getObjectByName('csFB');if(f)f.visible=!b};
+const setHole=b=>{const it=ITEMS[idx];const isPlaying=(it&&it.t=='v')||(ready&&yt&&typeof yt.getPlayerState==='function'&&yt.getPlayerState()===1);const showHole=b&&isPlaying;scr.visible=showHole;const f=AU.getObjectByName('csFB');if(f)f.visible=!showHole;};
 window.vidTick=function(){
  if(zone!='aud'){
   if(vbB.style.display!=='none')vbB.style.display='none';
@@ -4868,190 +5047,6 @@ function run(uid,guest){
  };
 
  console.info('[NAMMA CHEYYAR] Advanced systems (Radio, Weather, Camera, Temple, River) active.');
-})();
-</script>
-
-<script>
-/* ============================================================================
-   CHEYYAR 3D - ULTRA GRAPHICS & ZERO-LAG OPTIMIZER PATCH
-   ============================================================================ */
-(function(){
-  'use strict';
-  const R_ = window.R || (typeof R !== 'undefined' ? R : null);
-  const S_ = window.S || (typeof S !== 'undefined' ? S : null);
-  const C_ = window.C || (typeof C !== 'undefined' ? C : null);
-  if (!window.THREE || !R_ || !S_) return;
-
-  // 1. CINEMATIC RENDERER & COLOR GRADING (Zero FPS Cost)
-  R_.toneMapping = THREE.ACESFilmicToneMapping;
-  R_.toneMappingExposure = 1.12;
-  if ('outputEncoding' in R_) R_.outputEncoding = THREE.sRGBEncoding;
-  
-  // Smart Pixel Ratio Clamp (Prevents overheating & lag on high-DPI screens)
-  const clampPR = () => {
-    const isLow = (typeof gfx !== 'undefined' && gfx === 'low');
-    const maxPR = window.MOB ? (isLow ? 1.15 : 1.5) : (isLow ? 1.0 : 1.65);
-    R_.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
-  };
-  clampPR();
-  window.addEventListener('resize', clampPR);
-
-  // 2. PROCEDURAL HD TEXTURES (Generated in memory - 0 KB download, 0 Lag)
-  const maxAniso = Math.min(R_.capabilities.getMaxAnisotropy() || 1, 4);
-
-  function makeNoiseTex(w, h, baseHex, speck1, speck2, count, rx, ry) {
-    const c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    const g = c.getContext('2d');
-    g.fillStyle = baseHex;
-    g.fillRect(0, 0, w, h);
-    for (let i = 0; i < count; i++) {
-      g.fillStyle = (i % 2 === 0) ? speck1 : speck2;
-      const sz = 1 + (i % 3);
-      g.fillRect(Math.random() * w, Math.random() * h, sz, sz);
-    }
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(rx, ry);
-    tex.anisotropy = maxAniso;
-    return tex;
-  }
-
-  // Realistic Tar Road, Grass & Bus Stand Platform Textures
-  const roadTex = makeNoiseTex(128, 128, '#28292e', '#363840', '#1c1d21', 1400, 60, 4);
-  const grassTex = makeNoiseTex(128, 128, '#4e7a3a', '#5d8c47', '#3f662d', 1800, 75, 75);
-  const platTex  = makeNoiseTex(128, 128, '#8c8c8c', '#9e9e9e', '#757575', 1000, 16, 8);
-
-  // Apply textures to existing outdoor ground, roads, and platform
-  if (window.OUT) {
-    OUT.children.forEach(m => {
-      if (!m.isMesh || !m.geometry || m.geometry.type !== 'BoxGeometry') return;
-      const p = m.geometry.parameters;
-      const col = m.material && m.material.color ? m.material.color.getHex() : -1;
-      if (col === 0x6b9a52 && p.width >= 150) {
-        m.material = new THREE.MeshLambertMaterial({ map: grassTex });
-      } else if (col === 0x333338 && (p.width >= 150 || p.depth >= 50)) {
-        m.material = new THREE.MeshLambertMaterial({ map: roadTex });
-      } else if (col === 0x9a9a9a && p.width === 46) {
-        m.material = new THREE.MeshLambertMaterial({ map: platTex });
-      }
-    });
-  }
-
-  // 3. UPGRADE MATERIALS TO GLOSSY / METALLIC (Vehicles, Gold, Water, Glass)
-  const shinyCache = {};
-  function upgradeShinyMaterials(root) {
-    root.traverse(o => {
-      if (!o.isMesh || !o.material || Array.isArray(o.material)) return;
-      const mat = o.material;
-      if (mat.type !== 'MeshLambertMaterial' || mat.map) return;
-      const hex = mat.color ? mat.color.getHex() : -1;
-
-      // Gold Kalasam, Temple Borders & Brass Poles -> Real Metallic Gold Shine
-      if (hex === 0xc9a24a || hex === 0xffd54f || hex === 0xd4af37) {
-        const key = 'gold_' + hex;
-        o.material = shinyCache[key] || (shinyCache[key] = new THREE.MeshPhongMaterial({
-          color: hex, emissive: 0x2a1d05, specular: 0xfff0b3, shininess: 85
-        }));
-      }
-      // Glass Windows -> Reflective Gloss
-      else if (hex === 0x6fb8ff || hex === 0x1a2e3d || hex === 0x243e52) {
-        const key = 'glass_' + hex;
-        o.material = shinyCache[key] || (shinyCache[key] = new THREE.MeshPhongMaterial({
-          color: hex, specular: 0xffffff, shininess: 110, transparent: mat.transparent, opacity: mat.opacity
-        }));
-      }
-    });
-  }
-  upgradeShinyMaterials(S_);
-
-  // Give Vehicles (Car, Bike, Auto, Bus) glossy paint finish
-  if (window.VEH) {
-    window.VEH.forEach(v => {
-      v.g.traverse(o => {
-        if (o.isMesh && o.material && o.material.type === 'MeshLambertMaterial') {
-          const hex = o.material.color.getHex();
-          if (hex !== 0x181818 && hex !== 0x222222 && hex !== 0x333333) {
-            o.material = new THREE.MeshPhongMaterial({
-              color: hex, specular: 0xdddddd, shininess: 75
-            });
-          }
-        }
-      });
-    });
-  }
-
-  // Upgrade River & Temple Tank Water to Shimmering Reflective Water
-  if (window.__riverWat) {
-    window.__riverWat.material = new THREE.MeshPhongMaterial({
-      color: 0x1e6f9f, emissive: 0x072235, specular: 0xffe6b3, shininess: 95, transparent: true, opacity: 0.86
-    });
-  }
-  if (window.__templeTankWater) {
-    window.__templeTankWater.material = new THREE.MeshPhongMaterial({
-      color: 0x166958, emissive: 0x05241d, specular: 0xfff0c2, shininess: 90, transparent: true, opacity: 0.88
-    });
-  }
-
-  // 4. ULTRA-SHARP PLAYER-FOLLOWING SHADOWS (4x Sharper Shadows + Higher FPS)
-  if (window.sun && sun.shadow) {
-    const sc = sun.shadow.camera;
-    const d = window.MOB ? 36 : 48; // Tight frustum around player instead of 100
-    sc.left = -d; sc.right = d; sc.top = d; sc.bottom = -d;
-    sc.near = 5; sc.far = 160;
-    sc.updateProjectionMatrix();
-    sun.shadow.bias = -0.0005;
-  }
-
-  // Disable shadow casting on tiny objects (< 0.35m) to save 30% GPU vertex cost
-  S_.traverse(o => {
-    if (o.isMesh && o.castShadow && o.geometry) {
-      o.geometry.computeBoundingSphere();
-      if (o.geometry.boundingSphere && o.geometry.boundingSphere.radius < 0.35) {
-        o.castShadow = false;
-        o.receiveShadow = false;
-      }
-    }
-  });
-
-  // 5. TUNE BLOOM FOR REALISTIC NEON GLOW (No washed-out screen)
-  if (typeof composer !== 'undefined' && composer && composer.passes) {
-    composer.passes.forEach(pass => {
-      if (pass.strength !== undefined && pass.threshold !== undefined) {
-        pass.strength = 0.24;
-        pass.radius = 0.4;
-        pass.threshold = 0.86;
-      }
-    });
-  }
-
-  // 6. SMART FRUSTUM / DISTANCE CULLING & CAMERA POV HOOK
-  const prevTick = window.vehTick;
-  let cullTimer = 0;
-  window.vehTick = function(dt) {
-    if (prevTick) prevTick(dt);
-
-    // Camera Mode Support (V key: 0 = 3rd Person, 1 = 1st Person POV, 2 = Selfie Cam)
-    if (window.camMode === 1 && zone === 'out' && !seated && C_) {
-      const eyeH = window.drv ? (window.drv.t === 'bus' ? 2.5 : 1.45) : 1.72;
-      C_.position.set(P.x - Math.sin(yaw) * 0.25, P.y - 1.6 + gh() + jy + eyeH, P.z - Math.cos(yaw) * 0.25);
-      C_.rotation.set(pitch, yaw, 0);
-    } else if (window.camMode === 2 && !seated && C_) {
-      const d = 2.6;
-      C_.position.set(P.x - Math.sin(yaw) * d, P.y + gh() + jy + 0.25, P.z - Math.cos(yaw) * d);
-      C_.rotation.set(-pitch * 0.5, yaw + Math.PI, 0);
-    }
-
-    // Distance Culling every 250ms (Hides far-away small details to keep 60 FPS)
-    const now = performance.now();
-    if (now - cullTimer > 250 && zone === 'out') {
-      cullTimer = now;
-      S_.fog.near = 55;
-      S_.fog.far = (typeof gfx !== 'undefined' && gfx === 'low') ? 145 : 195;
-    }
-  };
-
-  console.info('✨ [CHEYYAR 3D] Ultra Graphics & Zero-Lag Patch Applied!');
 })();
 </script>
 </body></html>
