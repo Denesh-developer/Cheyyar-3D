@@ -2,6 +2,7 @@
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.5.2",
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
     "@capgo/capacitor-social-login": "^8.7.5",
     "firebase": "^12.19.0"

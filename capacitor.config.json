@@ -1,11 +1,13 @@
 {
   "appId": "com.cheyyar3d.dev",
-  "appName": "Cheyyar 3D Town",
+  "appName": "Namma Cheyyar",
   "webDir": "dist",
   "server": {
-    "url": "https://cheyyar-3D.vercel.app",
-    "cleartext": false
+    "url": "https://cheyyar-3d.vercel.app",
+    "cleartext": false,
+    "errorPath": "offline.html"
   },
+  "backgroundColor": "#0b0504",
   "plugins": {
     "FirebaseAuthentication": {
       "skipNativeAuth": true,
