@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "884742180730",
+    "firebase_url": "https://cheyyar-3d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "cheyyar-3d",
+    "storage_bucket": "cheyyar-3d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884742180730:android:482b4c48e66df8f9e650c3",
+        "android_client_info": {
+          "package_name": "com.cheyyar3d.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "884742180730-po43n2rnkcrqjmksu5ptqommsrkajqoi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cheyyar3d.app",
+            "certificate_hash": "9802971e79ab8a39a648588aad52e68017ec5312"
+          }
+        },
+        {
+          "client_id": "884742180730-tff4emn5k0krjgkgr3g50meo5v0bgoo3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEl2nDnaRk4CbMrQlIqDoPXcrlezbDU8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884742180730-tff4emn5k0krjgkgr3g50meo5v0bgoo3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884742180730:android:26f39fd6ec110e83e650c3",
+        "android_client_info": {
+          "package_name": "com.cheyyar3d.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "884742180730-tff4emn5k0krjgkgr3g50meo5v0bgoo3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEl2nDnaRk4CbMrQlIqDoPXcrlezbDU8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884742180730-tff4emn5k0krjgkgr3g50meo5v0bgoo3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

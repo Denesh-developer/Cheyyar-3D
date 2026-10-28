@@ -509,7 +509,13 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <div id="pad"><span></span><button data-k="w">▲</button><span></span><button data-k="a">◀</button><button data-k="s">▼</button><button data-k="d">▶</button></div>
 <button id="sndBtn" onclick="toggleSnd()" title="Sound on/off (M)" style="position:fixed;left:10px;bottom:150px;z-index:4;width:40px;height:40px;border-radius:50%;border:1px solid #6a4a1a;background:#2a120ccc;color:#fff;font-size:18px;cursor:pointer">🔊</button>
 <div id="msUI"><b>💆 Massage chair</b><button class="btn" onclick="msStart('head')">🧠 Head</button><button class="btn" onclick="msStart('body')">🪑 Body</button><button class="btn g" onclick="stand()">Stand up</button><div style="height:8px;border-radius:6px;background:#fff2;overflow:hidden;margin-top:8px"><div id="msFill" style="height:100%;width:0;background:linear-gradient(90deg,#7fffd4,#ffd34d)"></div></div><small id="msInfo" style="display:block;opacity:.7;margin-top:6px">Select Head or Body</small></div>
-<div id="seatUI"><div id="chat"></div>
+<style>
+#seatUI.min{display:none!important}
+#seatTog{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:6;display:none;padding:6px 14px;border-radius:999px;border:1px solid #6a4a1a;background:#2a120cdd;color:#ffd34d;font-weight:700;font-size:13px;cursor:pointer}
+#seatHide{position:absolute;top:-14px;right:10px;padding:2px 10px;border-radius:999px;border:1px solid #6a4a1a;background:#2a120cee;color:#ffd34d;font-size:12px;font-weight:700;cursor:pointer}
+</style>
+<button id="seatTog" onclick="toggleChat()">💬 Show chat</button>
+<div id="seatUI"><button id="seatHide" onclick="toggleChat()">▼ Hide</button><div id="chat"></div>
 <button class="btn" onclick="emote('popper')">🎉</button><button class="btn" onclick="emote('wave')">👋</button><button class="btn" onclick="emote('clap')">👏</button><button class="btn" onclick="emote('whistle')">😙</button><button class="btn" onclick="emote('pop')">🍿</button><button class="btn" id="snBtn" onclick="seatSnacks()">🍿 Snacks</button><button class="btn g" onclick="stand()">Stand up</button><button class="btn g" onclick="exitScreen()">🚪 Exit</button>
 <div class="cmrow" style="display:flex;gap:6px"><input id="cm" maxlength="80" placeholder="Theatre chat… ellarukkum theriyum" style="flex:1;min-width:0;font-size:15px"><button class="btn" onclick="sendC()">Send</button></div>
 <small class="cmrow" style="opacity:.6">💬 Public chat · theatre-la irukkura ellarum paarkkalaam</small></div>
@@ -2072,7 +2078,7 @@ window.sitAt=function(id){
  }catch(e){seatY=Math.max(s.y,audH(s.z))}
  P.set(s.x,seatY+1.55,s.z+.1);yaw=0;pitch=.18;
  try{setAudDim(true)}catch(e){console.warn('[sit] dim',e)}
- $('seatUI').classList.remove('chatOn');$('seatUI').style.display='block';$('prompt').style.display='none';
+ $('seatUI').classList.remove('chatOn','min');$('seatUI').style.display='block';$('prompt').style.display='none';
  clearTimeout(window.ivT);try{const st=getTheaterScheduleState();let d=70000;if(st.activeShow||st.nextShow){const mid=(typeof window.CY_INTERVAL_MIN==='number')?window.CY_INTERVAL_MIN:Math.round(CY_RUN/2),el=st.activeShow?getShowPlaybackOffset()/60:-Math.max(0,st.diffMin);d=(mid-el)*60000}window.ivT=d>0?setTimeout(intervalBreak,d):0}catch(e){console.warn('[sit] timer',e)}try{dimSnd()}catch(e){}
  toast('🍿 Seat '+id+' — Enjoy the show!',3500);
  try{if(window.CY_SEATCLAIM){const _r=CY_SEATCLAIM([id],window.lastTicket&&window.lastTicket.showTime);if(_r&&_r.catch)_r.catch(()=>{})}}catch(e){console.warn('[sit] claim',e)}
@@ -2088,7 +2094,9 @@ setInterval(()=>{
  setTimeout(()=>{if(zone!=='aud')return;if(seated)stand();goto('lobby');toast('🚪 Usher: "Thank you — next show-ku vaanga!"',3500)},20000);
 },3000);
 function sit(){const b=myBooked();sitAt(curSeatId&&b.includes(curSeatId)?curSeatId:(b[0]||''))}
-window.toggleChat=()=>{if(!seated){toast('💬 Seat-la ukkandha piragu chat open aagum',2800);return}const u=$('seatUI');u.classList.toggle('chatOn');if(u.classList.contains('chatOn')){$('chat').scrollTop=1e5;setTimeout(()=>$('cm').focus(),50)}};
+window.toggleChat=()=>{if(!seated){toast('💬 Seat-la ukkandha piragu chat open aagum',2800);return}const u=$('seatUI');u.classList.toggle('min');seatTogSync();if(!u.classList.contains('min')){$('chat').scrollTop=1e5}};
+window.seatTogSync=()=>{const u=$('seatUI'),b=$('seatTog');if(!u||!b)return;b.style.display=(seated&&u.style.display==='block'&&u.classList.contains('min'))?'block':'none'};
+setInterval(()=>{try{seatTogSync()}catch(e){}},300);
 window.stand=()=>{
  seated=false;if(zone!='aud')setAudDim(false);$('seatUI').style.display='none';
  if(curSeatId&&(!lastTicket||!lastTicket.seats||!lastTicket.seats.includes(curSeatId))){
@@ -6153,8 +6161,11 @@ const load=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.s
 const LF=f=>load(B+f).catch(()=>load('lib/'+f));
 LF('firebase-app-compat.js').then(()=>LF('firebase-auth-compat.js')).then(()=>LF('firebase-database-compat.js'))
  .then(()=>{firebase.initializeApp(CFG);const au=firebase.auth(),pv=new firebase.auth.GoogleAuthProvider();pv.setCustomParameters({prompt:'select_account'});
-  window.CY_SIGNIN=()=>au.signInWithPopup(pv).catch(e=>{if(e&&(e.code=='auth/popup-blocked'||e.code=='auth/operation-not-supported-in-this-environment'))return au.signInWithRedirect(pv);throw e});
-  window.CY_SIGNOUT=()=>au.signOut().then(()=>location.reload());
+  window.CY_SIGNIN=()=>{const cap=window.Capacitor,FA=cap&&cap.Plugins&&cap.Plugins.FirebaseAuthentication;
+   if(cap&&cap.isNativePlatform&&cap.isNativePlatform()&&FA){/* APK: native Google sign-in (WebView popup Google block pannum) */
+    return FA.signInWithGoogle().then(r=>{const t=r&&r.credential&&r.credential.idToken;if(!t)throw{code:'auth/no-id-token'};return au.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(t))})}
+   return au.signInWithPopup(pv).catch(e=>{if(e&&(e.code=='auth/popup-blocked'||e.code=='auth/operation-not-supported-in-this-environment'))return au.signInWithRedirect(pv);throw e})};
+  window.CY_SIGNOUT=()=>{try{const FA=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.FirebaseAuthentication;if(FA)FA.signOut().catch(()=>{})}catch(e){}return au.signOut().then(()=>location.reload())};
   window.CY_GUESTGO=()=>{if(window.CY_GUESTRUN)return Promise.resolve();const enter=u=>{if(window.CY_GUESTRUN)return;window.CY_GUESTRUN=true;window.CY_ANON=u;run(u.uid,true)};const cu=au.currentUser;if(cu&&cu.isAnonymous){enter(cu);return Promise.resolve()}return au.signInAnonymously().then(c=>enter(c.user)).catch(e=>{console.warn('[MP] guest sign-in fallback:',e&&e.code||e);enter({uid:'anon_'+Math.random().toString(36).slice(2,10),isAnonymous:true})})};
   au.onAuthStateChanged(u=>{window.CY_READY=true;
    if(u&&u.isAnonymous){window.CY_ANONAUTH=u;dispatchEvent(new Event('cy-auth'));return}/* anonymous = guest only (CY_GUESTGO) — never cloud-save / leaderboard */

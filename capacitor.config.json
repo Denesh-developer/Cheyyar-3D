@@ -1,0 +1,15 @@
+{
+  "appId": "com.cheyyar3d.dev",
+  "appName": "Cheyyar 3D Town",
+  "webDir": "dist",
+  "server": {
+    "url": "https://cheyyar-3D.vercel.app",
+    "cleartext": false
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
+    }
+  }
+}
