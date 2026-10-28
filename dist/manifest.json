@@ -1,0 +1,18 @@
+{
+  "name": "Namma Ooru · Cheyyar 3D Town",
+  "short_name": "Cheyyar 3D",
+  "description": "Explore Cheyyar in 3D - walk, drive and watch movies at Cheyyar Talkies.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#2a120c",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

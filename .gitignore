@@ -1,4 +1,30 @@
-*.backup.*
-*.backup.html
+# Node
+node_modules/
+npm-debug.log*
 
-scratch/
+# Android build files
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Capacitor synced web files (sync pannum pothu thirumba varum)
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# Vercel
+.vercel/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.env
+.env.*
