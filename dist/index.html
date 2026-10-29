@@ -2510,7 +2510,7 @@ let dr=null;R.domElement.onpointerdown=e=>dr=[e.clientX,e.clientY];addEventListe
 addEventListener('pointermove',e=>{if(!dr)return;yaw-=(e.clientX-dr[0])*.005;pitch=Math.max(-1.2,Math.min(1.2,pitch-(e.clientY-dr[1])*.005));dr=[e.clientX,e.clientY]});
 goto('out');let last=performance.now();
 (function loop(t){requestAnimationFrame(loop);window.__fc=(window.__fc|0)+1;window.cyScrViewTick&&cyScrViewTick(Math.min((t-last)/1000,.05));const dt=Math.min((t-last)/1000,.05);last=t;
- if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const boost=(window.speedBoostUntil&&performance.now()<window.speedBoostUntil)?1.35:1.0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?9:5))*boost*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
+ if(started&&!seated&&!lock&&!window.drv&&$('modal').style.display!='flex'){if(window.boatDrv){window.boatTick&&window.boatTick(dt)}else{const f=(K.w||K.arrowup?1:0)-(K.s||K.arrowdown?1:0),r=(K.d?1:0)-(K.a?1:0),y2=(K.arrowleft?1:0)-(K.arrowright?1:0);yaw+=y2*dt*1.8;moving=0;const boost=(window.speedBoostUntil&&performance.now()<window.speedBoostUntil)?1.35:1.0;const dx=-Math.sin(yaw)*f+Math.cos(yaw)*r,dz=-Math.cos(yaw)*f-Math.sin(yaw)*r,sp=(window.isSwimming?(K.shift?6.8:3.8):(K.shift?13:7.5))*boost*dt;P.x+=dx*sp;P.z+=dz*sp;if(f||r){moving=K.shift?1.7:1;let d=Math.atan2(-dx,-dz)-ME.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));ME.rotation.y+=d*Math.min(1,dt*12)}if(K[' ']&&jy==0&&vy==0&&!window.isSwimming)vy=6.5;const b=Z[zone].b;P.x=Math.max(b[0],Math.min(b[1],P.x));P.z=Math.max(b[2],Math.min(zone=='out'?b[3]:b[3],P.z));collide()}}
  cur=null;if(!seated&&!lock)for(const o of I)if(o.z==zone&&Math.hypot(o.x-P.x,o.y-P.z)<(o.r||4)&&(!o.when||o.when())){cur=o;break}
  const p=$('prompt');if(cur&&$('modal').style.display!='flex'){p.style.display='block';p.textContent=(window.MOB?'👆 Tap: ':'[E] ')+(typeof cur.l=='function'?cur.l():cur.l)}else p.style.display='none';
  const bp=$('boostPill');if(bp){if(window.speedBoostUntil&&performance.now()<window.speedBoostUntil){bp.style.display='inline-flex';$('boostSec').textContent=Math.max(0,Math.ceil((window.speedBoostUntil-performance.now())/1000));if(moving>0&&Math.random()<0.22&&window.spawnSpeedSparkle)window.spawnSpeedSparkle()}else{bp.style.display='none'}}
@@ -4707,7 +4707,7 @@ const hhmm=s=>{const m=Math.floor(s/60)%1440;return String(Math.floor(m/60)).pad
 
 /* ---------- 1. CONTROLS: mobile joystick, drag look, hold-W sprint ---------- */
 const touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/[?&]mobile=1/.test(location.search);
-const js=el('div','position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,rgba(91,31,26,.45),rgba(42,16,13,.88));border:2px solid var(--turmeric);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 16px rgba(240,169,27,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:15;touch-action:none;display:none');
+const js=el('div','position:fixed;left:max(46px,12vw);bottom:calc(26px + env(safe-area-inset-bottom,0px));width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,rgba(91,31,26,.45),rgba(42,16,13,.88));border:2px solid var(--turmeric);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 16px rgba(240,169,27,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:15;touch-action:none;display:none');
 const kn=el('div','position:absolute;left:30px;top:30px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#fff3c4,var(--turmeric));border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 10px rgba(240,169,27,.8);pointer-events:none');js.append(kn);js.id='joyPad';document.body.append(js);
 if(touch)$('pad').style.display='none';
 let jid=null,jx=0,jy=0,jOn=false;
@@ -4718,12 +4718,12 @@ const jend=e=>{if(e.pointerId===jid){jid=null;jx=jy=0;kn.style.transform=''}};
 js.addEventListener('pointerup',jend);js.addEventListener('pointercancel',jend);
 let lid=null,lx0=0,ly0=0;
 R.domElement.onpointerdown=e=>{if(lid===null){lid=e.pointerId;lx0=e.clientX;ly0=e.clientY}};
-addEventListener('pointermove',e=>{if(e.pointerId!==lid)return;const k=e.pointerType=='touch'?.006:.005;if(B.in)B.ly-=(e.clientX-lx0)*k;else yaw-=(e.clientX-lx0)*k;pitch=cl(pitch-(e.clientY-ly0)*k,-1.2,1.2);lx0=e.clientX;ly0=e.clientY});
+addEventListener('pointermove',e=>{if(e.pointerId!==lid)return;const k=e.pointerType=='touch'?.010:.005;if(B.in)B.ly-=(e.clientX-lx0)*k;else yaw-=(e.clientX-lx0)*k;pitch=cl(pitch-(e.clientY-ly0)*k,-1.2,1.2);lx0=e.clientX;ly0=e.clientY});
 const lend=e=>{if(e.pointerId===lid)lid=null};addEventListener('pointerup',lend);addEventListener('pointercancel',lend);
 let rs=false,wT=0,spr=false;
 addEventListener('keydown',e=>{if(e.key=='Shift')rs=true});addEventListener('keyup',e=>{if(e.key=='Shift')rs=false});
 function inputTick(dt){
- if(jid!==null){K.w=jy<-.3?1:0;K.s=jy>.3?1:0;K.a=jx<-.35?1:0;K.d=jx>.35?1:0;jOn=true}else if(jOn){K.w=K.s=K.a=K.d=0;jOn=false}
+ if(jid!==null){K.w=jy<-.2?1:0;K.s=jy>.2?1:0;K.a=jx<-.25?1:0;K.d=jx>.25?1:0;jOn=true}else if(jOn){K.w=K.s=K.a=K.d=0;jOn=false}
  const fwd=(K.w||K.arrowup)&&(jid===null||jy<-.8);wT=fwd?wT+dt:0;const ns=wT>.7;
  if(ns&&!spr&&started)toast('🏃 Sprint!',900);spr=ns;K.shift=(rs||spr)?1:0}
 
@@ -5406,7 +5406,7 @@ function updBus(si,t,dt){const bs=BS[si],o=curE(si,t);
 
 /* ---------- 5. BOARDING, SEATS, RIDE ---------- */
 const B={in:false,si:0,lx:0,lz:0,ly:0,sit:-1};let ctx=null,ending=false;
-const bp=el('button','position:fixed;left:50%;bottom:130px;transform:translateX(-50%);background:#ff7a1a;color:#000;font-weight:700;padding:7px 13px;border:0;border-radius:24px;z-index:5;display:none;font-size:13px');document.body.append(bp);
+const bp=el('button','position:fixed;left:50%;bottom:130px;transform:translateX(-50%);background:rgba(26,12,9,.78);color:#ffe9b0;font-weight:700;padding:5px 11px;border:1px solid rgba(255,207,90,.5);border-radius:16px;z-index:5;backdrop-filter:blur(8px);display:none;font-size:13px');document.body.append(bp);
 function leave(){B.in=false;B.sit=-1;lock=false;ME.visible=true;P.set(BX[B.si]+2.6,1.6,-12);yaw=Math.PI;pitch=0}
 function endRide(){if(ending)return;ending=true;const f=$('fade'),o=BS[B.si].o;f.style.opacity=1;setTimeout(()=>{leave();toast('🚏 '+(o?o.e.dest:'Destination')+' stop vandhuduchu (demo ride) — thirumbi Cheyyar bus stand-ku vandhuteenga',5000);f.style.opacity=0;ending=false},500)}
 function act(){if(!ctx)return;
@@ -5432,7 +5432,7 @@ const pill=el('div','');pill.className='pl';pill.innerHTML='🕒 <b id="gclk">--
 /* ---------- per-frame hook ---------- */
 const old=window.vehTick;let lastT=0;
 window.vehTick=function(dt){old&&old(dt);
- try{inputTick(dt);const mo=$('modal').style.display=='flex';js.style.display=(touch&&started&&!mo)?'block':'none';
+ try{inputTick(dt);const mo=$('modal').style.display=='flex';js.style.display=(touch&&started&&!mo&&!window.drv)?'block':'none';
   const t=clockS();$('gclk').textContent=hhmm(t);
   if(zone=='out'){applyTime(lightS());wasOut=true}else if(zone=='aud'){wasOut=false;if(window.__audDimmed!==false){hemi.intensity=0.03;S.background.setHex(0x020205);S.fog.color.setHex(0x020205);}}else if(wasOut){wasOut=false;S.background.setHex(0x10142a);S.fog.color.setHex(0x10142a);hemi.intensity=.85;hemi.color.setHex(0x8899cc);sun.intensity=.5;sun.color.setHex(0xaab8ff)}else if(zone=='lobby'&&hemi.intensity<.7){hemi.intensity=.85}
   const act0=zone=='out';
@@ -8175,5 +8175,55 @@ I.push({z:'out',x:X,y:CZ,r:2.6,when:()=>!window.drv&&!window.boatDrv&&zone=='out
 /* face colour button in the side HUD */
 {const sd=$('side');if(sd){const fb=document.createElement('button');fb.id='faceBtn';fb.textContent='🎨';fb.title='Face colour (skin tone)';fb.onclick=()=>openFace();sd.append(fb)}}
 }catch(e){console.warn('[hair studio]',e)}})();
+</script>
+
+<style id="mobFix">
+/* smaller, calmer "Tap" prompt */
+@media (pointer:coarse){
+ #prompt{font-size:12px!important;font-weight:700!important;padding:5px 12px!important;border-radius:16px!important;
+  background:rgba(26,12,9,.78)!important;color:#ffe9b0!important;border:1px solid rgba(255,207,90,.5)!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.45)!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  max-width:62vw!important;bottom:calc(104px + env(safe-area-inset-bottom,0px))!important;opacity:.92}
+}
+.mob #prompt{font-size:12px!important;padding:5px 12px!important;background:rgba(26,12,9,.78)!important;color:#ffe9b0!important;
+ border:1px solid rgba(255,207,90,.5)!important;box-shadow:0 3px 10px rgba(0,0,0,.45)!important;max-width:62vw!important;opacity:.92}
+/* vehicle drive buttons */
+.vbtn{position:fixed;width:60px;height:60px;border-radius:50%;z-index:15;display:none;align-items:center;justify-content:center;
+ font-size:24px;padding:0;color:#ffe9b0;touch-action:none;-webkit-user-select:none;user-select:none;
+ background:rgba(26,12,9,.62);border:1.5px solid rgba(255,207,90,.45);box-shadow:0 4px 14px rgba(0,0,0,.45);
+ backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .1s,background .1s}
+.vbtn.on{background:linear-gradient(135deg,#f0a91b,#e65100);color:#1a0806;border-color:#fff;transform:scale(.93)}
+body.drvUI .mbtn{left:14px!important;right:auto!important;margin-right:0!important;bottom:calc(172px + env(safe-area-inset-bottom,0px))!important}
+body.drvUI #sndBtn{bottom:calc(240px + env(safe-area-inset-bottom,0px))!important}
+body.drvUI #prompt{max-width:40vw!important}
+</style>
+<script>
+/* Vehicle touch controls: left side = steer left/right, right side = accelerate/brake */
+(function(){
+const touch=window.MOB||matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+if(!touch)return;
+const sb='env(safe-area-inset-bottom,0px)';
+const defs=[
+ ['◀','a','left:14px;bottom:calc(100px + '+sb+')'],
+ ['▶','d','left:84px;bottom:calc(100px + '+sb+')'],
+ ['▲','w','right:14px;bottom:calc(172px + '+sb+')'],
+ ['▼','s','right:14px;bottom:calc(100px + '+sb+')']];
+const btns=defs.map(([t,k,pos])=>{
+ const b=document.createElement('button');b.className='vbtn';b.textContent=t;b.style.cssText=pos;
+ const down=e=>{e.preventDefault();e.stopPropagation();try{b.setPointerCapture(e.pointerId)}catch(_){}K[k]=1;b.classList.add('on')};
+ const up=e=>{K[k]=0;b.classList.remove('on')};
+ b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up);
+ b.addEventListener('contextmenu',e=>e.preventDefault());
+ document.body.append(b);return {b,k}});
+let was=false;
+setInterval(()=>{
+ const modal=document.getElementById('modal');
+ const on=!!window.drv&&typeof started!=='undefined'&&started&&!(modal&&modal.style.display==='flex');
+ btns.forEach(o=>o.b.style.display=on?'flex':'none');
+ document.body.classList.toggle('drvUI',on);
+ if(was&&!on){btns.forEach(o=>{K[o.k]=0;o.b.classList.remove('on')})}
+ was=on;
+},120);
+})();
 </script>
 </body></html>
