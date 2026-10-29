@@ -4649,7 +4649,7 @@ function showCard(b){if(!b){card.style.display='none';return}
 /* ---- Per-frame ---- */
 const old=window.vehTick;let tCard=0,tClk=0,tLed=0,hitCd=0,ledInit=false;
 window.vehTick=function(dt){old(dt);if(zone!='out')return;const now=performance.now();
- TR.forEach(o=>{if(o.ut){const u=o.ut;u.a+=o.sp*dt/u.R;if(u.a>=Math.PI){o.ut=null;o.dir=-u.d;o.z=u.zB;o.x=u.xe;o.g.rotation.y=o.dir>0?-Math.PI/2:Math.PI/2}else{const th=u.a,vx=u.d*u.R*Math.cos(th),vz=-(u.zA-u.zc)*Math.sin(th);o.x=u.xe+u.d*u.R*Math.sin(th);o.z=u.zc+(u.zA-u.zc)*Math.cos(th);o.g.rotation.y=Math.atan2(-vx,-vz)}}
+ TR.forEach(o=>{if(o.ut){const u=o.ut;u.a+=o.sp*dt/u.R;if(u.a>=Math.PI){o.ut=null;o.dir=-u.d;o.z=u.zB;o.pz=u.zA;o.x=u.xe;o.g.rotation.y=o.dir>0?-Math.PI/2:Math.PI/2}else{const th=u.a,vx=u.d*u.R*Math.cos(th),vz=-(u.zA-u.zc)*Math.sin(th);o.x=u.xe+u.d*u.R*Math.sin(th);o.z=u.zc+(u.zA-u.zc)*Math.cos(th);o.g.rotation.y=Math.atan2(-vx,-vz)}}
  else{o.x+=o.dir*o.sp*dt;const mn=o.minX||XMIN,mx=o.maxX||(o.br?XMAXB:XMAX);if((o.dir>0&&o.x>mx)||(o.dir<0&&o.x<mn)){const xe=o.dir>0?mx:mn;o.x=xe;o.ut={a:0,d:o.dir,xe,zA:o.z,zB:o.pz,zc:(o.z+o.pz)/2,R:Math.abs(o.z-o.pz)/2}}}
  o.g.position.x=o.x;o.g.position.z=o.z;o.g.position.y=o.br&&window.__extraY?window.__extraY(o.x,o.z):0;o.g.userData.w.forEach(w=>w.rotation.x-=o.sp*dt/w.userData.r);
   const dx=P.x-o.x,dz=P.z-o.z,ex=dx-clamp(dx,-o.hl,o.hl),d=H(ex,dz),R=o.wd+(window.drv?window.drv.spec.r*.7:.5);
@@ -5876,7 +5876,7 @@ setInterval(()=>{
    Embed block aana YouTube video (error 150/101) auto-skip aagum.
    100% reliable venum na: mp4 files-a index.html irukura same folder-la 1.mp4, 2.mp4, 3.mp4 nu podunga. */
 (function(){
-const LINKS=window.CY_LINKS||['https://www.youtube.com/watch?v=-VPw6akXfiM'];
+const LINKS=window.CY_LINKS||['https://youtu.be/K-9ihQYkYqQ?si=s-oPb_1VV0uNeFQY'];
 const ID=u=>(u.match(/[?&]v=([\w-]{11})/)||u.match(/youtu\.be\/([\w-]{11})/)||u.match(/embed\/([\w-]{11})/)||[])[1];
 const ITEMS=LINKS.map(u=>{if(/\.(mp4|webm|ogv)(\?|$)/i.test(u))return{t:'v',src:u};const id=ID(u);return id?{t:'yt',id}:null}).filter(Boolean);
 const DURS=[41.45, 43.49, 35.94];
@@ -7888,5 +7888,152 @@ window.vehTick=function(dt){
  }catch(e){console.warn('[hits]',e)}};
 console.log('[hits] ready');
 }catch(e){console.warn('hits init failed',e)}})();
+</script>
+<script>
+/* ===== PATCH v1: distance streaming (no start-up hang) + traffic avoidance (brake / side-pass / scold) ===== */
+(function(){
+const H=Math.hypot,MOB=!!window.MOB;
+const warned={};const warn=(k,e)=>{if(!warned[k]){warned[k]=1;console.warn('[patch '+k+']',e)}};
+
+/* ---------- A. DISTANCE STREAMING : near-ah irukkura objects mattum render ---------- */
+try{
+ if(/[?&]nostream/.test(location.search))throw 'disabled';
+ const NEAR=MOB?50:65;      /* small props / people / poles : indha distance-ku ulla mattum */
+ const MID=MOB?105:135;     /* buildings / shops : indha distance-ku ulla mattum */
+ const BIG=45,HYS=14,BUD=MOB?30:60;  /* BIG: periya objects (road, ground) eppavum visible */
+ const items=[],seen=new WeakSet(),bx=new THREE.Box3(),sp=new THREE.Sphere();
+ let done=false,lastLen=-1,lx=1e9,lz=1e9,pendFull=true,tPrune=performance.now();
+ const ppos=()=>{try{if(typeof started!=='undefined'&&started)return[P.x,P.z];const s=Z.out.sp;return[s[0],s[1]]}catch(e){return[0,0]}};
+ function scan(){
+  const ch=OUT.children,t0=performance.now(),[px,pz]=ppos();
+  for(let i=0;i<ch.length;i++){
+   const o=ch[i];if(seen.has(o))continue;
+   if(performance.now()-t0>4)return false;
+   seen.add(o);
+   if(!o.visible||o.isLight||o.isSprite||o.isCamera)continue;
+   const u=o.userData||{};if(u.__rec||u.driver||u.w||u.door||u.vt||u.noCull)continue;
+   bx.setFromObject(o);if(bx.isEmpty())continue;
+   bx.getBoundingSphere(sp);const r=sp.radius;if(!(r<BIG))continue;
+   const it={o,dx:sp.center.x-o.position.x,dz:sp.center.z-o.position.z,r,R:r<4?NEAR:MID,hid:false};
+   items.push(it);
+   if(H(sp.center.x-px,sp.center.z-pz)-r>it.R){o.visible=false;it.hid=true}
+  }
+  return true}
+ function tick(){
+  try{
+   if(document.hidden||typeof zone==='undefined')return;
+   if(zone!=='out'){pendFull=true;return}
+   const len=OUT.children.length;if(!done||len!==lastLen){done=scan();lastLen=len}
+   const [px,pz]=ppos();
+   let bud=(pendFull||H(px-lx,pz-lz)>35)?1e9:BUD;pendFull=false;lx=px;lz=pz;
+   let shown=0;
+   for(let i=0;i<items.length;i++){const it=items[i],o=it.o;if(!o.parent)continue;
+    const d=H(o.position.x+it.dx-px,o.position.z+it.dz-pz)-it.r;
+    if(it.hid){if(d<it.R&&shown<bud){o.visible=true;it.hid=false;shown++}}
+    else if(d>it.R+HYS){o.visible=false;it.hid=true}}
+   const t=performance.now();if(t-tPrune>30000){tPrune=t;for(let i=items.length-1;i>=0;i--)if(!items[i].o.parent)items.splice(i,1)}
+  }catch(e){warn('stream',e)}}
+ setInterval(tick,120);tick();
+ window.CY_STREAM={items,NEAR,MID,showAll(){items.forEach(it=>{it.o.visible=true;it.hid=false})}};
+}catch(e){if(e!=='disabled')warn('stream-init',e)}
+
+/* ---------- B. TRAFFIC : overlap illa - brake, side-pass, illana thittu ---------- */
+try{
+ const HLt={bus:5,car:2.1,bike:.9,auto:1.6,cycle:.8},WDt={bus:1.7,car:1.1,bike:.5,auto:.95,cycle:.4};
+ const SCOLD=['வண்டிய எடுடா! 😡','Eduda vandi-ya! 😤','அறிவில்லயா? எடுடா வண்டிய! 😠','Horn adichum theriyalaya? Eduda! 🤬','Vazhi vidu da! 😡','Ennada nadu roadla nikkura! 😠'];
+ const vlist=()=>(window.__TR||[]).concat(window.__TV||[]);
+ const dims=o=>({hl:o.hl||HLt[o.t]||2,wd:o.wd||WDt[o.t]||1});
+ const isTR=o=>o.pz!==undefined&&o.minX!==undefined&&o.dir!==undefined;
+ let now=0;
+ function honk(o){try{const d=H(P.x-o.g.position.x,P.z-o.g.position.z);if(d>45)return;const v=.12*(1-d/45);blip(400,.16,v,'sawtooth');setTimeout(()=>blip(500,.2,v,'sawtooth'),210)}catch(e){}}
+ function clearBubble(o){const b=o.__bub;if(!b)return;o.__bub=null;try{o.g.remove(b);b.material.map&&b.material.map.dispose();b.material.dispose()}catch(e){}}
+ function glassOf(o){if(o.__gl)return o.__gl;const L=[];try{o.g.children.forEach(m=>{if(m.isMesh&&m.material&&!Array.isArray(m.material)&&m.material.transparent&&m.material.opacity<.95&&m.position.x<-.5&&m.position.x>-2.2)L.push(m)})}catch(e){}return o.__gl=L}
+ function scold(o){
+  clearBubble(o);
+  try{tag(o.g,SCOLD[Math.random()*SCOLD.length|0]);const b=o.g.children[o.g.children.length-1];b.scale.set(3,.84,1);b.position.y=o.t=='bus'?5.3:(o.t=='bike'?2.6:3.1);o.__bub=b;o.__bubT=now+3400}catch(e){}
+  o.__winUntil=now+3400;honk(o)}
+ function windowFx(o){
+  const on=now<(o.__winUntil||0),dr=o.g.userData&&o.g.userData.driver;
+  if(on){
+   if(!o.__winOn){o.__winOn=true;if(o.t!='bus')glassOf(o).forEach(m=>m.visible=false);if(dr&&dr.la)o.__arm=[dr.la.rotation.x,dr.ra.rotation.x]}
+   if(dr&&dr.la&&dr.ra){dr.la.rotation.x=2.6+Math.sin(now/80)*.35;dr.ra.rotation.x=2.4+Math.cos(now/95)*.3}
+  }else if(o.__winOn){
+   o.__winOn=false;glassOf(o).forEach(m=>m.visible=true);
+   if(dr&&dr.la&&o.__arm){dr.la.rotation.x=o.__arm[0];dr.ra.rotation.x=o.__arm[1]}}
+  if(o.__bub&&now>o.__bubT)clearBubble(o)}
+
+ function tryPass(o,V,D,by,byP,dm){
+  const gap=Math.abs(o.pz-o.__lz),sgn=Math.sign(o.pz-o.__lz)||1;
+  const bw=byP?D.spec.r*.7:dims(by).wd,need=bw+dm.wd+.7;
+  if(need>gap+.5)return false;
+  if((o.dir>0?o.maxX-o.x:o.x-o.minX)<30)return false;
+  const tz=o.__lz+sgn*need,ox=o.g.position.x;
+  for(const q of V){if(q===o||q===by||!q.g)continue;const qd=dims(q),al=(q.g.position.x-ox)*o.dir;
+   if(al<-8||al>34)continue;if(Math.abs(q.g.position.z-tz)<qd.wd+dm.wd+.5)return false}
+  if(D&&D.g&&!byP){const al=(D.g.position.x-ox)*o.dir;if(al>-8&&al<34&&Math.abs(D.g.position.z-tz)<D.spec.r*.7+dm.wd+.5)return false}
+  o.__oztg=sgn*need;o.__pass=byP?'P':by;return true}
+
+ function pre(dt){
+  if(zone!=='out'||!(dt>0)||dt>.2)return;
+  now=performance.now();
+  const V=vlist(),D=window.drv&&window.drv.g&&window.drv.spec?window.drv:null;
+  for(const o of V){
+   if(!o||!o.g)continue;
+   if(o.__b===undefined){o.__b=o.sp;o.__th=1;o.__bt=0}
+   const base=o.__b;if(!(base>0))continue;
+   const tr=isTR(o);
+   if(tr){
+    if(o.__lz===undefined){o.__lz=o.z;o.__oz=0;o.__oztg=0}
+    if(o.ut){o.__oz=0;o.__oztg=0;o.__pass=null;o.__ozp=0}
+    else{
+     if(Math.abs(o.z-(o.__lz+o.__oz))>.03){o.__lz=o.z;o.__oz=0;o.__oztg=0;o.__pass=null;o.__ozp=0}
+     if(o.__ry0!==undefined)o.g.rotation.y=o.__ry0}}
+   const g=o.g,ry=g.rotation.y,fx=-Math.sin(ry),fz=-Math.cos(ry),nx=-fz,nz=fx,ox=g.position.x,oz=g.position.z,dm=dims(o);
+   const look=3+base*1.3+dm.hl;
+   let gap=1e9,by=null,byP=false;
+   const cons=(bx,bz,bl,bw,who,pl)=>{
+    const rx=bx-ox,rz=bz-oz,al=rx*fx+rz*fz;if(al<=0||al>look+bl+dm.hl)return;
+    const lt=rx*nx+rz*nz;if(Math.abs(lt)>bw+dm.wd+.3)return;
+    const gp=al-bl-dm.hl;if(gp<gap){gap=gp;by=who;byP=pl}};
+   if(D)cons(D.g.position.x,D.g.position.z,D.spec.r,D.spec.r*.7,D,true);
+   if(now>(o.__ign||0))for(const q of V){if(q===o||!q.g||q.g.visible===false)continue;const qd=dims(q);cons(q.g.position.x,q.g.position.z,qd.hl,qd.wd,q,false)}
+   /* throttle : gap-ku yetha maari vegam kuraiyum, overlap aagaama nikkum */
+   let tgt=1;if(by){const span=Math.max(1,look-.8);tgt=gap<=.8?0:Math.min(1,(gap-.8)/span)}
+   let th=o.__th;
+   if(th>tgt)th=Math.max(tgt,th-dt*14/base);else th=Math.min(tgt,th+dt*3/base);
+   if(by&&gap<.35)th=0;
+   o.__th=th;o.sp=base*th;
+   const stopped=!!by&&th<.12;
+   if(stopped&&byP)o.__bt+=dt;else o.__bt=Math.max(0,o.__bt-dt*3);
+   if(stopped&&!byP){o.__nb=(o.__nb||0)+dt;if(o.__nb>6){o.__ign=now+3500;o.__nb=0}}else o.__nb=0;
+   /* player vehicle road-ah adachu nikkuthu -> horn + window open + thittu */
+   if(o.__bt>.8&&now>(o.__scT||0)&&H(P.x-ox,P.z-oz)<70){o.__scT=now+5200;scold(o)}
+   if(tr&&!o.ut){
+    if(!o.__pass&&stopped&&o.__bt>2.4&&now>(o.__passRetry||0)){if(!tryPass(o,V,D,by,byP,dm))o.__passRetry=now+1200}
+    if(o.__pass){
+     const pb=o.__pass==='P'?D:o.__pass;
+     if(!pb||!pb.g||(pb!==D&&V.indexOf(pb)<0))o.__pass=null;
+     else{const bl=pb===D?D.spec.r:dims(pb).hl;if((pb.g.position.x-ox)*o.dir<-(bl+dm.hl+2.2))o.__pass=null}
+     if(!o.__pass)o.__oztg=0}
+    if((o.dir>0?o.maxX-o.x:o.x-o.minX)<16){o.__oztg=0;o.__pass=null}
+    const dz=o.__oztg-o.__oz,st=Math.min(Math.abs(dz),4*dt);o.__oz+=Math.sign(dz)*st;
+    o.z=o.__lz+o.__oz}
+  }}
+ function post(dt){
+  for(const o of vlist()){
+   if(!o||!o.g)continue;
+   if(isTR(o)&&o.__lz!==undefined){
+    if(!o.ut){o.__ry0=o.g.rotation.y;const lv=(o.__oz-(o.__ozp||0))/Math.max(dt,.001);o.__ozp=o.__oz;
+     if(Math.abs(lv)>.15)o.g.rotation.y=Math.atan2(-o.dir*Math.max(o.sp,4),-lv)}
+    else o.__ry0=undefined}
+   if(o.__winOn||o.__winUntil||o.__bub)windowFx(o)}}
+ const _old=window.vehTick;
+ window.vehTick=function(dt){
+  try{pre(dt)}catch(e){warn('pre',e)}
+  try{_old&&_old(dt)}catch(e){warn('old',e)}
+  try{post(dt)}catch(e){warn('post',e)}};
+ window.CY_TRAFFIC={scoldTest:o=>{now=performance.now();scold(o)}};
+}catch(e){warn('traffic-init',e)}
+})();
 </script>
 </body></html>
