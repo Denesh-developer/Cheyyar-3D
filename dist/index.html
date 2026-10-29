@@ -807,7 +807,25 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
   }
  });
 
- if(!fem){
+ const HS=(opt&&opt.hs)|0;
+ if(HS>0&&(fem?HS<=4:HS<=5)){ /* salon hair styles (opt.hs) */
+  const TP=Math.PI*2,shell=(r,ps,pl,ts,tl)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,14,ps,pl,ts,tl),hqMat(hair,skin,hair));m.position.set(0,.04,-.01);m.scale.set(.95,1.05,1.02);m.castShadow=true;head.add(m)};
+  if(!fem){
+   const classic=()=>{sph(.235,hair,0,.10,.03,head,.98,.95,1.0);box(.24,.11,.05,hair,0,-.07,.16,head);[-.215,.215].forEach(ex=>box(.022,.065,.045,hair,ex,.025,-.065,head))};
+   if(HS===1){shell(.2285,0,TP,0,1.2);shell(.2285,0,Math.PI,1.2,.75);shell(.2375,0,TP,0,.85)} /* crew cut */
+   else if(HS===2){classic();sph(.11,hair,0,.255,-.075,head,1.25,.75,1.3);box(.19,.05,.035,hair,0,.185,-.2,head)} /* quiff */
+   else if(HS===3){classic();box(.3,.4,.07,hair,0,-.14,.19,head);[-1,1].forEach(sd=>box(.045,.34,.16,hair,sd*.205,-.07,.07,head));box(.19,.045,.03,hair,0,.165,-.197,head)} /* long */
+   else if(HS===4){shell(.2235,0,TP,0,1.15);shell(.2235,0,Math.PI,1.15,.65)} /* shaved */
+   else{classic();for(let si=0;si<7;si++){const sa=si/7*TP;cyl(0,.05,.16,6,hair,Math.cos(sa)*.1,.33,Math.sin(sa)*.1,head)}cyl(0,.055,.2,6,hair,0,.38,0,head)} /* spiky */
+  }else{
+   sph(.238,hair,0,.07,.05,head,1,.98,1.0);sph(.23,hair,-.08,.09,.0,head,.7,.6,.8);sph(.23,hair,.08,.09,.0,head,.7,.6,.8);
+   shell(.2376,0,TP,0,1.2);[-1,1].forEach(sd=>sph(.07,hair,sd*.178,.065,-.085,head,.55,1.15,1.1));
+   if(HS===1){box(.4,.62,.09,hair,0,-.3,.175,head);[-1,1].forEach(sd=>box(.07,.46,.15,hair,sd*.205,-.2,.03,head))} /* long open */
+   else if(HS===2){sph(.034,GOLD,0,.1,.25,head);cyl(.07,.035,.46,8,hair,0,-.16,.28,head)} /* ponytail */
+   else if(HS===3){box(.43,.25,.1,hair,0,-.06,.15,head);[-1,1].forEach(sd=>box(.06,.24,.3,hair,sd*.215,-.05,.04,head))} /* short bob */
+   else{for(let bi=0;bi<6;bi++)sph(.052-.002*bi,hair,0,-.02-bi*.095,.245,head,1,1.25,1);sph(.03,0xc2185b,0,-.6,.255,head);sph(.03,GOLD,0,.0,.255,head);sph(.026,0xffffff,0,.04,.262,head)} /* braid / jadai */
+  }
+ }else if(!fem){
   sph(.235,hair,0,.10,.03,head,.98,.95,1.0);
   box(.19,.045,.03,hair,0,.165,-.197,head);
   box(.24,.11,.05,hair,0,-.07,.16,head);
@@ -1405,7 +1423,7 @@ function makeMe(){
  const fem=myGender=='female',list=fem?FEMALE_OUTFITS:MALE_OUTFITS;
  const o=list[myOutfit%list.length]||list[0];
  const LK=window.myLook,okT=fem?['chudi','western','frock','saree','lehenga','gown','skirt','anarkali','hoodie']:['shirt','tshirt','shorts'];
- ME=person(0,0,LK?LK.c:o.col,0,S,0,LK&&LK.sk!=null?LK.sk:(fem?0x9a6a48:0x8a5a3a),LK?LK.l:o.leg,LK&&LK.hr!=null?LK.hr:0x100a06,fem,LK?LK.b:o.bdr,LK&&okT.includes(LK.t)?LK.t:o.type,LK&&LK.bd!=null?LK:null);
+ ME=person(0,0,LK?LK.c:o.col,0,S,0,LK&&LK.sk!=null?LK.sk:(fem?0x9a6a48:0x8a5a3a),LK?LK.l:o.leg,LK&&LK.hr!=null?LK.hr:0x100a06,fem,LK?LK.b:o.bdr,LK&&okT.includes(LK.t)?LK.t:o.type,LK||null);
  tag(ME,myName);
  const db=document.getElementById('dressBtn');if(db)db.textContent=fem?'👗':'👔';
 }
@@ -2456,7 +2474,7 @@ function afterTicket(){
  /* called by the Enter button: saves the chosen look so the in-game character matches the preview */
  window.cyApplyCreator=function(gen){
   syncGender(gen);if(!touched){stop(true);return}
-  const L={t:look.t,c:look.c,l:look.l,b:look.b,sk:look.sk,hr:look.hr,bd:look.bd,fc:look.fc};
+  const L={t:look.t,c:look.c,l:look.l,b:look.b,sk:look.sk,hr:look.hr,bd:look.bd,fc:look.fc,hs:look.hs|0};
   window.myLook=L;try{localStorage.setItem('cyr3d_look',JSON.stringify(L))}catch(e){}stop(true);
  };
 })();
@@ -2981,7 +2999,7 @@ function rideLook(on){
  if(!on&&!sk)return;
  if(!sk||skMe!==ME){skMe=ME;sk=ME.children.filter(o=>o.geometry&&o.geometry.type=='CylinderGeometry'&&(Math.abs(o.position.y-.47)<.01||Math.abs(o.position.y-.13)<.01));
   sk.forEach(o=>{o.userData.y0=o.position.y;o.userData.s0=o.scale.y});
-  lg=[ME.ll,ME.rl].map(l=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.1,.09,.72,8),fm(myGender=='female'?0x9a6a48:0x8a5a3a));m.position.y=-.38;m.visible=false;l.add(m);return m})}
+  lg=[ME.ll,ME.rl].map(l=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.1,.09,.72,8),fm(window.myLook&&window.myLook.sk!=null?window.myLook.sk:(myGender=='female'?0x9a6a48:0x8a5a3a)));m.position.y=-.38;m.visible=false;l.add(m);return m})}
  sk.forEach(o=>{const main=o.userData.y0>.3;if(on){o.scale.y=main?o.userData.s0*.5:o.userData.s0;o.position.y=main?.67:.5}else{o.scale.y=o.userData.s0;o.position.y=o.userData.y0}});
  lg.forEach(m=>m.visible=on)}
 function engStop(){if(eng){try{eng.o.stop()}catch(e){}eng=null}}
@@ -6232,11 +6250,11 @@ window.vehTick=function(dt){prev&&prev(dt);const now=performance.now(),show=zone
 let ACC=null,CL=null,applied=null,tl=0,tc=0,lastErr=0,shown=false;
 const lk=k=>'cyr3d_acc_'+k,rd=k=>{try{return JSON.parse(localStorage.getItem(lk(k))||'null')}catch(e){return null}};
 const arr=x=>String(x||'').split(',').filter(Boolean),V=d=>(d&&+d.s)||0;
-function snap(){const p=CY_PR.get();return{n:myName,g:myGender,s:Math.floor(pts+spent),sp:Math.floor(spent),pr:{d:p.done.join(','),p:p.pts|0,o:Math.floor(p.odo)|0,f:p.ref?1:0}}}
+function snap(){const p=CY_PR.get();return{n:myName,g:myGender,lk:window.myLook?JSON.parse(JSON.stringify(window.myLook)):null,s:Math.floor(pts+spent),sp:Math.floor(spent),pr:{d:p.done.join(','),p:p.pts|0,o:Math.floor(p.odo)|0,f:p.ref?1:0}}}
 function writeLocal(){if(!ACC)return;try{localStorage.setItem(lk(ACC),JSON.stringify(Object.assign(snap(),{t:Date.now()})))}catch(e){}}
 function bad(w,er){const c=er&&er.code||'error';console.warn('[SAVE] '+w+' failed:',c);const n=Date.now();if(n-lastErr>60000){lastErr=n;toast('⚠ Cloud save aagala ('+c+') — database.rules.json Firebase-la publish pannunga',7000)}}
 function pushCloud(){if(!CL||!CL.safe||!started)return;const d=snap();d.t=firebase.database.ServerValue.TIMESTAMP;
- CL.db.ref('users/'+CL.uid).set(d).catch(er=>bad('users',er));
+ if(window.__noLk)delete d.lk;CL.db.ref('users/'+CL.uid).set(d).catch(er=>{if(d.lk&&!window.__noLk){window.__noLk=true;const d2=Object.assign({},d);delete d2.lk;return CL.db.ref('users/'+CL.uid).set(d2).catch(e2=>bad('users',e2))}bad('users',er)});
  CL.db.ref('scores/'+CL.uid).set({n:d.n,g:d.g,s:d.s,sp:d.sp,t:d.t}).catch(er=>bad('scores',er))}
 window.CY_PERSIST=function(){if(!ACC||typeof started==='undefined'||!started)return;clearTimeout(tl);tl=setTimeout(writeLocal,400);if(CL&&CL.safe&&!tc)tc=setTimeout(()=>{tc=0;pushCloud()},2500)};
 window.CY_FLUSH=function(){if(!ACC||typeof started==='undefined'||!started)return;writeLocal();if(CL&&CL.safe){clearTimeout(tc);tc=0;pushCloud()}};
@@ -6253,6 +6271,7 @@ function fin(C){
  const pa=(C&&C.pr)||{},pb=(src&&src.pr)||{};
  const pr={pts:Math.max(+pa.p||0,+pb.p||0),done:[...new Set(arr(pa.d).concat(arr(pb.d)))],odo:Math.max(+pa.o||0,+pb.o||0),ref:!!(pa.f||pb.f)};
  const n=(C&&C.n)||(src&&src.n)||'',g=(C&&C.g)||(src&&src.g)||'';
+ if(C&&C.lk&&typeof C.lk==='object'&&!started){window.myLook=Object.assign({},C.lk);try{localStorage.setItem('cyr3d_look',JSON.stringify(window.myLook))}catch(e){}}
  spent=sp;pts=s0-sp;coinTot=s0;CY_PR.set(pr);walletShow();
  window.CY_PROF={n,g};applied={n,g,s:s0,sp,pr:{d:pr.done.join(','),p:pr.pts,o:pr.odo,f:pr.ref?1:0}};
  dispatchEvent(new Event('cy-prof'))}
@@ -6303,12 +6322,14 @@ LF('firebase-app-compat.js').then(()=>LF('firebase-auth-compat.js')).then(()=>LF
    return au.signInWithPopup(pv).catch(e=>{if(e&&(e.code=='auth/popup-blocked'||e.code=='auth/operation-not-supported-in-this-environment'))return au.signInWithRedirect(pv);throw e})};
   window.CY_SIGNOUT=()=>{try{const FA=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.FirebaseAuthentication;if(FA)FA.signOut().catch(()=>{})}catch(e){}return au.signOut().then(()=>location.reload())};
   window.CY_GUESTGO=()=>{if(window.CY_GUESTRUN)return Promise.resolve();const enter=u=>{if(window.CY_GUESTRUN)return;window.CY_GUESTRUN=true;window.CY_ANON=u;run(u.uid,true)};const cu=au.currentUser;if(cu&&cu.isAnonymous){enter(cu);return Promise.resolve()}return au.signInAnonymously().then(c=>enter(c.user)).catch(e=>{console.warn('[MP] guest sign-in fallback:',e&&e.code||e);enter({uid:'anon_'+Math.random().toString(36).slice(2,10),isAnonymous:true})})};
+  try{au.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{})}catch(e){}
   au.onAuthStateChanged(u=>{window.CY_READY=true;
+   if(!u&&!window.__anonTried){window.__anonTried=true;au.signInAnonymously().catch(e=>console.warn('[MP] anon sign-in:',e&&e.code||e))}/* only AFTER firebase says nobody is signed in (was racing the saved Google session) */
    if(u&&u.isAnonymous){window.CY_ANONAUTH=u;dispatchEvent(new Event('cy-auth'));return}/* anonymous = guest only (CY_GUESTGO) — never cloud-save / leaderboard */
    if(u&&!window.CY_USER){window.CY_USER=u;run(u.uid,false)}
    else if(u&&window.CY_USER&&u.uid!==window.CY_USER.uid){location.reload();return}
    dispatchEvent(new Event('cy-auth'))});
-   if(!au.currentUser){au.signInAnonymously().catch(e=>console.warn('[MP] anon sign-in:',e&&e.code||e))}})
+   })
  .catch(e=>{console.warn('[MP] Firebase failed:',e&&(e.code||e.message)||e);window.CY_FAIL=true;window.CY_ERR=(e&&(e.code||e.message))||'script blocked';dispatchEvent(new Event('cy-auth'))});
 function run(uid,guest){
  let db=null;try{if(typeof firebase!=='undefined'&&firebase.database)db=firebase.database()}catch(e){console.warn('[MP] DB offline',e)}const meRef=db?db.ref('players/'+uid):null,R=new Map(),me={bub:null};
@@ -6337,7 +6358,7 @@ function run(uid,guest){
   const fem=d.g=='female',list=fem?FEMALE_OUTFITS:MALE_OUTFITS;
   const oIdx=typeof d.o==='number'?(d.o%list.length):(hash(id)%list.length);
   const ot=list[oIdx]||list[0];
-  const lk=d.lk,g=person(0,0,lk?lk.c:ot.col,0,OUT,0,lk&&lk.sk!=null?lk.sk:(fem?0x9a6a48:0x8a5a3a),lk?lk.l:ot.leg,lk&&lk.hr!=null?lk.hr:0x100a06,fem,lk?lk.b:ot.bdr,lk?lk.t:ot.type,lk&&lk.bd!=null?lk:null);
+  const lk=d.lk,g=person(0,0,lk?lk.c:ot.col,0,OUT,0,lk&&lk.sk!=null?lk.sk:(fem?0x9a6a48:0x8a5a3a),lk?lk.l:ot.leg,lk&&lk.hr!=null?lk.hr:0x100a06,fem,lk?lk.b:ot.bdr,lk?lk.t:ot.type,lk||null);
   tag(g,d.n||'Player');g.userData.nameTag=g.children[g.children.length-1];
   return{id,g,px:d.x,pz:d.z,buf:[{t:performance.now(),x:d.x,y:d.y||0,z:d.z,r:d.r||0}],rd:'',veh:null,vt:'',zn:'',x:d.x,y:d.y||0,z:d.z,r:d.r||0,tx:d.x,ty:d.y||0,tz:d.z,tr:d.r||0,ph:0,s:0,seen:performance.now(),n:d.n,gd:d.g,o:d.o,em:'',emT:0,et:d.et||0,bub:null}}
  function drop(e){if(e.bub)clearTimeout(e.bub.tm);if(e.g.parent)e.g.parent.remove(e.g);if(e.veh&&e.veh.parent)e.veh.parent.remove(e.veh);R.delete(e.id);count()}
@@ -7036,6 +7057,7 @@ window.__shopBuy=async function(k,i){const s=M[k],q=s&&s.it[i];if(!q)return;
   {id:'bus',ic:'🚌',en:'Cheyyar Bus Stand',ta:'செய்யாறு பேருந்து நிலையம்',x:0,z:-8,r:9,note:'Bus board · timetable'},
   {id:'talk',ic:'🎬',en:'Cheyyar Talkies',ta:'செய்யாறு டாக்கீஸ் (I-MAX)',x:41+TX,z:TZ,r:9,note:'Theatre entrance'},
   {id:'aru',ic:'🥻',en:'Aruna Silks',ta:'அருணா சில்க்ஸ்',x:124,z:19.7,r:10,note:'Front entrance (big shop)'},
+  {id:'salon',ic:'💈',en:'Hair Studio',ta:'முடி நிலையம்',x:12,z:41,r:10,note:'Barber chair · hair styles'},
   {id:'temple',ic:'🛕',en:'Vedhapureeswarar Temple',ta:'வேதபுரீஸ்வரர் கோயில்',x:-100,z:-48,r:10,note:'East gopuram entrance'},
   {id:'cstall',ic:'🥥',en:'Tender Coconut & Meter Tea',ta:'இளநீர் & மீட்டர் டீ கடை',x:-31,z:-12,r:6,note:'Near bus stand · fresh elaneer'},
   {id:'bazaar',ic:'🛍️',en:'East Bazaar',ta:'கிழக்கு பஜார்',x:95,z:22,r:12,note:'Shops on both sides of the road'},
@@ -7317,6 +7339,7 @@ window.__shopBuy=async function(k,i){const s=M[k],q=s&&s.it[i];if(!q)return;
   {id:'temple',ic:'🛕',en:'Vedhapureeswarar Temple',ta:'வேதபுரீஸ்வரர் கோயில்',x:-100,z:-48,r:10,c:'d'},
   {id:'talk',ic:'🎬',en:'Cheyyar Talkies',ta:'செய்யாறு டாக்கீஸ்',x:20+TX,z:-8+TZ,r:9,c:'f'},
   {id:'aru',ic:'🥻',en:'Aruna Silks',ta:'அருணா சில்க்ஸ்',x:124,z:19.7,r:10,c:'s'},
+  {id:'salon',ic:'💈',en:'Hair Studio',ta:'முடி நிலையம்',x:12,z:41,r:10,c:'s'},
   {id:'cstall',ic:'🥥',en:'Tender Coconut & Meter Tea',ta:'இளநீர் & மீட்டர் டீ கடை',x:-31,z:-12,r:6,c:'f'},
   {id:'bazaar',ic:'🛍️',en:'East Bazaar',ta:'கிழக்கு பஜார்',x:113,z:30,r:28,c:'s'},
   {id:'ghat',ic:'🌊',en:'Cheyyar River Ghat',ta:'செய்யாறு ஆற்றங்கரை',x:196,z:10,r:10,c:'f'},
@@ -8035,5 +8058,122 @@ try{
  window.CY_TRAFFIC={scoldTest:o=>{now=performance.now();scold(o)}};
 }catch(e){warn('traffic-init',e)}
 })();
+</script>
+<script>
+/* ===== HAIR STUDIO (💈 salon + barber chair) + FACE COLOUR button ===== */
+(function(){try{
+if(typeof THREE==='undefined'||typeof OUT==='undefined'||typeof person!=='function')return;
+const $=id=>document.getElementById(id),hx=c=>'#'+c.toString(16).padStart(6,'0');
+const X=12,Z=48,W=12,D=9,H=6.5,fr=D/2,T0=.4,DW=3.4,sx=(W-DW)/2,CZ=Z+2.6,PRICE_STYLE=20,PRICE_COL=10;
+/* ---------- building ---------- */
+const g=new THREE.Group();g.position.set(X,0,Z);g.rotation.y=Math.PI;OUT.add(g); /* south side of the main road, door faces the bus stand */
+const wall=0x2d6a6a,L=(a,b,c,e,hh)=>hit(X-b,X-a,Z-e,Z-c,hh||H,'out');
+box(W,.05,D,0xe9e4da,0,.025,0,g);
+for(let i=0;i<6;i++)for(let j=0;j<4;j++)if((i+j)%2==0)box(2,.052,2.25,0x2a2a2e,-W/2+1+i*2,.026,-D/2+1.125+j*2.25,g);
+box(3,.03,3.6,0x8a1f2a,0,.07,-1.9,g);
+box(W,.2,D,0xf3efe4,0,H-.1,0,g);box(W+.5,.3,D+.5,0x555a60,0,H+.15,0,g);
+box(W,H,T0,wall,0,H/2,-fr+T0/2,g);
+[-1,1].forEach(s=>{box(T0,H,D,wall,s*(W/2-T0/2),H/2,0,g);box(sx,H,T0,wall,s*(DW/2+sx/2),H/2,fr-T0/2,g);glow(Math.max(1,sx-1.2),1.6,.1,0xbfe4f0,s*(DW/2+sx/2),1.9,fr+.03,g);box(.25,3.2,.5,0x3a2a1a,s*DW/2,1.6,fr-.1,g);glow(.5,.08,D-2,0xfff4d0,s*W/4,H-.25,0,g)});
+box(DW,H-3.2,T0,wall,0,3.2+(H-3.2)/2,fr-T0/2,g);
+L(-W/2,W/2,-fr,-fr+T0);L(-W/2,-W/2+T0,-fr,fr);L(W/2-T0,W/2,-fr,fr);L(-W/2,-DW/2,fr-T0,fr);L(DW/2,W/2,fr-T0,fr);
+[-W/2+.5,W/2-.5].forEach(px=>box(.5,3.4,.5,0xdddddd,px,1.7,fr+.3,g));box(W+.6,.25,2.2,0xd81b60,0,3.4,fr+1,g);
+box(10.3,2.1,.1,0x1a1a1a,0,5.0,fr+.07,g);sign('💈 HAIR STUDIO · முடி நிலையம்',10,1.8,0,5.0,fr+.16,0,g,'#0e3b3b','#ffd34d');
+/* barber pole */
+for(let i=0;i<8;i++){const m=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.3,12),new THREE.MeshLambertMaterial({color:i%3==0?0xd32f2f:i%3==1?0xffffff:0x1565c0}));m.position.set(-3.1,.4+i*.3,fr+1.1);g.add(m)}
+glow(.4,.12,.4,0xffd34d,-3.1,2.9,fr+1.1,g);
+/* inside: mirrors, shelf, chairs, bench, price boards */
+[-3.6,0,3.6].forEach(x=>{box(2.3,2.9,.06,0x1a1a1a,x,2.1,-fr+.45,g);glow(2,2.6,.05,0xcfe9f2,x,2.1,-fr+.5,g)});
+box(11,.9,.5,0x3a2a2a,0,.45,-fr+.75,g);for(let k=0;k<14;k++)box(.15,.35,.15,[0xe91e63,0x1565c0,0x2e7d32,0xffb300][k%4],-5+k*.77,1.07,-fr+.75,g);L(-5.5,5.5,-fr+.4,-fr+1.1,1.1);
+const chair=(x,z,c)=>{box(.9,.25,.8,0x15151a,x,.2,z,g);box(1.0,.34,.95,c,x,.5,z,g);box(.95,.95,.25,c,x,1.15,z+.45,g);[-1,1].forEach(s=>box(.12,.3,.7,0x222,x+s*.55,.85,z,g));box(.7,.08,.5,0x888888,x,.18,z-.7,g);L(x-.6,x+.6,z-.9,z+.6,1.2)};
+chair(0,-2.6,0xb71c1c);chair(-3.6,-2.6,0x1565c0);chair(3.6,-2.6,0x1565c0);
+box(2.8,.45,.8,0x7a4a2a,-4.2,.23,2.6,g);box(2.8,.5,.15,0x7a4a2a,-4.2,.7,2.95,g);L(-5.6,-2.8,2.2,3.0,.9);
+sign('💈 HAIR STUDIO',5,.8,0,4.6,-fr+.46,0,g,'#0e3b3b','#ffd34d');
+sign('✂️ Haircut / Style '+PRICE_STYLE+' pts · 🎨 Hair colour '+PRICE_COL+' pts',5.6,.8,-W/2+T0+.05,3.3,0,Math.PI/2,g,'#7a1f26','#fff');
+try{const bp=person(1.5,-1.6,0xffffff,0,g,0,0xb07a50,0x1a1a1a,0x100a06,false,0xffffff,'shirt');tag(bp,'💈 Barber Murugan')}catch(e){console.warn('barber',e)}
+/* ---------- helpers ---------- */
+const MALE_HS=['Classic','Crew cut','Quiff','Long hair','Shaved','Spiky'],FEM_HS=['Bun & jasmine','Long open','Ponytail','Short bob','Braid (Jadai)'];
+const HAIRC=[0x100a06,0x3b2314,0x7a4a24,0xc9a063,0x9e9e9e,0xf5f5f5,0x6a1b9a,0xb71c1c,0xe91e63,0x1565c0,0x00897b,0xff8f00];
+const SKINC=[0xf1c9a0,0xe6b48a,0xd9a577,0xc99a6a,0xb07a50,0x9a6a48,0x8a5a3a,0x6e4630,0x4f3022];
+const baseLook=()=>{const fem=myGender=='female',list=fem?FEMALE_OUTFITS:MALE_OUTFITS,o=list[myOutfit%list.length]||list[0];return{t:o.type,c:o.col,l:o.leg,b:o.bdr,sk:fem?0x9a6a48:0x8a5a3a,hr:0x100a06,bd:1,fc:0,hs:0}};
+const curLook=()=>{const b=baseLook(),m=window.myLook||{};const r=Object.assign(b,m);if(r.hs==null)r.hs=0;return r};
+let PV=null,T=null,B=null,mode='';
+function mkPrev(cv){
+ let R=null,raf=0,mdl=null,rot=Math.PI+.35,drag=null;
+ try{
+  R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  const w=cv.clientWidth||170,h=cv.clientHeight||210;R.setSize(w,h,false);R.setClearColor(0,0);
+  const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(27,w/h,.1,60);cam.position.set(0,1.78,2.55);cam.lookAt(0,1.6,0);
+  sc.add(new THREE.AmbientLight(0xffffff,.6));sc.add(new THREE.HemisphereLight(0xdbe8ff,0x4a3426,.45));
+  const d=new THREE.DirectionalLight(0xfff1d6,.95);d.position.set(2,4,4);sc.add(d);const rim=new THREE.DirectionalLight(0xffc98a,.7);rim.position.set(-3,3,-4);sc.add(rim);
+  const build=()=>{try{if(mdl)sc.remove(mdl);mdl=person(0,0,T.c,0,sc,0,T.sk,T.l,T.hr,myGender=='female',T.b,T.t,T);mdl.rotation.y=rot}catch(e){console.warn('[salon]',e)}};
+  build();
+  const tick=()=>{raf=requestAnimationFrame(tick);if(document.hidden||!R)return;if(drag===null)rot+=.012;if(mdl)mdl.rotation.y=rot;R.render(sc,cam)};tick();
+  cv.addEventListener('pointerdown',e=>{drag=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  cv.addEventListener('pointermove',e=>{if(drag===null)return;rot+=(e.clientX-drag)*.012;drag=e.clientX});
+  const up=()=>{drag=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  return{rebuild:build,dispose(){cancelAnimationFrame(raf);try{R.dispose();R.forceContextLoss()}catch(e){}R=null}};
+ }catch(e){console.warn('[salon] preview',e);return{rebuild(){},dispose(){}}}
+}
+const sw=(k,c,cur)=>'<button type="button" data-k="'+k+'" data-v="'+c+'" style="width:30px;height:30px;border-radius:50%;margin:3px;cursor:pointer;border:3px solid '+(cur==c?'#ffd34d':'#0006')+';background:'+hx(c)+'"></button>';
+const lbl=t=>'<div style="margin:10px 0 2px;color:#ffd34d;font-weight:700">'+t+'</div>';
+function cost(){return mode=='salon'?((T.hs|0)!==(B.hs|0)?PRICE_STYLE:0)+(T.hr!==B.hr?PRICE_COL:0):0}
+function refresh(){
+ const bx=$('box');if(!bx)return;
+ bx.querySelectorAll('[data-k="hs"]').forEach(b=>{const on=+b.dataset.v===(T.hs|0);b.style.outline=on?'2px solid #ffd34d':''});
+ bx.querySelectorAll('[data-k="hr"],[data-k="sk"]').forEach(b=>b.style.borderColor=(+b.dataset.v===T[b.dataset.k])?'#ffd34d':'#0006');
+ const c=cost(),ok=$('slOk');if(ok)ok.textContent=mode=='salon'?(c?'✂️ Confirm · '+c+' pts':'✅ Done'):'✅ Save face colour';
+ const inf=$('slInfo');if(inf&&mode=='salon')inf.textContent='Balance: '+Math.floor(pts)+' pts';
+}
+function wire(){
+ const bx=$('box');
+ bx.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;T[k]=+b.dataset.v;refresh();PV&&PV.rebuild()});
+ $('slNo').onclick=()=>closeModal();
+ $('slOk').onclick=()=>{
+  if(mode=='salon'){const c=cost();if(c>0&&!spend(c,'Hair studio'))return}
+  const full=Object.assign(baseLook(),window.myLook||{});full.hs=T.hs|0;full.hr=T.hr;full.sk=T.sk;window.myLook=full;
+  try{localStorage.setItem('cyr3d_look',JSON.stringify(full))}catch(e){}
+  makeMe();window.CY_FLUSH&&CY_FLUSH();closeModal();
+  toast(mode=='salon'?'💈 Barber Murugan: "Super thambi! Semma style 😎"':'🎨 Face colour save aachu',3200)};
+ PV=mkPrev($('slCv'));refresh();
+}
+function openSalon(){
+ const fem=myGender=='female',HS=fem?FEM_HS:MALE_HS;mode='salon';B=curLook();if(B.hs>=HS.length)B.hs=0;T=Object.assign({},B);
+ modal('<h2 style="margin:0;color:#ffd34d">💈 Hair Studio · முடி நிலையம்</h2><div style="opacity:.8;font-size:13px">Barber Murugan: "Style pick pannunga — preview-la paarunga, apuram confirm!"</div>'
+ +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><canvas id="slCv" style="width:170px;height:210px;border-radius:12px;background:#0006;touch-action:none"></canvas><div style="flex:1;min-width:200px">'
+ +lbl('✂️ Hair style · '+PRICE_STYLE+' pts')+HS.map((n,i)=>'<button type="button" data-k="hs" data-v="'+i+'" class="btn g">'+n+'</button>').join('')
+ +lbl('🎨 Hair colour · '+PRICE_COL+' pts')+HAIRC.map(c=>sw('hr',c,T.hr)).join('')+'</div></div>'
+ +'<div id="slInfo" style="font-size:12.5px;opacity:.8;margin-top:8px"></div><div style="text-align:center;margin-top:10px"><button type="button" id="slOk" class="btn">Confirm</button> <button type="button" id="slNo" class="btn g">Cancel</button></div>');
+ wire();
+}
+function openFace(){
+ if(!started)return;if(seated||window.drv||window.boatDrv){toast('Seat/vehicle-la irundhu irangunga, appuram face colour maathunga',2500);return}
+ mode='face';B=curLook();T=Object.assign({},B);
+ modal('<h2 style="margin:0;color:#ffd34d">🎨 Face colour · முக நிறம்</h2><div style="opacity:.8;font-size:13px">Skin tone pick pannunga — free!</div>'
+ +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px"><canvas id="slCv" style="width:170px;height:210px;border-radius:12px;background:#0006;touch-action:none"></canvas><div style="flex:1;min-width:200px">'
+ +lbl('Face / skin colour')+SKINC.map(c=>sw('sk',c,T.sk)).join('')+'</div></div>'
+ +'<div style="text-align:center;margin-top:10px"><button type="button" id="slOk" class="btn">Save</button> <button type="button" id="slNo" class="btn g">Cancel</button></div>');
+ wire();
+}
+window.openFaceColour=openFace;window.openHairStudio=openSalon;
+function sitSalon(){
+ if(!started||seated||window.drv||window.boatDrv)return;
+ seated=true;window.__salonSeat=true;massage=false;seatYaw=Math.PI;seatY=-.1;P.set(X,seatY+1.55,CZ+.1);yaw=Math.PI;pitch=.18;
+ try{$('prompt').style.display='none'}catch(e){}
+ openSalon();
+}
+I.push({z:'out',x:X,y:CZ,r:2.6,when:()=>!window.drv&&!window.boatDrv&&zone=='out'&&!seated&&started,l:'💈 Barber chair · உட்கார்ந்து hair style maathunga',f:sitSalon});
+/* stand up from the barber chair */
+{const _s=window.stand;window.stand=function(){
+ if(window.__salonSeat){window.__salonSeat=false;seated=false;ME.rotation.x=ME.rotation.z=0;P.set(X,1.6,Z+.6);yaw=0;try{Gs=gh()}catch(e){};return}
+ return _s&&_s.apply(this,arguments)}}
+/* closing the modal (Esc / Cancel / Confirm) disposes the preview and gets the player off the chair */
+{const _cm=window.closeModal;window.closeModal=function(){
+ if(PV){try{PV.dispose()}catch(e){}PV=null}
+ const r=_cm.apply(this,arguments);
+ if(window.__salonSeat)try{window.stand()}catch(e){}
+ return r}}
+/* face colour button in the side HUD */
+{const sd=$('side');if(sd){const fb=document.createElement('button');fb.id='faceBtn';fb.textContent='🎨';fb.title='Face colour (skin tone)';fb.onclick=()=>openFace();sd.append(fb)}}
+}catch(e){console.warn('[hair studio]',e)}})();
 </script>
 </body></html>
