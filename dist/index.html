@@ -680,16 +680,16 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
    cyl(.12,.13,.05,10,col,0,1.51,0,torso);
    const cfL=box(.08,.08,.025,col,-.065,1.49,-.115,torso);cfL.rotation.z=-.25;cfL.rotation.y=.15;
    const cfR=box(.08,.08,.025,col,.065,1.49,-.115,torso);cfR.rotation.z=.25;cfR.rotation.y=-.15;
-   box(.038,.44,.02,col,0,1.25,-.155,torso);
-   for(let bi=0;bi<4;bi++)sph(.012,0xf0f0f0,0,1.42-bi*.10,-.165,torso);
-   box(.075,.085,.015,col,-.11,1.33,-.155,torso);
+   box(.038,.44,.02,col,0,1.25,-.18,torso);
+   for(let bi=0;bi<4;bi++)sph(.012,0xf0f0f0,0,1.42-bi*.10,-.19,torso);
+   box(.075,.085,.015,col,-.11,1.33,-.18,torso);
   }else{
    cyl(.12,.125,.035,12,col,0,1.50,0,torso);
-   box(.11,.09,.015,bdr,0,1.32,-.156,torso); // Graphic chest logo
+   box(.11,.09,.015,bdr,0,1.32,-.182,torso); // Graphic chest logo
   }
   cyl(.225,.235,.065,10,0x1b1b1b,0,.92,0,torso,.76);
-  box(.055,.042,.02,0xd8d8d8,0,.92,-.155,torso);
-  box(.025,.032,.025,0x1b1b1b,0,.92,-.158,torso);
+  box(.055,.042,.02,0xd8d8d8,0,.92,-.18,torso);
+  box(.025,.032,.025,0x1b1b1b,0,.92,-.183,torso);
   cyl(.235,.255,.18,10,leg,0,.82,0,torso,.77);
  }else{
   // GIRLS: Modern Kurti / Chudidhar / Western Top & Jeans / Modern Frock Dress
@@ -781,13 +781,13 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
  head.userData.nextBlink=(typeof performance!=='undefined'?performance.now():Date.now())+2000+Math.random()*3000;
  head.userData.blinkEnd=0;
 
- box(.032,.07,.038,skin,0,-.01,-.208,head);
+ sph(.03,skin,0,-.012,-.214,head,.6,1.5,.85); /* nose bridge */
  sph(.034,skin,0,-.045,-.222,head,1.1,.9,1.1);
  sph(.018,skin,-.025,-.05,-.21,head);
  sph(.018,skin,.025,-.05,-.21,head);
  if(fem)sph(.011,GOLD,.032,-.042,-.212,head);
  const lipCol=fem?0xc23b5a:0x8e5042;
- box(.068,.015,.022,lipCol,0,-.102,-.205,head);
+ sph(.03,lipCol,0,-.102,-.206,head,1.25,.36,.6); /* upper lip */
  sph(.028,lipCol,0,-.116,-.202,head,1.2,.55,.75);
  [-1,1].forEach(sd=>{const b=new THREE.Mesh(hqS(.05),hqBlush(fem));b.position.set(sd*.105,-.045,-.178);b.scale.set(1,.7,.35);head.add(b)}); /* cheek blush */
  box(.06,.004,.006,0x3a1512,0,-.1095,-.2155,head); /* mouth line */
@@ -932,7 +932,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
  /* 4. ARMS & HANDS WITH ARTICULATED FINGERS */
  const makeArm=(px,isLeft)=>{
   const a=new THREE.Group();a.position.set(px,1.48,0);
-  sph(.115,col,0,0,0,a,.95,1.05,.95);
+  sph(.104,col,0,0,0,a,.95,1,.95); /* shoulder no longer a pom-pom */
   if(fem){
    cyl(.095,.088,.15,8,col,0,-.075,0,a);
    cyl(.091,.091,.022,8,bdr||0xffffff,0,-.15,0,a);
@@ -954,7 +954,7 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
    box(.034,.024,.02,0xd4d8dc,0,-.26,-.068,forearm);
    sph(.012,0x0a192f,0,-.26,-.078,forearm);
   }
-  box(.076,.075,.036,skin,0,-.36,0,forearm);
+  sph(.05,skin,0,-.372,0,forearm,.92,1.15,.62); /* rounded palm */
   box(.024,.048,.028,skin,(isLeft?.038:-.038),-.35,-.018,forearm);
   sph(.013,skin,(isLeft?.038:-.038),-.33,-.015,forearm);
   const fX=[-.025,-.008,.009,.025],fH=[.048,.052,.048,.040];
@@ -979,11 +979,11 @@ function person(x,z,col,ry,p,y=0,skin,leg,hair,fem=false,bdr,type,opt){
  g.la=makeArm(fem?-.34:-.38,true);
  g.ra=makeArm(fem?.34:.38,false);
  /* realism proportions: slimmer arms/legs, smaller head (less toy-like) */
- g.la.scale.set(.84,1,.84);g.ra.scale.set(.84,1,.84);[g.ll,g.rl].forEach(l=>l.scale.set(.9,1,.9));
- const H0=.86;head.scale.set(H0,H0,H0);
+ g.la.scale.set(1.15,.85,1.15);g.ra.scale.set(1.15,.85,1.15);[g.ll,g.rl].forEach(l=>l.scale.set(1.1,1,1.1));g.la.position.x*=1.12;g.ra.position.x*=1.12;torso.scale.x=1.12; /* chibi: stocky body, short puffy arms */
+ const H0=1.0;head.scale.set(H0,H0,H0);head.position.y=1.72; /* chibi: big round head */
  if(opt){ /* character creator: body build + face structure */
   const B=opt.bd==null?1:opt.bd,bs=[.9,1,1.14][B],bz=[.9,1,1.1][B],as=[.78,1,1.32][B];
-  if(B!==1){torso.scale.set(bs,1,bz);g.la.scale.set(as*.84,1,as*.84);g.ra.scale.set(as*.84,1,as*.84);g.la.position.x*=bs;g.ra.position.x*=bs;[g.ll,g.rl].forEach(l=>l.scale.set((B==2?1.1:.9)*.9,1,(B==2?1.1:.9)*.9))}
+  if(B!==1){torso.scale.set(bs*1.12,1,bz);g.la.scale.set(as*1.15,.85,as*1.15);g.ra.scale.set(as*1.15,.85,as*1.15);g.la.position.x*=bs;g.ra.position.x*=bs;[g.ll,g.rl].forEach(l=>l.scale.set((B==2?1.25:1.05),1,(B==2?1.25:1.05)))}
   if(B===2&&!fem){sph(.085,col,-.1,1.37,-.115,torso,1,.85,.7);sph(.085,col,.1,1.37,-.115,torso,1,.85,.7)}
   const F=opt.fc||0;
   if(F===1)head.scale.set(1.08*H0,.98*H0,1.05*H0);
