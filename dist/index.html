@@ -8851,7 +8851,7 @@ function buildBots(){
  for(let i=0;i<nB;i++){const b=mkBot(1,FOE_N[i]||'Foe'+(i+1),i+1);if(mp){b.aid=(1-SQMP.team)+'_'+i;b.pup=!SQMP.isHost()}G.bots.push(b)}
  if(mp)SQMP.addRemotes();
 }
-window.__SQ={G:G,mkBot:mkBot,drawTag:drawTag,SQG:SQG,start:startMatch,hurt:hurtBot,hurtMe:hurtMe,kill:killBot,setGun:setGun};
+window.__SQ={G:G,mkBot:mkBot,drawTag:drawTag,SQG:SQG,start:startMatch,hurt:hurtBot,hurtMe:hurtMe,kill:killBot,setGun:setGun,next:nextRound,fight:beginFight,endRound:endRound,endMatch:endMatch,W:W,tracer:tracer};
 function botLoadout(b){
  const r=G.round;if(b.coin===undefined){b.coin=1000;b.own=[]}
  const opts=['holi','ak','pattasu','kavan'].filter(k=>!b.own.includes(k)&&b.coin>=W[k].cost);
@@ -8922,7 +8922,7 @@ function fire(ox,oy,oz,dx,dy,dz,w,shooter,err,isMe){
   else if(hit.type==='me')hurtMe(dmgFall(w,tt)*(hit.head?1.6:1)*DIFF[G.diff].dmg,shooter,hit.head,w.n);
  }
 }
-function botFire(b,t){
+function botFire(b,t){if(window.SQMP&&SQMP.on&&b.aid!==undefined&&!b.pup)SQMP.shot(b,t);
  const w=W[b.wpn],D=DIFF[G.diff],fx=-Math.sin(b.yaw),fz=-Math.cos(b.yaw),rx=Math.cos(b.yaw),rz=-Math.sin(b.yaw);
  const ox=b.x+fx*.6+rx*.3,oy=1.25,oz=b.z+fz*.6+rz*.3;
  let dx=t.x-ox,dy=(t.isMe&&G.crouch?.75:1.1)-oy,dz=t.z-oz;const L=Math.hypot(dx,dy,dz)||1;dx/=L;dy/=L;dz/=L;
@@ -9091,15 +9091,15 @@ function buy(it){
 }
 
 /* ---------- match flow ---------- */
-function nextRound(){
+function nextRound(){if(window.SQMP&&SQMP.gate('buy'))return;
  G.round++;G.tab='w';G.phase='buy';G.t=BUY_T;G.buyEl=0;G.buyShown=0;G.cdN=0;resetRound();hud();shop();
  $s('sqBuy').style.display='none';$s('sqBuyOpen').style.display='none';RINGS.forEach(r=>r.visible=true);
  const zw=$s('sqZoneW');zw.textContent='🔴 STAY INSIDE THE RING';zw.style.display='block';banner('ROUND '+G.round,1500);timerTxt();
 }
-function beginFight(){
+function beginFight(){if(window.SQMP&&SQMP.gate('fight'))return;
  G.phase='fight';G.t=FIGHT_T;G.zdmg=0;$s('sqBuy').style.display='none';$s('sqBuyOpen').style.display='none';RINGS.forEach(r=>r.visible=false);{const zw=$s('sqZoneW');zw.textContent='OUTSIDE SAFE ZONE';zw.style.display='none'}banner('FIGHT',1100);sfx(300,700,.25,.05,'sawtooth');hud();
 }
-function endRound(win,why){
+function endRound(win,why){if(G.phase==='fight'&&window.SQMP&&SQMP.gate('over',win,why))return;
  if(G.phase!=='fight')return;G.phase='over';G.t=OVER_T;ZONE.visible=false;$s('sqZoneW').style.display='none';
  if(win>=0)G.score[win]++;G.coins+=win===0?600:400;G.bots.forEach(b=>{b.coin=(b.coin||0)+(b.team===win?600:400)});G.rlog.push({r:G.round,w:win,k:G.me.kills-(G.me.k0||0),tk:G.bots.reduce((a,b)=>a+(b.team===0?b.kills-(b.k0||0):0),G.me.kills-(G.me.k0||0))});mvpShow();
  banner(win===0?'ROUND WON':win===1?'ROUND LOST':'DRAW',2200);sfx(win===0?600:200,win===0?1200:80,.4,.05,'sine');hud();
@@ -9110,7 +9110,7 @@ function checkEnd(){
  if(a1===0){finishKnocked(1);endRound(0,'Vetri da!')}else if(a0===0){finishKnocked(0);endRound(1,'Adutha round paathukalam')}
  else if(G.t<=0){let h0=G.me.dead?0:G.me.hp,h1=0;G.bots.forEach(b=>{if(b.alive){if(b.team===0)h0+=b.hp;else h1+=b.hp}});endRound(h0>h1?0:h1>h0?1:-1,'Time up — HP '+Math.round(h0)+' vs '+Math.round(h1))}
 }
-function endMatch(){
+function endMatch(){if(window.SQMP&&SQMP.gate('done'))return;
  G.phase='done';const win=G.score[0]>G.score[1];
  $s('sqEH').textContent=win?'🏆 VICTORY! வெற்றி!':'💥 DEFEAT';$s('sqEH').style.color=win?'#4cd964':'#ff7b72';
  $s('sqES').textContent='Final score  '+G.score[0]+' – '+G.score[1]+(win?'   ·   Bus Stand Boys rule!':'   ·   Adutha thadava paathukalam!');
@@ -9449,6 +9449,9 @@ box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.datase
  else if(a==='new')join(String(1000+Math.random()*9000|0));
  else if(a==='join'){const c=($('mpC').value||'').trim().toUpperCase();if(!/^[A-Z0-9]{3,8}$/.test(c)){msg='3–8 letters/numbers code podunga';draw();return}join(c)}};
 const PT={},BT={};M.isHost=host;
+const pub=(k,a,y)=>{if(rr)rr.child('rs').set({k:k,r:SQ.G.round+(k==='buy'?1:0),a:a===undefined?null:a,y:y||'',n:Date.now()+Math.random()}).catch(()=>{})};
+M.gate=(k,a,y)=>{if(!M.on)return false;if(k==='buy'&&SQ.G.round===0)return false;if(host()){pub(k,k==='over'&&a>=0?(a===0?M.team:1-M.team):a,y);return false}return !M.allow};
+const sht={};M.shot=(b,t)=>{const n=Date.now();if(!rr||n-(sht[b.aid]||0)<90)return;sht[b.aid]=n;const r=rr.child('sh').push({i:b.aid,x:+t.x.toFixed(1),z:+t.z.toFixed(1)});setTimeout(()=>r.remove().catch(()=>{}),2500)};
 M.addRemotes=()=>{const n=[0,0];Object.keys(mm).forEach(k=>{if(k===uid())return;const rel=mm[k].t===M.team?0:1,b=SQ.mkBot(rel,mm[k].n||'Player',rel+(n[rel]++)*2);b.remote=1;b.uid=k;SQ.G.bots.push(b)})};
 const rmRem=f=>{SQ.G.bots=SQ.G.bots.filter(b=>{if(b.remote&&f(b)){if(b.g.parent)b.g.parent.remove(b.g);return false}return true})};
 M.net=(b,dt)=>{const t=b.remote?PT[b.uid]:BT[b.aid];if(!t)return;const G=SQ.G,k=Math.min(1,dt*12),dx=t.x-b.x,dz=t.z-b.z;b.moving=Math.hypot(dx,dz)>.04;b.x+=dx*k;b.z+=dz*k;let d=t.y-b.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));b.yaw+=d*k;b.kn=!!t.k;if(b.kn&&!(b.kh>0))b.kh=40;if(t.h!==undefined)b.hp=t.h;if(t.a!==undefined)b.ar=t.a;
@@ -9461,11 +9464,15 @@ function join(code){
  Promise.all([db().ref('.info/serverTimeOffset').once('value'),r.child('m').once('value')]).then(q=>{SKEW=+q[0].val()||0;const m=q[1].val()||{},ks=Object.keys(m).filter(k=>k!==uid()&&!stale(m[k]));if(ks.length>=8){msg='Room full (8/8)';draw();return}
   rr=r;const a=ks.filter(k=>m[k].t===0).length,b=ks.length-a,hk=ks.sort((x,y)=>(m[x].j||0)-(m[y].j||0))[0];M.team=a<b?0:b<a?1:(hk?1-m[hk].t:0);M.code=code;first=true;
   const me=rr.child('m/'+uid()),pp=rr.child('p/'+uid());me.onDisconnect().remove();pp.onDisconnect().remove();
-  return me.set({n:nm(),t:M.team,j:TS(),hb:TS()}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key;
+  return me.set({n:nm(),t:M.team,j:TS(),hb:TS()}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key,k1=rr.child('sh').push().key;let fr=1,lastN=0;
    const on=(q,ev,f)=>{q.on(ev,f);lis.push([q,ev,f])};
-   on(rr.child('m'),'value',s=>{{const v=s.val()||{};mm={};for(const k in v)if(!stale(v[k]))mm[k]=v[k]}recalc();rmRem(b=>!mm[b.uid]);draw()});
+   on(rr.child('m'),'value',s=>{{const v=s.val()||{};mm={};for(const k in v)if(!stale(v[k]))mm[k]=v[k]}recalc();if(SQ.G.on&&host())SQ.G.bots.forEach(b=>{if(b.aid!==undefined)b.pup=false});rmRem(b=>!mm[b.uid]);draw()});
    on(rr.child('st'),'value',s=>{const v=s.val()||0;if(first){st0=v;first=false;return}if(v&&v!==st0){st0=v;if(!SQ.G.on)SQ.start()}});
    on(rr.child('p'),'child_added',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_changed',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_removed',s=>{delete PT[s.key]});
+   on(rr.child('rs'),'value',s=>{const v=s.val();if(fr){fr=0;lastN=v&&v.n;return}if(!v||v.n===lastN)return;lastN=v.n;if(host()||!SQ.G.on)return;const G=SQ.G;M.allow=1;try{
+    if(v.k==='buy'){if(G.round<v.r)SQ.next()}else if(v.k==='fight'){if(G.phase==='buy')SQ.fight()}
+    else if(v.k==='over'){if(G.phase==='fight')SQ.endRound(v.a<0?-1:(v.a===M.team?0:1),v.y)}else if(v.k==='done'){if(G.phase!=='done')SQ.endMatch()}}finally{M.allow=0}});
+   on(rr.child('sh').orderByKey().startAt(k1),'child_added',s=>{const v=s.val(),G=SQ.G;if(!v||host())return;const b=G.bots.find(o=>o.aid===v.i);if(b&&b.alive){const w=SQ.W[b.wpn]||{col:0xffd34d};SQ.tracer(b.x-Math.sin(b.yaw)*.6,1.25,b.z-Math.cos(b.yaw)*.6,v.x,1.1,v.z,w.col)}});
    on(rr.child('b'),'value',s=>{const o=s.val()||{};for(const k in o){const a=o[k];BT[k]={x:a[0],z:a[1],y:a[2],h:a[3],a:a[4],d:a[5],k:a[6],w:a[7]}}});
    on(rr.child('ev').orderByKey().startAt(k0),'child_added',s=>{const v=s.val();if(!v||v.to!==uid())return;s.ref.remove();const G=SQ.G;
     if(v.i){const b=G.bots.find(o=>o.aid===v.i);if(b&&b.alive&&!b.pup)SQ.hurt(b,v.a,G.bots.find(o=>o.uid===v.f)||{x:v.x,z:v.z,name:v.n,team:1},!!v.h,v.w)}
