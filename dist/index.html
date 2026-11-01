@@ -8846,8 +8846,11 @@ function mkBot(team,name,idx){
 }
 function buildBots(){
  G.bots.forEach(b=>{if(b.g.parent)b.g.parent.remove(b.g)});G.bots=[];
- ALLY_N.forEach((n,i)=>G.bots.push(mkBot(0,n,i)));FOE_N.forEach((n,i)=>G.bots.push(mkBot(1,n,i+1)));
+ const mp=window.SQMP&&SQMP.on,nA=mp?SQMP.botsA:ALLY_N.length,nB=mp?SQMP.botsB:FOE_N.length;
+ for(let i=0;i<nA;i++)G.bots.push(mkBot(0,ALLY_N[i]||'Ally'+(i+1),i));
+ for(let i=0;i<nB;i++)G.bots.push(mkBot(1,FOE_N[i]||'Foe'+(i+1),i+1));
 }
+window.__SQ={G:G,mkBot:mkBot,drawTag:drawTag,SQG:SQG,start:startMatch};
 function botLoadout(b){
  const r=G.round;if(b.coin===undefined){b.coin=1000;b.own=[]}
  const opts=['holi','ak','pattasu','kavan'].filter(k=>!b.own.includes(k)&&b.coin>=W[k].cost);
@@ -9412,5 +9415,45 @@ try{window.CY_POI&&CY_POI.push({id:'squad',ic:'⚔️',en:'Cheyyar Squad Arena',
 }catch(e){console.warn('[SquadBuilding]',e)}
 })();
 
+</script>
+<script>
+/* ===== SQUAD MULTIPLAYER (step 1): rooms, auto team balance, bot fill (4 - humans per team), remote avatars. Firebase: sqrooms/{code}/{m,p,st} ===== */
+(function(){
+const SQ=window.__SQ;if(!SQ)return;
+const M=window.SQMP={on:false,code:'',team:0,botsA:3,botsB:4},R=new Map(),$=id=>document.getElementById(id);
+let rr=null,mm={},st0=0,first=true,lis=[];
+const db=()=>window.CY_DB,uid=()=>window.CY_UID,nm=()=>($('inName')&&$('inName').value.trim().slice(0,14))||SQ.G.pl.name||'Player';
+const el=(t,h,c)=>{const e=document.createElement(t);if(h)e.innerHTML=h;if(c)e.style.cssText=c;return e};
+const bx=el('button','👥 Room','position:fixed;left:12px;top:calc(44% + 52px);z-index:12;padding:9px 14px;border-radius:999px;border:1px solid #c9a24a;background:#2a1a10;color:#ffd34d;font:700 13px system-ui');
+const pn=el('div','','display:none;position:fixed;left:12px;top:calc(44% + 96px);z-index:13;width:230px;padding:12px;border-radius:14px;background:rgba(20,12,8,.94);color:#fff;font:13px system-ui;border:1px solid #c9a24a');
+document.body.append(bx,pn);bx.onclick=()=>{pn.style.display=pn.style.display=='none'?'block':'none';draw()};
+function recalc(){const ks=Object.keys(mm);let a=0,b=0;ks.forEach(k=>mm[k].t===M.team?a++:b++);M.botsA=Math.max(0,4-a);M.botsB=Math.max(0,4-b)}
+function host(){return Object.keys(mm).sort()[0]===uid()}
+function draw(){
+ if(!M.on){pn.innerHTML='<b>Squad Room</b><br><input id="mpC" maxlength="4" placeholder="Room code" style="width:100%;margin:8px 0;padding:7px;border-radius:8px;border:0;text-align:center;font-size:16px"><button id="mpJ" style="width:100%;padding:8px;border-radius:8px;border:0;background:#ffd34d;font-weight:700">Create / Join</button><div style="opacity:.7;margin-top:6px">Blank = new room. Max 8 players, rest are bots.</div>';
+  $('mpJ').onclick=()=>join(($('mpC').value||String(1000+Math.random()*9000|0)).trim());return}
+ const ks=Object.keys(mm).sort(),row=t=>ks.filter(k=>mm[k].t===t).map(k=>'• '+(mm[k].n||'Player')+(k===uid()?' (you)':'')+(k===ks[0]?' 👑':'')).join('<br>')||'<i>bots only</i>';
+ pn.innerHTML='<b>Room '+M.code+'</b> · '+ks.length+'/8<br><div style="margin:8px 0"><b style="color:#6ab0ff">Team A</b><br>'+row(0)+'</div><div><b style="color:#ff7a6a">Team B</b><br>'+row(1)+'</div><div style="opacity:.8;margin:8px 0">You: '+(4-M.botsA)+'H+'+M.botsA+'B vs '+(4-M.botsB)+'H+'+M.botsB+'B</div>'+(host()?'<button id="mpS" style="width:100%;padding:8px;border-radius:8px;border:0;background:#4cd964;font-weight:700;margin-bottom:6px">▶ Start match</button>':'<div style="opacity:.7;margin-bottom:6px">Waiting for host…</div>')+'<button id="mpL" style="width:100%;padding:7px;border-radius:8px;border:0">Leave</button>';
+ if($('mpS'))$('mpS').onclick=()=>rr.child('st').set(Date.now());$('mpL').onclick=leave}
+function join(code){
+ if(!db()||!uid()){toast&&toast('Online illa — Firebase connect aagala',2500);return}
+ rr=db().ref('sqrooms/'+code);
+ rr.child('m').once('value').then(s=>{const m=s.val()||{},ks=Object.keys(m).filter(k=>k!==uid());if(ks.length>=8){toast('Room full (8/8)',2500);return}
+  const a=ks.filter(k=>m[k].t===0).length,b=ks.length-a;M.team=a<=b?0:1;M.code=code;M.on=true;first=true;
+  const me=rr.child('m/'+uid()),pp=rr.child('p/'+uid());me.onDisconnect().remove();pp.onDisconnect().remove();me.set({n:nm(),t:M.team});
+  const on=(r,e,f)=>{r.on(e,f);lis.push([r,e,f])};
+  on(rr.child('m'),'value',s=>{mm=s.val()||{};recalc();draw()});
+  on(rr.child('st'),'value',s=>{const v=s.val()||0;if(first){st0=v;first=false;return}if(v&&v!==st0){st0=v;pn.style.display='none';if(!SQ.G.on)SQ.start()}});
+  const up=s=>{if(s.key===uid())return;upsert(s.key,s.val())};on(rr.child('p'),'child_added',up);on(rr.child('p'),'child_changed',up);
+  on(rr.child('p'),'child_removed',s=>drop(s.key));draw()})}
+function leave(){lis.forEach(l=>l[0].off(l[1],l[2]));lis=[];try{rr.child('m/'+uid()).remove();rr.child('p/'+uid()).remove()}catch(e){}[...R.keys()].forEach(drop);M.on=false;M.botsA=3;M.botsB=4;mm={};draw()}
+function upsert(k,v){if(!v)return;let e=R.get(k);const same=v.t===M.team;
+ if(!e){const b=SQ.mkBot(same?0:1,v.n||'Player',R.size+(same?0:1));b.remote=true;e={b:b,tx:v.x,tz:v.z,ty:v.y,nm:v.n};b.x=v.x;b.z=v.z;b.yaw=v.y;R.set(k,e)}
+ e.tx=v.x;e.tz=v.z;e.ty=v.y;e.b.g.visible=!v.d;if(v.n&&v.n!==e.nm){e.nm=v.n;e.b.name=v.n;SQ.drawTag(e.b)}}
+function drop(k){const e=R.get(k);if(e){if(e.b.g.parent)e.b.g.parent.remove(e.b.g);R.delete(k)}}
+setInterval(()=>{if(!M.on||!rr)return;const p=rr.child('p/'+uid());
+ if(SQ.G.on&&zone==='squad')p.set({n:SQ.G.pl.name,t:M.team,x:+P.x.toFixed(2),z:+P.z.toFixed(2),y:+yaw.toFixed(2),h:SQ.G.me.hp|0,w:SQ.G.me.wpn,d:SQ.G.me.dead?1:0});else p.remove()},100);
+(function f(){for(const e of R.values()){const b=e.b;b.x+=(e.tx-b.x)*.3;b.z+=(e.tz-b.z)*.3;let d=e.ty-b.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));b.yaw+=d*.3;b.g.position.set(b.x,0,b.z);b.g.rotation.y=b.yaw;if(!(SQ.G.on&&zone==='squad'))b.g.visible=false}requestAnimationFrame(f)})();
+})();
 </script>
 </body></html>
