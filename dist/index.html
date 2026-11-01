@@ -6464,6 +6464,8 @@ function run(uid,guest){
    if(e.rd){const hv=e.rd===uid?(window.drv?window.drv.t:''):((R.get(e.rd)||{}).vt||''),ok=hv==='bus'||!!SEATS[hv];const h=!ok?null:(e.rd===uid?(window.drv&&window.drv.spec.rd?{x:ME.position.x,y:ME.position.y,z:ME.position.z,r:ME.rotation.y}:{x:P.x,y:0,z:P.z,r:(window.drv&&!window.drv.spec.rd?window.drv.h:ME.rotation.y)}):R.get(e.rd));
     if(h){e.pp=SEATS[hv]?hv:'';let o,oy=.2;if(e.pp){const q=SEATS[hv];o=q[sidx(e.rd,e.id)%q.length];oy=OYR[hv]}else o=SLOT[hash(e.id)%6];const c=Math.cos(h.r),sn=Math.sin(h.r);e.x=h.x+o[0]*c+o[1]*sn;e.z=h.z-o[0]*sn+o[1]*c;e.y=(h.y||0)+oy;e.r=h.r}else e.pp=''}else e.pp=''
    const ox=e.px,oz=e.pz;
+   /* Squad arena draws other players as team-coloured squad avatars; hide the town avatar so they never double up */
+   {const inSq=e.zn==='squad';if(inSq){if(e.g.visible!==false){e.g.visible=false;e._sqh=1}if(e.veh&&e.veh.visible!==false){e.veh.visible=false;e._sqhv=1}}else{if(e._sqh){e.g.visible=true;e._sqh=0}if(e._sqhv&&e.veh){e.veh.visible=true;e._sqhv=0}}}
    {const nt=e.g.userData.nameTag;if(nt)nt.visible=!(typeof zone!=='undefined'&&zone==='aud'&&e.zn==='aud')||Math.hypot(e.x-P.x,e.z-P.z)<4.6}
    const sp=Math.hypot(e.x-ox,e.z-oz)/Math.max(dt,.001),g=e.g,rid=RIDE[e.vt];e.spd=sp;
    g.position.set(e.x,e.y,e.z);g.rotation.y=e.r;g.ll.rotation.z=g.rl.rotation.z=0;if(e.fo){g.position.x+=e.fo.x;g.position.y+=e.fo.y;g.position.z+=e.fo.z;g.rotation.x=e.fo.rx;g.rotation.z=e.fo.rz}else if(g.rotation.x||g.rotation.z){g.rotation.x=g.rotation.z=0}
