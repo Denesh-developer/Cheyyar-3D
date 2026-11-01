@@ -6385,11 +6385,12 @@ function run(uid,guest){
   const oIdx=typeof d.o==='number'?(d.o%list.length):(hash(id)%list.length);
   const ot=list[oIdx]||list[0];
   const lk=d.lk,g=person(0,0,lk?lk.c:ot.col,0,OUT,0,lk&&lk.sk!=null?lk.sk:(fem?0x9a6a48:0x8a5a3a),lk?lk.l:ot.leg,lk&&lk.hr!=null?lk.hr:0x100a06,fem,lk?lk.b:ot.bdr,lk?lk.t:ot.type,lk||null);
-  tag(g,d.n||'Player');g.userData.nameTag=g.children[g.children.length-1];
+  tag(g,d.n||'Player');g.userData.nameTag=g.children[g.children.length-1];g.userData.noCull=1;
   return{id,g,px:d.x,pz:d.z,buf:[{t:performance.now(),x:d.x,y:d.y||0,z:d.z,r:d.r||0}],rd:'',veh:null,vt:'',zn:'',x:d.x,y:d.y||0,z:d.z,r:d.r||0,tx:d.x,ty:d.y||0,tz:d.z,tr:d.r||0,ph:0,s:0,seen:performance.now(),n:d.n,gd:d.g,o:d.o,em:'',emT:0,et:d.et||0,bub:null}}
  function drop(e){if(e.wk){try{releaseWorld(e.wk,e)}catch(x){}e.wk=null}if(e.bub)clearTimeout(e.bub.tm);if(e.g.parent)e.g.parent.remove(e.g);if(e.veh&&e.veh.parent)e.veh.parent.remove(e.veh);R.delete(e.id);count()}
  const holder=e=>HID[e.vt]&&e.veh?[e.veh,TY[e.vt]+.5]:[e.g,3.15];
  /* ---- shared world vehicles: a taken car disappears for everybody, a parked car stays where it was left ---- */
+ let SKEW=0;window.CY_NOW=()=>Date.now()+SKEW;
  const WVT=new Map(),PKT=new Map(),PKS={};let lastDv=null;
  function findWorld(k){if(!k)return null;const ch=OUT.children;for(let i=0;i<ch.length;i++){const c=ch[i],u=c.userData;if(u&&u.seed===k&&u.vt&&!u.remote&&!u.jkc)return c}return null}
  function detach(w){for(const arr of [window.__TR,window.__TV]){if(!arr)continue;const i=arr.findIndex(o=>o.g===w);if(i>=0){const o=arr[i];arr.splice(i,1);if(o.tg)o.tg.visible=false;return{arr,o}}}return null}
@@ -6416,7 +6417,7 @@ function run(uid,guest){
    PKT.set(k,q.t);parkWorld(w,q)}}
  function pkTick(){const dv=window.drv||null;if(dv===lastDv)return;const o=lastDv;lastDv=dv;
   if(o&&o.g&&o.g.visible&&o.g.position.x<5000&&o.g.userData&&o.g.userData.seed){
-   const q={x:+o.g.position.x.toFixed(2),z:+o.g.position.z.toFixed(2),r:+o.g.rotation.y.toFixed(3),t:Date.now()};
+   const q={x:+o.g.position.x.toFixed(2),z:+o.g.position.z.toFixed(2),r:+o.g.rotation.y.toFixed(3),t:window.CY_NOW()};
    PKS['s'+o.g.userData.seed]=q;PKT.set(o.g.userData.seed,q.t)}}
  function apply(id,d){
   if(id===uid||!d||typeof d.x!=='number'||typeof d.z!=='number')return;
@@ -6438,21 +6439,21 @@ function run(uid,guest){
    if(e.wk&&e.wk!==w){releaseWorld(e.wk,e);e.wk=null}
    if(w&&e.wk!==w)takeWorld(w,e)}}
   applyPk(d);
-  if(d.hit&&d.hit!==e.hit){e.hit=d.hit;if(d.hi===uid&&Date.now()-d.hit<6000&&!MUTE.has(e.id)){toast('👋 '+String(d.n||e.n||'Player').slice(0,14)+' ungala paathu Hi sonnaanga!',3500);try{blip(880,.12,.05,'sine')}catch(x){}}}
-  if(d.jkt&&d.jkt!==e.jkt){e.jkt=d.jkt;if(d.jk===uid&&Date.now()-d.jkt<5000&&window.drv&&window.drv.t!=='bus'){
+  if(d.hit&&d.hit!==e.hit){e.hit=d.hit;if(d.hi===uid&&window.CY_NOW()-d.hit<6000&&!MUTE.has(e.id)){toast('👋 '+String(d.n||e.n||'Player').slice(0,14)+' ungala paathu Hi sonnaanga!',3500);try{blip(880,.12,.05,'sine')}catch(x){}}}
+  if(d.jkt&&d.jkt!==e.jkt){e.jkt=d.jkt;if(d.jk===uid&&window.CY_NOW()-d.jkt<5000&&window.drv&&window.drv.t!=='bus'){
    const v=window.drv,g0=v.g,ox=g0.position.x,oz=g0.position.z;
    try{window.__vdismount()}catch(x){}try{jy=.01;vy=5}catch(x){}
    g0.visible=false;g0.position.set(9999,0,9999);
    if(!v.jk)setTimeout(()=>{if(window.drv!==v&&!g0.userData.__taken){g0.position.set(ox,0,oz);g0.visible=true}},25000);
    toast('😱 '+String(d.n||e.n||'Player').slice(0,14)+' unga vandi-ya thooki eduthuttaanga! Thirumba thooki edukkalam 😈',3500);try{blip(160,.2,.1,'sawtooth')}catch(x){}}}
-  if(d.kbt&&d.kbt!==e.kbt){e.kbt=d.kbt;if(d.kb===uid&&Date.now()-d.kbt<4000&&window.__knock)window.__knock(+d.kx||0,+d.kz||0,String(d.n||e.n||'Player').slice(0,14))}
-  if(d.et&&d.et!==e.et){e.et=d.et;if(Date.now()-d.et<5000&&d.e){e.em=d.e;e.emT=2.2;const h=holder(e);bubble(e,h[0],EM[d.e]||'👋',h[1]);
+  if(d.kbt&&d.kbt!==e.kbt){e.kbt=d.kbt;if(d.kb===uid&&window.CY_NOW()-d.kbt<4000&&window.__knock)window.__knock(+d.kx||0,+d.kz||0,String(d.n||e.n||'Player').slice(0,14))}
+  if(d.et&&d.et!==e.et){e.et=d.et;if(window.CY_NOW()-d.et<5000&&d.e){e.em=d.e;e.emT=2.2;const h=holder(e);bubble(e,h[0],EM[d.e]||'👋',h[1]);
    if(d.zn==='aud'){if(d.e==='whistle'&&window.whistleSound)whistleSound();if(d.e==='popper'&&window.confettiBlast)confettiBlast()}}}}
  function frame(dt,now){
   /* snapshot-buffer interpolation: render other players ~170ms in the past, so far-away players glide instead of teleporting */
   for(const e of R.values()){
    e.px=e.x;e.pz=e.z;
-   const b=e.buf,rt=now-170;let a=b[b.length-1];
+   const b=e.buf,rt=now-(window.MOB?260:170);let a=b[b.length-1];
    if(b.length>1&&rt<a.t){
     if(rt<=b[0].t)a=b[0];
     else for(let i=b.length-1;i>0;i--){if(b[i-1].t<=rt){const p=b[i-1],q=b[i],f=(rt-p.t)/Math.max(1,q.t-p.t);let dr=q.r-p.r;dr=Math.atan2(Math.sin(dr),Math.cos(dr));a={x:p.x+(q.x-p.x)*f,y:p.y+(q.y-p.y)*f,z:p.z+(q.z-p.z)*f,r:p.r+dr*f};break}}}
@@ -6486,7 +6487,7 @@ function run(uid,guest){
   if(j!==last&&now-lastSend>100){last=j;lastSend=lastBeat=now;meRef.update(s)}
   else if(now-lastBeat>4000){lastBeat=now;meRef.update({hb:Date.now()})}}
  if(db){
-  const pl=db.ref('players');
+  const pl=db.ref('players');db.ref('.info/serverTimeOffset').on('value',s=>{SKEW=+s.val()||0});
   pl.on('child_added',s=>apply(s.key,s.val()));
   pl.on('child_changed',s=>apply(s.key,s.val()));
   pl.on('child_removed',s=>{const e=R.get(s.key);if(e)drop(e)});
@@ -6561,7 +6562,7 @@ function run(uid,guest){
  bar.querySelector('button').onclick=sendBar;
  const _tc=window.toggleChat;window.toggleChat=()=>{if(seated)_tc();else{bar.style.display=bar.style.display=='flex'?'none':'flex';if(bar.style.display=='flex')setTimeout(()=>inp.focus(),50)}};
  const _sc=window.sendC;window.sendC=()=>{const v=$('cm').value.trim();if(!v)return;if(push(v)){addC(myName,v);$('cm').value='';bubble(me,ME,v)}};
- const _em=window.emote;let _le=0;window.emote=k=>{const nw=Date.now();if(nw-_le<800)return;_le=nw;_em(k);try{meRef&&meRef.update({e:k,et:nw}).catch(()=>{})}catch(x){}};
+ const _em=window.emote;let _le=0;window.emote=k=>{const nw=Date.now();if(nw-_le<800)return;_le=nw;_em(k);try{meRef&&meRef.update({e:k,et:(window.CY_NOW?CY_NOW():nw)}).catch(()=>{})}catch(x){}};
  /* ---- PRIVATE CHAT: nearby player -> popup "Chat with NAME" -> DM box (inbox/<uid>) ---- */
  const NEAR=4,dmH=new Map(),dmN=new Map(),dism=new Set(),unread=new Set();let dmPeer=null,nearId=null,lastTitle='',lastDM=0;
  const sty=document.createElement('style');
@@ -6593,7 +6594,7 @@ function run(uid,guest){
   else{unread.add(d.u);toast('\ud83d\udcac '+n+': '+m,3500)}},er=>{console.warn('[DM] inbox listen failed:',er&&er.code||er);toast('\u26a0 Chat inbox blocked: '+(er&&er.code||'error'),5000)});console.info('[DM] private chat ready, uid',uid);
  dmGo.onclick=()=>{if(nearId)openDM(nearId)};
  let lastHi=0;pop.querySelector('#dmHi').onclick=()=>{const id=nearId;if(!id||Date.now()-lastHi<3000)return;lastHi=Date.now();
-  window.emote('wave');try{meRef&&meRef.update({hi:id,hit:Date.now()}).catch(()=>{})}catch(x){}
+  window.emote('wave');try{meRef&&meRef.update({hi:id,hit:(window.CY_NOW?CY_NOW():Date.now())}).catch(()=>{})}catch(x){}
   toast('👋 '+pn(id)+'-ku Hi sonneenga!',2200)};
  pop.querySelector('#dmX').onclick=()=>{if(nearId){unread.delete(nearId);dism.add(nearId)}pop.style.display='none';nearId=null};
  box.querySelector('#dmC').onclick=closeDM;box.querySelector('#dmB').onclick=()=>{if(!dmPeer)return;const id=dmPeer;if(MUTE.has(id)){MUTE.delete(id);toast('Unblocked '+pn(id),2000)}else{MUTE.add(id);toast('🚫 Blocked '+pn(id),2000);closeDM()}try{localStorage.setItem('cyr3d_mute',JSON.stringify([...MUTE]))}catch(e){}};box.querySelector('#dmS').onclick=sendDM;
@@ -6716,7 +6717,7 @@ function run(uid,guest){
  function doJack(){
   const e=jkT;if(!e||Date.now()-lastJk<700||!R.has(e.id))return;lastJk=Date.now();
   const t=e.vt,sp=window.__vSPEC&&window.__vSPEC[t];if(!sp||!window.VBUILD||!window.__vmount)return;
-  try{meRef&&meRef.update({jk:e.id,jkt:Date.now()}).catch(()=>{})}catch(x){}
+  try{meRef&&meRef.update({jk:e.id,jkt:(window.CY_NOW?CY_NOW():Date.now())}).catch(()=>{})}catch(x){}
   const g=window.VBUILD(t,undefined,e.vk||undefined),bk=(t==='bike'||t==='cycle')?.31:0,sn=Math.sin(e.r),cs=Math.cos(e.r),x0=e.x-bk*sn,z0=e.z-bk*cs;
   g.userData.jkc=1;g.position.set(x0,0,z0);g.rotation.y=0;grp('out').add(g);g.updateMatrixWorld(true);
   const bb=new THREE.Box3();g.children.forEach(o=>{if(!o.isSprite)bb.expandByObject(o)});
@@ -7967,7 +7968,7 @@ window.vehTick=function(dt){
    const sd=(lx-v.bx.cx)>=0?1:-1,vx=fx*spd*.9+c*sd*1.6,vz=fz*spd*.9-s*sd*1.6;
    v.v*=.85;
    if(it.e){const e=it.e;e.fo={x:0,y:0,z:0,rx:0,rz:0,vx,vz,vy:3.5+spd*.28,spin:(RND()<.5?-1:1)*(7+RND()*4),side:sd,ph:'fly',t:0};
-    try{window.CY_DB&&window.CY_DB.ref('players/'+window.CY_UID).update({kb:e.id,kbt:Date.now(),kx:+vx.toFixed(2),kz:+vz.toFixed(2)}).catch(()=>{})}catch(x){}}
+    try{window.CY_DB&&window.CY_DB.ref('players/'+window.CY_UID).update({kb:e.id,kbt:(window.CY_NOW?CY_NOW():Date.now()),kx:+vx.toFixed(2),kz:+vz.toFixed(2)}).catch(()=>{})}catch(x){}}
    else fly(o,vx,vz,spd);
    try{blip(90,.12,.12,'sine')}catch(x){}
    if(performance.now()-lastToast>2500){lastToast=performance.now();toast('💥 Paathu ottunga! Aal mela idichuteenga',2200)}}
