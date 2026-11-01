@@ -8307,4 +8307,60 @@ setInterval(()=>{
  .lm-card .lm-close{display:none}
 }
 </style>
+
+<style id="waPopupCss">
+#waPop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(5,3,6,.62);-webkit-tap-highlight-color:transparent;touch-action:auto}
+#waPop.show{display:flex;animation:waFade .25s ease}
+@keyframes waFade{from{opacity:0}to{opacity:1}}
+#waPop .wa-box{position:relative;width:min(360px,100%);text-align:center;padding:26px 22px 20px;border-radius:20px;color:#fff8ec;font-family:var(--font,system-ui,sans-serif);
+ background:linear-gradient(150deg,rgba(74,26,20,.97),rgba(30,10,8,.98));border:1.5px solid rgba(255,207,90,.55);
+ box-shadow:0 20px 56px rgba(0,0,0,.7),0 0 26px rgba(240,169,27,.28);animation:waPop .4s cubic-bezier(.18,.89,.32,1.25)}
+@keyframes waPop{from{transform:scale(.88) translateY(18px);opacity:0}to{transform:none;opacity:1}}
+#waPop .wa-ico{width:62px;height:62px;margin:-58px auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#25d366;border:3px solid #2a100d;box-shadow:0 6px 18px rgba(37,211,102,.45)}
+#waPop .wa-ico svg{width:34px;height:34px;fill:#fff}
+#waPop h3{margin:0 0 6px;font-size:19px;font-weight:800;color:#ffcf5a;line-height:1.25}
+#waPop p{margin:0 0 16px;font-size:13.5px;line-height:1.5;color:rgba(255,248,236,.78)}
+#waPop .wa-join{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 16px;border-radius:999px;background:linear-gradient(135deg,#25d366,#128c4a);color:#fff;font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 6px 18px rgba(37,211,102,.4);transition:transform .15s}
+#waPop .wa-join:hover{transform:translateY(-2px)}
+#waPop .wa-join:active{transform:scale(.97)}
+#waPop .wa-later{margin-top:10px;background:none;border:0;color:rgba(255,248,236,.6);font:600 12.5px var(--font,system-ui,sans-serif);cursor:pointer;padding:6px 12px;border-radius:8px}
+#waPop .wa-later:hover{color:#fff;background:rgba(255,255,255,.08)}
+#waPop .wa-x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,207,90,.25);background:rgba(255,255,255,.07);color:#fff8ec;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+#waPop .wa-x:hover{background:rgba(255,255,255,.18)}
+</style>
+<div id="waPop" role="dialog" aria-modal="true" aria-labelledby="waTitle">
+ <div class="wa-box">
+  <button class="wa-x" id="waX" type="button" aria-label="Close">✕</button>
+  <div class="wa-ico"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3C9.4 3 4 8.4 4 15.04c0 2.12.55 4.19 1.6 6.02L4 28l7.1-1.86a12 12 0 0 0 4.94 1.05h.01C22.68 27.19 28 21.8 28 15.15 28 11.94 26.75 8.92 24.48 6.65A11.9 11.9 0 0 0 16.04 3zm0 21.9h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.9 9.9 0 0 1-1.52-5.23c0-5.47 4.46-9.92 9.94-9.92 2.65 0 5.14 1.03 7.01 2.91a9.85 9.85 0 0 1 2.9 7.02c0 5.47-4.46 9.85-9.94 9.85zm5.45-7.43c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.88.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/></svg></div>
+  <h3 id="waTitle">📢 Cheyyar 3D update-kaga WhatsApp group-la join pannunga!</h3>
+  <p>Pudhu features, events, rewards, bug fixes ellam first-a inga thaan therinjukkalaam. Namma Ooru community-oda serunga 🙏</p>
+  <a class="wa-join" id="waJoin" href="https://chat.whatsapp.com/CrgtsmEOWTU6zp1Zcq8fxK?s=cl&amp;p=a&amp;iam=2" target="_blank" rel="noopener noreferrer">Join WhatsApp Group</a>
+  <button class="wa-later" id="waLater" type="button">Apram paakalaam</button>
+ </div>
+</div>
+<script id="waPopJs">
+(function(){
+ var pop=document.getElementById('waPop');if(!pop)return;
+ var KEY='cyr3d_wa_joined';
+ var joined=false;try{joined=localStorage.getItem(KEY)==='1'}catch(e){}
+ if(joined)return;                       /* already joined -> never show again */
+ function close(){pop.classList.remove('show')}
+ function open(){pop.classList.add('show');try{document.getElementById('waJoin').focus({preventScroll:true})}catch(e){}}
+ document.getElementById('waX').onclick=close;
+ document.getElementById('waLater').onclick=close;
+ pop.addEventListener('click',function(e){if(e.target===pop)close()});
+ document.getElementById('waJoin').addEventListener('click',function(){
+  try{localStorage.setItem(KEY,'1')}catch(e){}
+  setTimeout(close,150);                 /* link opens in a new tab */
+ });
+ addEventListener('keydown',function(e){if(e.key==='Escape'&&pop.classList.contains('show')){e.stopPropagation();close()}},true);
+ /* wait until the player is actually inside the game, then show once per visit */
+ var iv=setInterval(function(){
+  var inGame=false;try{inGame=(typeof started!=='undefined'&&started)}catch(e){}
+  if(!inGame)return;
+  clearInterval(iv);
+  setTimeout(open,2500);
+ },500);
+})();
+</script>
 </body></html>
