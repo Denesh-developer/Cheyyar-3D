@@ -8847,10 +8847,11 @@ function mkBot(team,name,idx){
 function buildBots(){
  G.bots.forEach(b=>{if(b.g.parent)b.g.parent.remove(b.g)});G.bots=[];
  const mp=window.SQMP&&SQMP.on,nA=mp?SQMP.botsA:ALLY_N.length,nB=mp?SQMP.botsB:FOE_N.length;
- for(let i=0;i<nA;i++)G.bots.push(mkBot(0,ALLY_N[i]||'Ally'+(i+1),i));
- for(let i=0;i<nB;i++)G.bots.push(mkBot(1,FOE_N[i]||'Foe'+(i+1),i+1));
+ for(let i=0;i<nA;i++){const b=mkBot(0,ALLY_N[i]||'Ally'+(i+1),i);if(mp){b.aid=SQMP.team+'_'+i;b.pup=!SQMP.isHost()}G.bots.push(b)}
+ for(let i=0;i<nB;i++){const b=mkBot(1,FOE_N[i]||'Foe'+(i+1),i+1);if(mp){b.aid=(1-SQMP.team)+'_'+i;b.pup=!SQMP.isHost()}G.bots.push(b)}
+ if(mp)SQMP.addRemotes();
 }
-window.__SQ={G:G,mkBot:mkBot,drawTag:drawTag,SQG:SQG,start:startMatch};
+window.__SQ={G:G,mkBot:mkBot,drawTag:drawTag,SQG:SQG,start:startMatch,hurt:hurtBot,hurtMe:hurtMe,kill:killBot,setGun:setGun};
 function botLoadout(b){
  const r=G.round;if(b.coin===undefined){b.coin=1000;b.own=[]}
  const opts=['holi','ak','pattasu','kavan'].filter(k=>!b.own.includes(k)&&b.coin>=W[k].cost);
@@ -8879,7 +8880,7 @@ function alive(team){let n=0;G.bots.forEach(b=>{if(b.team===team&&b.alive)n++});
 function aliveUp(team){let n=0;G.bots.forEach(b=>{if(b.team===team&&b.alive&&!b.kn)n++});if(team===0&&!G.me.dead&&!G.me.kn)n++;return n}
 const fnm=f=>f?(f.isMe?'<b style="color:#ffd34d">'+esc(G.pl.name)+'</b>':f.name):'';
 const wtag=wn=>'<small style="opacity:.75">['+(wn||'Zone')+']</small>';
-function hurtBot(b,amt,from,head,wn){
+function hurtBot(b,amt,from,head,wn){if(window.SQMP&&SQMP.on&&(b.remote||b.pup)){SQMP.hit(b,amt,from,head,wn);if(from&&from.isMe){G.me.dmg+=amt;crossFlash(head);sndHit(head)}pop(b.x,2.1,b.z,Math.round(amt),head?'h':'d');return}
  if(!b.alive||G.phase!=='fight')return;
  if(from&&from.isMe){G.me.dmg+=amt;crossFlash(head);sndHit(head)}
  pop(b.x,2.1,b.z,Math.round(amt),head?'h':'d');
@@ -8937,7 +8938,7 @@ function pickTarget(b){
  if(b.team===1&&!G.me.dead){const d=Math.hypot(P.x-b.x,P.z-b.z)*(losClear(b.x,b.z,P.x,P.z)?1:1.6)*.9;if(d<bd){bd=d;best=MEO}}
  b.tgt=best;
 }
-function botAI(b,dt){
+function botAI(b,dt){if(b.remote||b.pup){SQMP.net(b,dt);return}
  const D=DIFF[G.diff];
  if(!b.alive)return;
  if(b.kn){b.kh-=dt*3.2;if(b.kh<=0){killBot(b,null,false,'Bleed-out');return}b.moving=false;
@@ -9445,26 +9446,33 @@ box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.datase
  else if(a==='share'){const x='Cheyyar Squad room code: '+M.code;if(navigator.share)navigator.share({text:x}).catch(()=>{});else if(navigator.clipboard){navigator.clipboard.writeText(M.code);msg='Code copied ✓';draw()}}
  else if(a==='new')join(String(1000+Math.random()*9000|0));
  else if(a==='join'){const c=($('mpC').value||'').trim().toUpperCase();if(!/^[A-Z0-9]{3,8}$/.test(c)){msg='3–8 letters/numbers code podunga';draw();return}join(c)}};
+const PT={},BT={},hostId=()=>Object.keys(mm).sort()[0];M.isHost=host;
+M.addRemotes=()=>{const n=[0,0];Object.keys(mm).forEach(k=>{if(k===uid())return;const rel=mm[k].t===M.team?0:1,b=SQ.mkBot(rel,mm[k].n||'Player',rel+(n[rel]++)*2);b.remote=1;b.uid=k;SQ.G.bots.push(b)})};
+const rmRem=f=>{SQ.G.bots=SQ.G.bots.filter(b=>{if(b.remote&&f(b)){if(b.g.parent)b.g.parent.remove(b.g);return false}return true})};
+M.net=(b,dt)=>{const t=b.remote?PT[b.uid]:BT[b.aid];if(!t)return;const G=SQ.G,k=Math.min(1,dt*12),dx=t.x-b.x,dz=t.z-b.z;b.moving=Math.hypot(dx,dz)>.04;b.x+=dx*k;b.z+=dz*k;let d=t.y-b.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));b.yaw+=d*k;b.kn=!!t.k;if(b.kn&&!(b.kh>0))b.kh=40;if(t.h!==undefined)b.hp=t.h;if(t.a!==undefined)b.ar=t.a;
+ if(t.w&&b.wpn!==t.w){b.wpn=t.w;try{SQ.setGun(b.g.gun,t.w)}catch(e){}}if(t.d&&b.alive&&G.phase==='fight')SQ.kill(b,null,false,'')};
+M.hit=(b,amt,from,head,wn)=>{if(!from||!rr)return;const to=b.remote?b.uid:hostId();if(!to||to===uid())return;
+ rr.child('ev').push({to:to,i:b.remote?'':b.aid,a:Math.round(amt),h:head?1:0,w:String(wn||'').slice(0,20),f:uid(),n:String(from.name||(from.isMe?SQ.G.pl.name:'?')).slice(0,14),x:+(from.x||0).toFixed(1),z:+(from.z||0).toFixed(1)}).catch(()=>{})};
 function join(code){
  if(!db()||!uid()){msg='⚠ Online connect aagala, internet check pannitu refresh pannunga';draw();return}
  const r=db().ref('sqrooms/'+code);msg='Connecting…';draw();
  r.child('m').once('value').then(s=>{const m=s.val()||{},ks=Object.keys(m).filter(k=>k!==uid());if(ks.length>=8){msg='Room full (8/8)';draw();return}
   rr=r;const a=ks.filter(k=>m[k].t===0).length,b=ks.length-a;M.team=a<=b?0:1;M.code=code;first=true;
   const me=rr.child('m/'+uid()),pp=rr.child('p/'+uid());me.onDisconnect().remove();pp.onDisconnect().remove();
-  return me.set({n:nm(),t:M.team}).then(()=>{M.on=true;msg='';
+  return me.set({n:nm(),t:M.team}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key;
    const on=(q,ev,f)=>{q.on(ev,f);lis.push([q,ev,f])};
-   on(rr.child('m'),'value',s=>{mm=s.val()||{};recalc();draw()});
+   on(rr.child('m'),'value',s=>{mm=s.val()||{};recalc();rmRem(b=>!mm[b.uid]);draw()});
    on(rr.child('st'),'value',s=>{const v=s.val()||0;if(first){st0=v;first=false;return}if(v&&v!==st0){st0=v;if(!SQ.G.on)SQ.start()}});
-   const up=s=>{if(s.key!==uid())upsert(s.key,s.val())};on(rr.child('p'),'child_added',up);on(rr.child('p'),'child_changed',up);on(rr.child('p'),'child_removed',s=>drop(s.key));draw()})
+   on(rr.child('p'),'child_added',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_changed',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_removed',s=>{delete PT[s.key]});
+   on(rr.child('b'),'value',s=>{const o=s.val()||{};for(const k in o){const a=o[k];BT[k]={x:a[0],z:a[1],y:a[2],h:a[3],a:a[4],d:a[5],k:a[6],w:a[7]}}});
+   on(rr.child('ev').orderByKey().startAt(k0),'child_added',s=>{const v=s.val();if(!v||v.to!==uid())return;s.ref.remove();const G=SQ.G;
+    if(v.i){const b=G.bots.find(o=>o.aid===v.i);if(b&&b.alive&&!b.pup)SQ.hurt(b,v.a,G.bots.find(o=>o.uid===v.f)||{x:v.x,z:v.z,name:v.n,team:1},!!v.h,v.w)}
+    else SQ.hurtMe(v.a,{x:v.x,z:v.z,name:v.n,team:1},!!v.h,v.w)});draw()})
  }).catch(x=>{rr=null;M.on=false;msg='⚠ '+(x&&x.code||x&&x.message||'error')+(x&&x.code==='PERMISSION_DENIED'?' · Firebase rules publish pannunga':'');draw()})}
-function leave(){lis.forEach(l=>l[0].off(l[1],l[2]));lis=[];try{rr.child('m/'+uid()).remove();rr.child('p/'+uid()).remove()}catch(e){}[...R.keys()].forEach(drop);M.on=false;M.botsA=3;M.botsB=4;mm={};rr=null;msg='';draw()}
-function upsert(k,v){if(!v)return;let e=R.get(k);const same=v.t===M.team;
- if(!e){const b=SQ.mkBot(same?0:1,v.n||'Player',R.size+(same?0:1));b.remote=true;e={b:b,tx:v.x,tz:v.z,ty:v.y,nm:v.n};b.x=v.x;b.z=v.z;b.yaw=v.y;R.set(k,e)}
- e.tx=v.x;e.tz=v.z;e.ty=v.y;e.b.g.visible=!v.d;if(v.n&&v.n!==e.nm){e.nm=v.n;e.b.name=v.n;SQ.drawTag(e.b)}}
-function drop(k){const e=R.get(k);if(e){if(e.b.g.parent)e.b.g.parent.remove(e.b.g);R.delete(k)}}
-setInterval(()=>{if(!M.on||!rr)return;const p=rr.child('p/'+uid());
- if(SQ.G.on&&zone==='squad')p.set({n:SQ.G.pl.name,t:M.team,x:+P.x.toFixed(2),z:+P.z.toFixed(2),y:+yaw.toFixed(2),h:SQ.G.me.hp|0,w:SQ.G.me.wpn,d:SQ.G.me.dead?1:0});else p.remove()},100);
-(function f(){for(const e of R.values()){const b=e.b;b.x+=(e.tx-b.x)*.3;b.z+=(e.tz-b.z)*.3;let d=e.ty-b.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));b.yaw+=d*.3;b.g.position.set(b.x,0,b.z);b.g.rotation.y=b.yaw;if(!(SQ.G.on&&zone==='squad'))b.g.visible=false}requestAnimationFrame(f)})();
+function leave(){lis.forEach(l=>l[0].off(l[1],l[2]));lis=[];try{rr.child('m/'+uid()).remove();rr.child('p/'+uid()).remove()}catch(e){}rmRem(()=>1);for(const k in PT)delete PT[k];for(const k in BT)delete BT[k];M.on=false;M.botsA=3;M.botsB=4;mm={};rr=null;msg='';draw()}
+setInterval(()=>{if(!M.on||!rr)return;const G=SQ.G,live=G.on&&zone==='squad',p=rr.child('p/'+uid());
+ if(live)p.set({n:G.pl.name,t:M.team,x:+P.x.toFixed(2),z:+P.z.toFixed(2),y:+yaw.toFixed(2),h:G.me.hp|0,w:G.me.wpn,d:G.me.dead?1:0,k:G.me.kn?1:0});else p.remove();
+ if(live&&host()){const o={};G.bots.forEach(b=>{if(b.aid!==undefined&&!b.pup)o[b.aid]=[+b.x.toFixed(2),+b.z.toFixed(2),+b.yaw.toFixed(2),b.hp|0,b.ar|0,b.alive?0:1,b.kn?1:0,b.wpn]});rr.child('b').set(o).catch(()=>{})}},100);
 draw();
 })();
 </script>
