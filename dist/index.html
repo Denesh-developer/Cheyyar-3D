@@ -8923,6 +8923,7 @@ function fire(ox,oy,oz,dx,dy,dz,w,shooter,err,isMe){
   const L=Math.hypot(ex,ey,ez)||1;ex/=L;ey/=L;ez/=L;
   const hit=castRay(ox,oy,oz,ex,ey,ez,shooter.team,w.range),tt=hit.t;
   tracer(ox,oy,oz,ox+ex*tt,oy+ey*tt,oz+ez*tt,w.col);
+  if(isMe&&window.SQMP&&SQMP.on&&SQMP.me)SQMP.shot({aid:SQMP.me()},{x:ox+ex*tt,z:oz+ez*tt});
   if(hit.type!=='none'){const px=ox+ex*tt,py=oy+ey*tt,pz=oz+ez*tt;if(hit.o&&hit.o.gw){hit.o.hp-=dmgFall(w,tt);if(hit.o.hp<=0)rmGloo(hit.o)}impact(hit,px,py,pz,w.col)}
   if(hit.type==='bot')hurtBot(hit.bot,dmgFall(w,tt)*(hit.head?2:1)*(isMe?1:(shooter.team===1?DIFF[G.diff].dmg:1)),shooter,hit.head,w.n);
   else if(hit.type==='me')hurtMe(dmgFall(w,tt)*(hit.head?1.6:1)*DIFF[G.diff].dmg,shooter,hit.head,w.n);
@@ -9201,7 +9202,7 @@ function sqTick(dt){
  {const sp=$s('sqSpec'),on=m.dead&&G.phase==='fight'&&!!G.spec;sp.style.display=on?'flex':'none';if(on)$s('sqSpT').textContent='\ud83d\udc41 '+G.spec.name;G.mapT=(G.mapT||0)-dt;if(G.mapT<=0){G.mapT=.1;drawMap()}if(K[' ']&&G.crouch)G.crouch=0}
  /* phases */
  if(G.phase==='buy'){G.t-=dt;G.buyEl+=dt;{const c=Math.ceil(G.t);if(c<=3&&c>0&&G.cdN!==c){G.cdN=c;banner(String(c),900);sfx(520,520,.1,.05,'sine')}}if(!G.buyShown&&G.buyEl>=MENU_DELAY){G.buyShown=1;openBuy()}
-  keepIn(P,myRing());G.bots.forEach(b=>{if(b.alive)buyIdle(b,dt)});RINGS[myRing()].children[2].material.opacity=.14+.07*Math.sin(performance.now()/220);
+  keepIn(P,myRing());G.bots.forEach(b=>{if(b.alive){if(b.remote||b.pup)SQMP.net(b,dt);else buyIdle(b,dt)}});RINGS[myRing()].children[2].material.opacity=.14+.07*Math.sin(performance.now()/220);
   $s('sqBT').textContent=Math.max(0,Math.ceil(G.t));timerTxt();if(G.t<=0)beginFight()}
  else if(G.phase==='fight'){
   G.t-=dt;timerTxt();
@@ -9464,7 +9465,7 @@ box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.datase
  else if(a==='new')join(String(1000+Math.random()*9000|0));
  else if(a==='join'){const c=($('mpC').value||'').trim().toUpperCase();if(!/^[0-9]{4}$/.test(c)){msg='4 digit code podunga';draw();return}join(c)}};
 box.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='mpC'){const v=t.value.replace(/[^0-9]/g,'').slice(0,4);if(v!==t.value)t.value=v}});
-const PT={},BT={};M.isHost=host;
+const PT={},BT={};M.isHost=host;M.me=uid;
 const pub=(k,a,y)=>{if(rr)rr.child('rs').set({k:k,r:SQ.G.round+(k==='buy'?1:0),a:a===undefined?null:a,y:y||'',n:Date.now()+Math.random()}).catch(()=>{})};
 M.gate=(k,a,y)=>{if(!M.on)return false;if(k==='buy'&&SQ.G.round===0)return false;if(host()){pub(k,k==='over'&&a>=0?(a===0?M.team:1-M.team):a,y);return false}return !M.allow};
 const sht={};M.shot=(b,t)=>{const n=Date.now();if(!rr||n-(sht[b.aid]||0)<90)return;sht[b.aid]=n;const r=rr.child('sh').push({i:b.aid,x:+t.x.toFixed(1),z:+t.z.toFixed(1)});setTimeout(()=>r.remove().catch(()=>{}),2500)};
@@ -9488,7 +9489,7 @@ function join(code){
    on(rr.child('rs'),'value',s=>{const v=s.val();if(fr){fr=0;lastN=v&&v.n;return}if(!v||v.n===lastN)return;lastN=v.n;if(host()||!SQ.G.on)return;const G=SQ.G;M.allow=1;try{
     if(v.k==='buy'){if(G.round<v.r)SQ.next()}else if(v.k==='fight'){if(G.phase==='buy')SQ.fight()}
     else if(v.k==='over'){if(G.phase==='fight')SQ.endRound(v.a<0?-1:(v.a===M.team?0:1),v.y)}else if(v.k==='done'){if(G.phase!=='done')SQ.endMatch()}}finally{M.allow=0}});
-   on(rr.child('sh').orderByKey().startAt(k1),'child_added',s=>{const v=s.val(),G=SQ.G;if(!v||host())return;const b=G.bots.find(o=>o.aid===v.i);if(b&&b.alive){const w=SQ.W[b.wpn]||{col:0xffd34d};SQ.tracer(b.x-Math.sin(b.yaw)*.6,1.25,b.z-Math.cos(b.yaw)*.6,v.x,1.1,v.z,w.col)}});
+   on(rr.child('sh').orderByKey().startAt(k1),'child_added',s=>{const v=s.val(),G=SQ.G;if(!v||v.i===uid())return;const b=G.bots.find(o=>o.aid===v.i||o.uid===v.i);if(b&&b.aid!==undefined&&host())return;if(b&&b.alive){const w=SQ.W[b.wpn]||{col:0xffd34d};SQ.tracer(b.x-Math.sin(b.yaw)*.6,1.25,b.z-Math.cos(b.yaw)*.6,v.x,1.1,v.z,w.col)}});
    on(rr.child('b'),'value',s=>{const o=s.val()||{};for(const k in o){const a=o[k];BT[k]={x:a[0],z:a[1],y:a[2],h:a[3],a:a[4],d:a[5],k:a[6],w:a[7]}}});
    on(rr.child('ev').orderByKey().startAt(k0),'child_added',s=>{const v=s.val();if(!v||v.to!==uid())return;s.ref.remove();const G=SQ.G;
     if(v.i){const b=G.bots.find(o=>o.aid===v.i);if(b&&b.alive&&!b.pup)SQ.hurt(b,v.a,G.bots.find(o=>o.uid===v.f)||{x:v.x,z:v.z,name:v.n,team:1},!!v.h,v.w)}
