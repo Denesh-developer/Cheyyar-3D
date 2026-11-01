@@ -9460,7 +9460,7 @@ function team(t,c,ks){const hs=ks.filter(k=>mm[k].t===t);let h='<div class="mpTm
  for(let i=0;i<4;i++){const k=hs[i];h+=k?'<div class="mpS"><i>'+esc((mm[k].n||'P')[0]).toUpperCase()+'</i><span>'+esc(mm[k].n||'Player')+'</span><em>'+(k===hostId()?'👑':'')+(k===uid()?' YOU':'')+'</em></div>':'<div class="mpS bot"><i>🤖</i><span>Bot</span></div>'}return h+'</div>'}
 function draw(){
  const ks=Object.keys(mm).sort();let h='';
- if(M.on)h='<div class="mpHero"><div class="mpH"><div><small>ROOM CODE</small><div class="mpCd">'+M.code.split('').map(c=>'<u>'+esc(c)+'</u>').join('')+'</div></div><button class="mpSh" data-a="share">SHARE</button></div><div class="mpT">'+team(0,'#4aa3ff',ks)+team(1,'#ff6a5a',ks)+'</div><div class="mpM">'+(msg||ks.length+'/8 players'+(WS&&ping?' · '+ping+'ms':'')+' · '+(host()?'Ellarum vandhaachaa? START press pannunga':'Host start pannum varaikkum wait pannunga'))+'</div><div class="mpR"><button data-a="swap" style="min-height:44px;font-size:13px">⇄ SWITCH TEAM</button><button data-a="leave" style="min-height:44px;font-size:13px">LEAVE</button></div></div>';
+ if(M.on)h='<div class="mpHero"><div class="mpH"><div><small>ROOM CODE</small><div class="mpCd">'+M.code.split('').map(c=>'<u>'+esc(c)+'</u>').join('')+'</div></div><button class="mpSh" data-a="share">SHARE</button></div><div class="mpT">'+team(0,'#4aa3ff',ks)+team(1,'#ff6a5a',ks)+'</div><div class="mpM">'+(msg||ks.length+'/8 players'+(WS?(ping?' · '+ping+'ms':''):' · ⚠ FIREBASE mode')+' · '+(host()?'Ellarum vandhaachaa? START press pannunga':'Host start pannum varaikkum wait pannunga'))+'</div><div class="mpR"><button data-a="swap" style="min-height:44px;font-size:13px">⇄ SWITCH TEAM</button><button data-a="leave" style="min-height:44px;font-size:13px">LEAVE</button></div></div>';
  else if(solo)h='<div class="mpSolo"><span>SOLO · VS BOTS</span><button data-a="room">PLAY WITH FRIENDS</button></div>';
  else h='<div class="mpHero"><div class="mpK">MULTIPLAYER · 4v4</div><h3>SQUAD ROOM</h3><p>Friends-oda aadunga. Room code share pannunga, meedhi slots bots fill pannum.</p><input id="mpC" class="mpIn" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="4-DIGIT CODE" autocomplete="off"><button class="mpB pri" data-a="join">JOIN ROOM</button><div class="mpOr">OR</div><button class="mpB gh" data-a="new">＋ CREATE NEW ROOM</button><div class="mpM">'+msg+'</div><button class="mpLn" data-a="solo">Play solo vs bots</button></div>';
  box.innerHTML=h;go.style.display=(M.on||solo)?'':'none';go.textContent=M.on?(host()?'START ROOM MATCH':'WAITING FOR HOST…'):'START MATCH';go.style.opacity=M.on&&!host()?.5:1}
@@ -9519,10 +9519,31 @@ function joinWS(code,fallback){
    case 'pong':ping=Math.max(0,Date.now()-v.c);window.CY_PING=ping;{const e=document.getElementById('sqPing');if(e){e.textContent=ping+' ms';e.className=ping<80?'g':ping<160?'y':'r'}}break;
   }}
 }
+let joining=0;
+/* wait until the free Render server is awake (cold start can take 60-90s) so every player lands on the SAME transport */
+function wakeServer(){
+ const url=WSU.replace(/^wss:/,'https:').replace(/^ws:/,'http:')+'/health',t0=Date.now();
+ return new Promise(res=>{
+  const tryOnce=()=>{
+   const s=Math.round((Date.now()-t0)/1000);
+   if(s>100){res(false);return}
+   msg='Server ezhunthirukku… '+s+'s (30-90s aagalaam, wait pannunga)';draw();
+   const ac=typeof AbortController!=='undefined'?new AbortController():null,tm=setTimeout(()=>{try{ac&&ac.abort()}catch(e){}},8000);
+   fetch(url,{cache:'no-store',signal:ac?ac.signal:undefined}).then(r=>{clearTimeout(tm);if(r.ok)res(true);else setTimeout(tryOnce,2000)}).catch(()=>{clearTimeout(tm);setTimeout(tryOnce,2000)});
+  };
+  tryOnce();
+ });
+}
 function join(code){
  if(!db()||!uid()){msg='⚠ Online connect aagala, internet check pannitu refresh pannunga';draw();return}
  if(!WSU)return joinFB(code);
- joinWS(code,()=>{msg='Server connect aagala, Firebase-la try pannuren…';draw();joinFB(code)});
+ if(joining)return;joining=1;
+ const fb=()=>{joining=0;msg='Server connect aagala, Firebase-la try pannuren…';draw();joinFB(code)};
+ wakeServer().then(ok=>{
+  if(!ok){fb();return}
+  joinWS(code,fb);
+  const w=setInterval(()=>{if(M.on||!joining){clearInterval(w);joining=0}},500);
+ });
 }
 function joinFB(code){
  if(!db()||!uid()){msg='⚠ Online connect aagala, internet check pannitu refresh pannunga';draw();return}
