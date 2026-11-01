@@ -9430,7 +9430,7 @@ const box=document.createElement('div');box.id='mpBox';ul.after(box);
 css.textContent+='.sqOv .sqCard{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.mpHw{display:block;width:100%;margin:0 0 8px;min-height:40px;border-radius:8px;border:1px solid #2d333d;background:#10141b;color:#9aa1ad;font:700 12px inherit;letter-spacing:2px}';
 if(window.MOB||innerHeight<760){ul.style.display='none';const tg=document.createElement('button');tg.className='mpHw';tg.style.fontFamily='inherit';tg.textContent='ℹ HOW TO PLAY';tg.onclick=()=>{const h=ul.style.display==='none';ul.style.display=h?'':'none';tg.textContent=h?'✕ HIDE':'ℹ HOW TO PLAY'};ul.before(tg)}
 function recalc(){let a=0,b=0;Object.values(mm).forEach(v=>v.t===M.team?a++:b++);M.botsA=Math.max(0,4-a);M.botsB=Math.max(0,4-b)}
-let SKEW=0;const TS=()=>firebase.database.ServerValue.TIMESTAMP,stale=v=>!v||(v.hb&&Date.now()+SKEW-v.hb>20000);
+let SKEW=0;const TS=()=>firebase.database.ServerValue.TIMESTAMP,stale=v=>!v||!v.hb||Date.now()+SKEW-v.hb>20000;
 function hostId(){return Object.keys(mm).sort((a,b)=>((mm[a].j||0)-(mm[b].j||0))||(a<b?-1:1))[0]}
 function host(){return hostId()===uid()}
 const esc=s=>String(s).replace(/[<>&"]/g,'');
@@ -9438,13 +9438,13 @@ function team(t,c,ks){const hs=ks.filter(k=>mm[k].t===t);let h='<div class="mpTm
  for(let i=0;i<4;i++){const k=hs[i];h+=k?'<div class="mpS"><i>'+esc((mm[k].n||'P')[0]).toUpperCase()+'</i><span>'+esc(mm[k].n||'Player')+'</span><em>'+(k===hostId()?'👑':'')+(k===uid()?' YOU':'')+'</em></div>':'<div class="mpS bot"><i>🤖</i><span>Bot</span></div>'}return h+'</div>'}
 function draw(){
  const ks=Object.keys(mm).sort();let h='';
- if(M.on)h='<div class="mpHero"><div class="mpH"><div><small>ROOM CODE</small><div class="mpCd">'+M.code.split('').map(c=>'<u>'+esc(c)+'</u>').join('')+'</div></div><button class="mpSh" data-a="share">SHARE</button></div><div class="mpT">'+team(0,'#4aa3ff',ks)+team(1,'#ff6a5a',ks)+'</div><div class="mpM">'+(msg||ks.length+'/8 players · '+(host()?'Ellarum vandhaachaa? START press pannunga':'Host start pannum varaikkum wait pannunga'))+'</div><button class="mpB gh" data-a="leave" style="min-height:44px;font-size:13px">LEAVE ROOM</button></div>';
+ if(M.on)h='<div class="mpHero"><div class="mpH"><div><small>ROOM CODE</small><div class="mpCd">'+M.code.split('').map(c=>'<u>'+esc(c)+'</u>').join('')+'</div></div><button class="mpSh" data-a="share">SHARE</button></div><div class="mpT">'+team(0,'#4aa3ff',ks)+team(1,'#ff6a5a',ks)+'</div><div class="mpM">'+(msg||ks.length+'/8 players · '+(host()?'Ellarum vandhaachaa? START press pannunga':'Host start pannum varaikkum wait pannunga'))+'</div><div class="mpR"><button data-a="swap" style="min-height:44px;font-size:13px">⇄ SWITCH TEAM</button><button data-a="leave" style="min-height:44px;font-size:13px">LEAVE</button></div></div>';
  else if(solo)h='<div class="mpSolo"><span>SOLO · VS BOTS</span><button data-a="room">PLAY WITH FRIENDS</button></div>';
  else h='<div class="mpHero"><div class="mpK">MULTIPLAYER · 4v4</div><h3>SQUAD ROOM</h3><p>Friends-oda aadunga. Room code share pannunga, meedhi slots bots fill pannum.</p><input id="mpC" class="mpIn" maxlength="8" placeholder="CODE" autocomplete="off" autocapitalize="characters"><button class="mpB pri" data-a="join">JOIN ROOM</button><div class="mpOr">OR</div><button class="mpB gh" data-a="new">＋ CREATE NEW ROOM</button><div class="mpM">'+msg+'</div><button class="mpLn" data-a="solo">Play solo vs bots</button></div>';
  box.innerHTML=h;go.style.display=(M.on||solo)?'':'none';go.textContent=M.on?(host()?'START ROOM MATCH':'WAITING FOR HOST…'):'START MATCH';go.style.opacity=M.on&&!host()?.5:1}
 const o=go.onclick;go.onclick=function(e){if(!M.on)return o&&o.call(this,e);if(host())rr.child('st').set(Date.now()).catch(x=>{msg='⚠ '+(x&&x.code||'error');draw()});else{msg='Host start pannum varaikkum wait pannunga…';draw()}};
 box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
- if(a==='solo'){solo=1;msg='';draw()}else if(a==='room'){solo=0;draw()}else if(a==='leave')leave();
+ if(a==='swap'){if(SQ.G.on)return;const o=Object.values(mm).filter(v=>v.t===1-M.team).length;if(o>=4){msg='Antha team full (4/4)';draw();return}rr.child('m/'+uid()+'/t').set(1-M.team).catch(x=>{msg='⚠ '+(x&&x.code||'error');draw()})}else if(a==='solo'){solo=1;msg='';draw()}else if(a==='room'){solo=0;draw()}else if(a==='leave')leave();
  else if(a==='share'){const x='Cheyyar Squad room code: '+M.code;if(navigator.share)navigator.share({text:x}).catch(()=>{});else if(navigator.clipboard){navigator.clipboard.writeText(M.code);msg='Code copied ✓';draw()}}
  else if(a==='new')join(String(1000+Math.random()*9000|0));
  else if(a==='join'){const c=($('mpC').value||'').trim().toUpperCase();if(!/^[A-Z0-9]{3,8}$/.test(c)){msg='3–8 letters/numbers code podunga';draw();return}join(c)}};
@@ -9466,7 +9466,7 @@ function join(code){
   const me=rr.child('m/'+uid()),pp=rr.child('p/'+uid());me.onDisconnect().remove();pp.onDisconnect().remove();
   return me.set({n:nm(),t:M.team,j:TS(),hb:TS()}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key,k1=rr.child('sh').push().key;let fr=1,lastN=0;
    const on=(q,ev,f)=>{q.on(ev,f);lis.push([q,ev,f])};
-   on(rr.child('m'),'value',s=>{{const v=s.val()||{};mm={};for(const k in v)if(!stale(v[k]))mm[k]=v[k]}recalc();if(SQ.G.on&&host())SQ.G.bots.forEach(b=>{if(b.aid!==undefined)b.pup=false});rmRem(b=>!mm[b.uid]);draw()});
+   on(rr.child('m'),'value',s=>{{const v=s.val()||{};mm={};for(const k in v)if(!stale(v[k]))mm[k]=v[k]}if(mm[uid()]&&!SQ.G.on)M.team=mm[uid()].t;recalc();if(SQ.G.on&&host())SQ.G.bots.forEach(b=>{if(b.aid!==undefined)b.pup=false});rmRem(b=>!mm[b.uid]);draw()});
    on(rr.child('st'),'value',s=>{const v=s.val()||0;if(first){st0=v;first=false;return}if(v&&v!==st0){st0=v;if(!SQ.G.on)SQ.start()}});
    on(rr.child('p'),'child_added',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_changed',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_removed',s=>{delete PT[s.key]});
    on(rr.child('rs'),'value',s=>{const v=s.val();if(fr){fr=0;lastN=v&&v.n;return}if(!v||v.n===lastN)return;lastN=v.n;if(host()||!SQ.G.on)return;const G=SQ.G;M.allow=1;try{
