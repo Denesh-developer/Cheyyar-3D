@@ -9430,10 +9430,12 @@ const box=document.createElement('div');box.id='mpBox';ul.after(box);
 css.textContent+='.sqOv .sqCard{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.mpHw{display:block;width:100%;margin:0 0 8px;min-height:40px;border-radius:8px;border:1px solid #2d333d;background:#10141b;color:#9aa1ad;font:700 12px inherit;letter-spacing:2px}';
 if(window.MOB||innerHeight<760){ul.style.display='none';const tg=document.createElement('button');tg.className='mpHw';tg.style.fontFamily='inherit';tg.textContent='ℹ HOW TO PLAY';tg.onclick=()=>{const h=ul.style.display==='none';ul.style.display=h?'':'none';tg.textContent=h?'✕ HIDE':'ℹ HOW TO PLAY'};ul.before(tg)}
 function recalc(){let a=0,b=0;Object.values(mm).forEach(v=>v.t===M.team?a++:b++);M.botsA=Math.max(0,4-a);M.botsB=Math.max(0,4-b)}
-function host(){return Object.keys(mm).sort()[0]===uid()}
+let SKEW=0;const TS=()=>firebase.database.ServerValue.TIMESTAMP,stale=v=>!v||(v.hb&&Date.now()+SKEW-v.hb>20000);
+function hostId(){return Object.keys(mm).sort((a,b)=>((mm[a].j||0)-(mm[b].j||0))||(a<b?-1:1))[0]}
+function host(){return hostId()===uid()}
 const esc=s=>String(s).replace(/[<>&"]/g,'');
 function team(t,c,ks){const hs=ks.filter(k=>mm[k].t===t);let h='<div class="mpTm" style="--c:'+c+'"><h4>TEAM '+(t?'B':'A')+'<b>'+hs.length+'/4</b></h4>';
- for(let i=0;i<4;i++){const k=hs[i];h+=k?'<div class="mpS"><i>'+esc((mm[k].n||'P')[0]).toUpperCase()+'</i><span>'+esc(mm[k].n||'Player')+'</span><em>'+(k===ks[0]?'👑':'')+(k===uid()?' YOU':'')+'</em></div>':'<div class="mpS bot"><i>🤖</i><span>Bot</span></div>'}return h+'</div>'}
+ for(let i=0;i<4;i++){const k=hs[i];h+=k?'<div class="mpS"><i>'+esc((mm[k].n||'P')[0]).toUpperCase()+'</i><span>'+esc(mm[k].n||'Player')+'</span><em>'+(k===hostId()?'👑':'')+(k===uid()?' YOU':'')+'</em></div>':'<div class="mpS bot"><i>🤖</i><span>Bot</span></div>'}return h+'</div>'}
 function draw(){
  const ks=Object.keys(mm).sort();let h='';
  if(M.on)h='<div class="mpHero"><div class="mpH"><div><small>ROOM CODE</small><div class="mpCd">'+M.code.split('').map(c=>'<u>'+esc(c)+'</u>').join('')+'</div></div><button class="mpSh" data-a="share">SHARE</button></div><div class="mpT">'+team(0,'#4aa3ff',ks)+team(1,'#ff6a5a',ks)+'</div><div class="mpM">'+(msg||ks.length+'/8 players · '+(host()?'Ellarum vandhaachaa? START press pannunga':'Host start pannum varaikkum wait pannunga'))+'</div><button class="mpB gh" data-a="leave" style="min-height:44px;font-size:13px">LEAVE ROOM</button></div>';
@@ -9446,7 +9448,7 @@ box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.datase
  else if(a==='share'){const x='Cheyyar Squad room code: '+M.code;if(navigator.share)navigator.share({text:x}).catch(()=>{});else if(navigator.clipboard){navigator.clipboard.writeText(M.code);msg='Code copied ✓';draw()}}
  else if(a==='new')join(String(1000+Math.random()*9000|0));
  else if(a==='join'){const c=($('mpC').value||'').trim().toUpperCase();if(!/^[A-Z0-9]{3,8}$/.test(c)){msg='3–8 letters/numbers code podunga';draw();return}join(c)}};
-const PT={},BT={},hostId=()=>Object.keys(mm).sort()[0];M.isHost=host;
+const PT={},BT={};M.isHost=host;
 M.addRemotes=()=>{const n=[0,0];Object.keys(mm).forEach(k=>{if(k===uid())return;const rel=mm[k].t===M.team?0:1,b=SQ.mkBot(rel,mm[k].n||'Player',rel+(n[rel]++)*2);b.remote=1;b.uid=k;SQ.G.bots.push(b)})};
 const rmRem=f=>{SQ.G.bots=SQ.G.bots.filter(b=>{if(b.remote&&f(b)){if(b.g.parent)b.g.parent.remove(b.g);return false}return true})};
 M.net=(b,dt)=>{const t=b.remote?PT[b.uid]:BT[b.aid];if(!t)return;const G=SQ.G,k=Math.min(1,dt*12),dx=t.x-b.x,dz=t.z-b.z;b.moving=Math.hypot(dx,dz)>.04;b.x+=dx*k;b.z+=dz*k;let d=t.y-b.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));b.yaw+=d*k;b.kn=!!t.k;if(b.kn&&!(b.kh>0))b.kh=40;if(t.h!==undefined)b.hp=t.h;if(t.a!==undefined)b.ar=t.a;
@@ -9456,12 +9458,12 @@ M.hit=(b,amt,from,head,wn)=>{if(!from||!rr)return;const to=b.remote?b.uid:hostId
 function join(code){
  if(!db()||!uid()){msg='⚠ Online connect aagala, internet check pannitu refresh pannunga';draw();return}
  const r=db().ref('sqrooms/'+code);msg='Connecting…';draw();
- r.child('m').once('value').then(s=>{const m=s.val()||{},ks=Object.keys(m).filter(k=>k!==uid());if(ks.length>=8){msg='Room full (8/8)';draw();return}
-  rr=r;const a=ks.filter(k=>m[k].t===0).length,b=ks.length-a;M.team=a<=b?0:1;M.code=code;first=true;
+ Promise.all([db().ref('.info/serverTimeOffset').once('value'),r.child('m').once('value')]).then(q=>{SKEW=+q[0].val()||0;const m=q[1].val()||{},ks=Object.keys(m).filter(k=>k!==uid()&&!stale(m[k]));if(ks.length>=8){msg='Room full (8/8)';draw();return}
+  rr=r;const a=ks.filter(k=>m[k].t===0).length,b=ks.length-a,hk=ks.sort((x,y)=>(m[x].j||0)-(m[y].j||0))[0];M.team=a<b?0:b<a?1:(hk?1-m[hk].t:0);M.code=code;first=true;
   const me=rr.child('m/'+uid()),pp=rr.child('p/'+uid());me.onDisconnect().remove();pp.onDisconnect().remove();
-  return me.set({n:nm(),t:M.team}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key;
+  return me.set({n:nm(),t:M.team,j:TS(),hb:TS()}).then(()=>{M.on=true;msg='';const k0=rr.child('ev').push().key;
    const on=(q,ev,f)=>{q.on(ev,f);lis.push([q,ev,f])};
-   on(rr.child('m'),'value',s=>{mm=s.val()||{};recalc();rmRem(b=>!mm[b.uid]);draw()});
+   on(rr.child('m'),'value',s=>{{const v=s.val()||{};mm={};for(const k in v)if(!stale(v[k]))mm[k]=v[k]}recalc();rmRem(b=>!mm[b.uid]);draw()});
    on(rr.child('st'),'value',s=>{const v=s.val()||0;if(first){st0=v;first=false;return}if(v&&v!==st0){st0=v;if(!SQ.G.on)SQ.start()}});
    on(rr.child('p'),'child_added',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_changed',s=>{if(s.key!==uid())PT[s.key]=s.val()});on(rr.child('p'),'child_removed',s=>{delete PT[s.key]});
    on(rr.child('b'),'value',s=>{const o=s.val()||{};for(const k in o){const a=o[k];BT[k]={x:a[0],z:a[1],y:a[2],h:a[3],a:a[4],d:a[5],k:a[6],w:a[7]}}});
@@ -9470,6 +9472,7 @@ function join(code){
     else SQ.hurtMe(v.a,{x:v.x,z:v.z,name:v.n,team:1},!!v.h,v.w)});draw()})
  }).catch(x=>{rr=null;M.on=false;msg='⚠ '+(x&&x.code||x&&x.message||'error')+(x&&x.code==='PERMISSION_DENIED'?' · Firebase rules publish pannunga':'');draw()})}
 function leave(){lis.forEach(l=>l[0].off(l[1],l[2]));lis=[];try{rr.child('m/'+uid()).remove();rr.child('p/'+uid()).remove()}catch(e){}rmRem(()=>1);for(const k in PT)delete PT[k];for(const k in BT)delete BT[k];M.on=false;M.botsA=3;M.botsB=4;mm={};rr=null;msg='';draw()}
+setInterval(()=>{if(M.on&&rr)rr.child('m/'+uid()+'/hb').set(TS()).catch(()=>{})},5000);
 setInterval(()=>{if(!M.on||!rr)return;const G=SQ.G,live=G.on&&zone==='squad',p=rr.child('p/'+uid());
  if(live)p.set({n:G.pl.name,t:M.team,x:+P.x.toFixed(2),z:+P.z.toFixed(2),y:+yaw.toFixed(2),h:G.me.hp|0,w:G.me.wpn,d:G.me.dead?1:0,k:G.me.kn?1:0});else p.remove();
  if(live&&host()){const o={};G.bots.forEach(b=>{if(b.aid!==undefined&&!b.pup)o[b.aid]=[+b.x.toFixed(2),+b.z.toFixed(2),+b.yaw.toFixed(2),b.hp|0,b.ar|0,b.alive?0:1,b.kn?1:0,b.wpn]});rr.child('b').set(o).catch(()=>{})}},100);
