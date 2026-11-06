@@ -31,8 +31,8 @@
     outfitTypes: false, // false = only colours change (hoodie + pants stay). true = also swap in veshti / saree / skirt overlays
     enabled: true,
     npc: true,          /* NPCs / other players get the GLB model too (own dress colours) */
-    npcMax: window.MOB ? 10 : 18,   /* smaller detailed crowd pool on phones */
-    npcRadius: window.MOB ? 85 : 125, /* shorter GLB detail radius on phones */
+    npcMax: window.MOB ? (window.GFX0 == 'high' ? 14 : 10) : 18,   /* smaller detailed crowd pool on phones */
+    npcRadius: window.MOB ? (window.GFX0 == 'high' ? 105 : 85) : 125, /* shorter GLB detail radius on phones */
     hide: /helmet|vest/i,   // mesh names to hide (Mixamo soldier gear)
     dracoLoader: 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js',
     dracoPath: 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/gltf/',
@@ -192,7 +192,7 @@
         }
       }
       if (o.isMesh) {
-        o.castShadow = !window.MOB; o.receiveShadow = false; o.frustumCulled = false;
+        o.castShadow = !window.MOB || window.GFX0 == 'high'; o.receiveShadow = false; o.frustumCulled = false;
         [].concat(o.material).forEach(function (m) {
           fixMat(m);
           if (m && m.name) { var a = mats[m.name] || (mats[m.name] = []); if (a.indexOf(m) < 0) a.push(m); }
