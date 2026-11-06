@@ -2,9 +2,9 @@
 <html lang="en"><head><meta charset="utf-8"><title>Cheyyar 3D Town</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>window.MOB=(function(){try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||/[?&]mobile=1/.test(location.search)}catch(e){return false}})();
-window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return(ios||m>=4||c>=6)?'high':'low'})();
+window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return ios?'high':'low'})();
 /* pixel ratio per quality tier: phones in HIGH render up to 2x (adaptive scaling lowers it only if FPS drops) */
-window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.35:2):Math.min(d,lo?1:2)};
+window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:1.5):Math.min(d,lo?1:2)};
 /* phones: backdrop-filter blur over a live WebGL canvas is very costly - turn it off */
 if(window.MOB){var _st=document.createElement('style');_st.textContent='*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';(document.head||document.documentElement).appendChild(_st)}
 if(window.MOB)document.documentElement.className+=' mob';</script>
@@ -573,7 +573,7 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <script>
 (function(){let cur=null;const w={};Object.defineProperty(window,'vehTick',{configurable:true,get(){return cur},set(f){if(typeof f!=='function'){cur=f;return}const fn=f;cur=function(dt){try{return fn(dt)}catch(e){const k=String(e&&e.message);if(!w[k]){w[k]=1;console.warn('[vehTick layer]',e)}}}}})})();
 const $=id=>document.getElementById(id);
-const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB||GFX0=='high',powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
+const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
 /* Keep the WebGL canvas pixel-aligned on mobile; adaptive scaling below can lower this if FPS drops. */
 R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;document.body.prepend(R.domElement);window.R=R;
 const S=new THREE.Scene();S.background=new THREE.Color(0x10142a);S.fog=new THREE.Fog(0x10142a,60,220);window.S=S;
@@ -592,7 +592,7 @@ const TX={fine:TXF((g,r)=>{g.fillStyle='#f0f0f0';g.fillRect(0,0,256,256);for(let
  bark:TXF((g,r)=>{g.fillStyle='#d2d2d2';g.fillRect(0,0,256,256);for(let i=0;i<260;i++){g.strokeStyle=r()<.6?'rgba(0,0,0,.28)':'rgba(255,255,255,.2)';g.lineWidth=1+r()*2.5;const x=r()*256,y=r()*256;g.beginPath();g.moveTo(x,y);g.lineTo(x+r()*4-2,y+20+r()*50);g.stroke()}})};
 const TXA=[0x333338,0x3a3a40,0x2a2a30],TXG=[0x6b9a52,0x2e7d32,0x2b8a3a,0x1f6a2a,0x1f6a2a,0x4a8a3a],TXB=[0x5a3b1e,0x2a2018,0x4a2a14,0x7a4a2a];
 const M={};const mat=c=>M[c]||(M[c]=new THREE.MeshLambertMaterial({color:c,map:TXA.includes(c)?TX.asph:TXG.includes(c)?TX.grass:TXB.includes(c)?TX.bark:TX.fine}));
-R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
 const BG={};function box(w,h,d,c,x,y,z,p){const k=w+'_'+h+'_'+d,m=new THREE.Mesh(BG[k]||(BG[k]=(()=>{const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes.uv,f=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];for(let i=0;i<24;i++){const q=f[i>>2];uv.setXY(i,uv.getX(i)*q[0]/5,uv.getY(i)*q[1]/5)}return g})()),mat(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(p||S).add(m);return m}
 
 /* ===== CM photo boards + Thalapathy posters =====
@@ -2065,8 +2065,8 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
  let m=cyFpsMeter(),lowN=0,hiN=0,cool=0;
- setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,gfx=='low'?.8:1);if(cool>0)cool--;
-  if(fps<30){hiN=0;if(++lowN>=2){if(Q&&composer){Q=false;lowN=0;cool=4;toast('✨ Glow effect temporary off — smooth FPS-ku',3500)}else if(cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}}}
+ setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,1);if(cool>0)cool--;
+  if(fps<30){hiN=0;if(++lowN>=2){if(Q&&composer){Q=false;lowN=0;cool=4;toast('✨ Glow effect temporary off — smooth FPS-ku',3500)}else if(cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}else if(gfx=='high'){setGfx('low',true);lowN=0;cool=6;toast('⚡ Auto Low graphics — smooth FPS-ku',3500)}}}
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
  if(/[?&]perf=1/.test(location.search)){const d=document.createElement('div');d.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#000b;color:#7dffa0;font:11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(d);let pm=cyFpsMeter();
