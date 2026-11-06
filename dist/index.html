@@ -2,9 +2,9 @@
 <html lang="en"><head><meta charset="utf-8"><title>Cheyyar 3D Town</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>window.MOB=(function(){try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||/[?&]mobile=1/.test(location.search)}catch(e){return false}})();
-window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return ios?'high':'low'})();
+window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}var q=(location.search.match(/[?&]gfx=(low|high)/)||[])[1];if(q)return q;if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return ios?'high':'low'})();
 /* pixel ratio per quality tier: phones in HIGH render up to 2x (adaptive scaling lowers it only if FPS drops) */
-window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:1.5):Math.min(d,lo?1:2)};
+window.cyPR=function(lo){var d=window.devicePixelRatio||1,o=(location.search.match(/[?&]pr=([\d.]+)/)||[])[1];if(o&&+o>0)return Math.min(d,+o);return window.MOB?Math.min(d,lo?1.5:1.5):Math.min(d,lo?1:2)};
 /* phones: backdrop-filter blur over a live WebGL canvas is very costly - turn it off */
 if(window.MOB){var _st=document.createElement('style');_st.textContent='*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';(document.head||document.documentElement).appendChild(_st)}
 if(window.MOB)document.documentElement.className+=' mob';</script>
@@ -2061,6 +2061,7 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
 {let m=cyFpsMeter(),slow=0,told=false;setInterval(()=>{const fps=m();if(fps===null)return;if(started&&gfx=='high'&&!told&&fps<22){if(++slow>=6){told=true;toast('🐢 Game slow-aa irukku — left la ✨ button click panni Low graphics try pannunga',6000)}}else slow=0},1000)}
 /* ---------- MOBILE PERF: light trim + adaptive resolution + ?perf=1 overlay ---------- */
 (function(){
+ try{const gl=R.getContext(),ex=gl.getExtension('WEBGL_debug_renderer_info'),rn=ex?gl.getParameter(ex.UNMASKED_RENDERER_WEBGL):'';window.__gpu=rn;if(/swiftshader|llvmpipe|software|basic render/i.test(rn))setTimeout(()=>toast('⚠ Browser GPU use pannala (software rendering) — Chrome update pannunga / hardware acceleration ON pannunga',9000),4000)}catch(e){}
  function trimLights(){const lo=gfx=='low';S.traverse(o=>{if(!o.isPointLight)return;if(o.userData._pv===undefined)o.userData._pv=o.visible;if(o===window.__screenLight||o===screenLight){o.visible=o.userData._pv;return}o.visible=lo?false:o.userData._pv})}
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
@@ -2070,7 +2071,7 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
  if(/[?&]perf=1/.test(location.search)){const d=document.createElement('div');d.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#000b;color:#7dffa0;font:11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(d);let pm=cyFpsMeter();
-  setInterval(()=>{const f0=pm();if(f0===null)return;const fps=Math.round(f0);let pl=0;S.traverse(o=>{if(o.isPointLight&&o.visible)pl++});const i=R.info;d.textContent='FPS '+fps+'  px '+R.getPixelRatio().toFixed(2)+'\ncalls '+i.render.calls+'  tris '+(i.render.triangles/1000|0)+'k\ngeom '+i.memory.geometries+'  tex '+i.memory.textures+'\nplights '+pl+'  gfx '+gfx+'  zone '+zone},1000)}
+  setInterval(()=>{const f0=pm();if(f0===null)return;const fps=Math.round(f0);let pl=0;S.traverse(o=>{if(o.isPointLight&&o.visible)pl++});const i=R.info;d.textContent='FPS '+fps+'  px '+R.getPixelRatio().toFixed(2)+'\ncalls '+i.render.calls+'  tris '+(i.render.triangles/1000|0)+'k\ngeom '+i.memory.geometries+'  tex '+i.memory.textures+'\nplights '+pl+'  gfx '+gfx+'  zone '+zone+'\nGPU '+(window.__gpu||'?')+'\nmerge '+(window.CY_MERGE?window.CY_MERGE.meshes+'->'+window.CY_MERGE.chunks:'pending/off')},1000)}
 })();
 /* ---------- SOUND (WebAudio, no files) ---------- */
 let sndOn=true;try{if(localStorage.getItem('cyr3d_snd')=='0')sndOn=false}catch(e){}
@@ -8465,6 +8466,55 @@ try{
  setInterval(tick,120);tick();
  window.CY_STREAM={items,NEAR,MID,showAll(){items.forEach(it=>{it.o.visible=true;it.hid=false})}};
 }catch(e){if(e!=='disabled')warn('stream-init',e)}
+/* ---------- A2. STATIC MERGE : static mesh-ellam chunk+material-wise merge panni draw calls kammi pannum (mobile) ---------- */
+try{
+ if(!(window.MOB||/[?&]merge=1/.test(location.search))||/[?&]nomerge/.test(location.search))throw 'disabled';
+ const CELL=48,MAXV=60000,EPS=1e-5,OBR=THREE.Object3D.prototype.onBeforeRender;
+ const hiddenByStream=()=>{const s=new Set();try{window.CY_STREAM&&CY_STREAM.items.forEach(it=>{if(it.hid&&it.o)s.add(it.o)})}catch(e){}return s};
+ const okMesh=m=>{const mt=m.material,g=m.geometry;
+  if(!mt||Array.isArray(mt)||!g||!g.attributes||!g.attributes.position||!g.attributes.normal||!g.attributes.uv)return false;
+  if(Object.keys(g.attributes).length!==3||(g.groups&&g.groups.length>1))return false;
+  if(!(mt.isMeshLambertMaterial||mt.isMeshBasicMaterial))return false;
+  if(mt.transparent||mt.fog===false||mt.wireframe||mt.vertexColors||mt.alphaTest>0||mt.depthWrite===false||mt.depthTest===false)return false;
+  if(m.renderOrder!==0||m.frustumCulled===false||m.layers.mask!==1||m.onBeforeRender!==OBR)return false;
+  if(m.matrixWorld.determinant()<=0)return false;
+  return true};
+ /* static candidates = empty userData, visible chain, simple materials; returns Map(mesh -> matrixWorld copy) */
+ function collect(){
+  const hs=hiddenByStream(),res=new Map();OUT.updateMatrixWorld(true);
+  const walk=o=>{const ch=o.children;for(let i=0;i<ch.length;i++){const c=ch[i];
+   if(c.isLight||c.isSprite||c.isPoints||c.isLine||c.isCamera||c.isSkinnedMesh||c.isInstancedMesh)continue;
+   if(Object.keys(c.userData||{}).length)continue;
+   if(!(c.visible||(o===OUT&&hs.has(c))))continue;
+   if(c.isMesh){if(okMesh(c))res.set(c,c.matrixWorld.elements.slice())}
+   else if(c.isGroup||c.type==='Object3D')walk(c)}};
+  walk(OUT);return res}
+ function same(a,b){for(let i=0;i<16;i++)if(Math.abs(a[i]-b[i])>EPS)return false;return true}
+ function build(gr,inv){
+  let nv=0,ni=0;gr.items.forEach(m=>{const g=m.geometry;nv+=g.attributes.position.count;ni+=g.index?g.index.count:g.attributes.position.count});
+  const P=new Float32Array(nv*3),N=new Float32Array(nv*3),U=new Float32Array(nv*2),I=new Uint16Array(ni);
+  const rel=new THREE.Matrix4(),nm=new THREE.Matrix3(),v=new THREE.Vector3();let vo=0,io=0;
+  gr.items.forEach(m=>{const g=m.geometry,pa=g.attributes.position,na=g.attributes.normal,ua=g.attributes.uv,c=pa.count;
+   rel.multiplyMatrices(inv,m.matrixWorld);nm.getNormalMatrix(rel);
+   for(let i=0;i<c;i++){v.set(pa.getX(i),pa.getY(i),pa.getZ(i)).applyMatrix4(rel);P[(vo+i)*3]=v.x;P[(vo+i)*3+1]=v.y;P[(vo+i)*3+2]=v.z;
+    v.set(na.getX(i),na.getY(i),na.getZ(i)).applyMatrix3(nm).normalize();N[(vo+i)*3]=v.x;N[(vo+i)*3+1]=v.y;N[(vo+i)*3+2]=v.z;
+    U[(vo+i)*2]=ua.getX(i);U[(vo+i)*2+1]=ua.getY(i)}
+   if(g.index){const ix=g.index;for(let i=0;i<ix.count;i++)I[io++]=ix.getX(i)+vo}else for(let i=0;i<c;i++)I[io++]=vo+i;
+   vo+=c});
+  const bg=new THREE.BufferGeometry();bg.setAttribute('position',new THREE.BufferAttribute(P,3));bg.setAttribute('normal',new THREE.BufferAttribute(N,3));bg.setAttribute('uv',new THREE.BufferAttribute(U,2));bg.setIndex(new THREE.BufferAttribute(I,1));
+  const me=new THREE.Mesh(bg,gr.mat);me.castShadow=gr.cs;me.receiveShadow=gr.rs;OUT.add(me)}
+ function run(a,b){
+  const t0=performance.now(),list=[];a.forEach((ma,m)=>{const mb=b.get(m);if(mb&&same(ma,mb)&&m.parent)list.push(m)});
+  const map=new Map(),inv=new THREE.Matrix4().copy(OUT.matrixWorld).invert();
+  list.forEach(m=>{const e=m.matrixWorld.elements,k=m.material.uuid+'|'+(m.castShadow?1:0)+(m.receiveShadow?1:0)+'|'+Math.floor(e[12]/CELL)+'|'+Math.floor(e[14]/CELL),
+   cnt=m.geometry.attributes.position.count;let arr=map.get(k);if(!arr){arr=[];map.set(k,arr)}
+   let gr=arr[arr.length-1];if(!gr||gr.v+cnt>MAXV){gr={mat:m.material,cs:m.castShadow,rs:m.receiveShadow,items:[],v:0};arr.push(gr)}
+   gr.items.push(m);gr.v+=cnt});
+  let made=0;map.forEach(arr=>arr.forEach(gr=>{if(gr.items.length<2)return;build(gr,inv);gr.items.forEach(m=>{m.parent&&m.parent.remove(m)});made++}));
+  window.CY_MERGE={meshes:list.length,chunks:made,ms:Math.round(performance.now()-t0)};console.info('[merge]',window.CY_MERGE)}
+ addEventListener('load',()=>setTimeout(()=>{try{const a=collect();setTimeout(()=>{try{run(a,collect())}catch(e){warn('merge',e)}},2500)}catch(e){warn('merge',e)}},3000));
+}catch(e){if(e!=='disabled')warn('merge-init',e)}
+
 
 /* ---------- B. TRAFFIC : overlap illa - brake, side-pass, illana thittu ---------- */
 try{
