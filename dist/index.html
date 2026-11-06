@@ -4,7 +4,7 @@
 <script>window.MOB=(function(){try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||/[?&]mobile=1/.test(location.search)}catch(e){return false}})();
 window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return ios?'high':'low'})();
 /* pixel ratio per quality tier: phones in HIGH render up to 2x (adaptive scaling lowers it only if FPS drops) */
-window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:1.5):Math.min(d,lo?1:2)};
+window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:2):Math.min(d,lo?1:2)};
 /* phones: backdrop-filter blur over a live WebGL canvas is very costly - turn it off */
 if(window.MOB){var _st=document.createElement('style');_st.textContent='*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';(document.head||document.documentElement).appendChild(_st)}
 if(window.MOB)document.documentElement.className+=' mob';</script>
@@ -573,7 +573,7 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <script>
 (function(){let cur=null;const w={};Object.defineProperty(window,'vehTick',{configurable:true,get(){return cur},set(f){if(typeof f!=='function'){cur=f;return}const fn=f;cur=function(dt){try{return fn(dt)}catch(e){const k=String(e&&e.message);if(!w[k]){w[k]=1;console.warn('[vehTick layer]',e)}}}}})})();
 const $=id=>document.getElementById(id);
-const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
+const R=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
 /* Keep the WebGL canvas pixel-aligned on mobile; adaptive scaling below can lower this if FPS drops. */
 R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;document.body.prepend(R.domElement);window.R=R;
 const S=new THREE.Scene();S.background=new THREE.Color(0x10142a);S.fog=new THREE.Fog(0x10142a,60,220);window.S=S;
@@ -583,7 +583,7 @@ function fitCam(){const a=innerWidth/innerHeight;C.aspect=a;C.fov=a<1?Math.min(9
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam()});
 S.add(new THREE.HemisphereLight(0x8899cc,0x333344,.85));
 const sun=new THREE.DirectionalLight(0xaab8ff,.5);sun.position.set(30,60,20);S.add(sun);S.add(sun.target);sun.castShadow=GFX0!='low';sun.shadow.mapSize.set(window.MOB?(GFX0=='high'?1024:512):2048,window.MOB?(GFX0=='high'?1024:512):2048);{const c2=sun.shadow.camera;c2.left=-100;c2.right=100;c2.top=100;c2.bottom=-100;c2.near=1;c2.far=250}sun.shadow.bias=-.0004;window.sun=sun;
-let composer=null;try{if(window.MOB&&GFX0!='high')throw 'skip post-fx on weak phones';composer=new THREE.EffectComposer(R);composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
+let composer=null;try{if(window.MOB&&GFX0!='high')throw 'skip post-fx on weak phones';let _rt;try{if(R.capabilities.isWebGL2){_rt=new THREE.WebGLMultisampleRenderTarget(innerWidth,innerHeight,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat});_rt.samples=window.MOB?2:4}}catch(e){_rt=undefined}composer=new THREE.EffectComposer(R,_rt);if(_rt){composer.setPixelRatio(R.getPixelRatio());composer.setSize(innerWidth,innerHeight)}composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
 /* ---- realism pass: procedural surface textures + soft shadows ---- */
 const TXF=(fn)=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),r=Math.random;fn(g,r);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=window.MOB?Math.min(4,R.capabilities.getMaxAnisotropy()):Math.min(8,R.capabilities.getMaxAnisotropy());return t};
 const TX={fine:TXF((g,r)=>{g.fillStyle='#f0f0f0';g.fillRect(0,0,256,256);for(let i=0;i<3500;i++){g.fillStyle=r()<.7?'rgba(0,0,0,.07)':'rgba(255,255,255,.35)';g.fillRect(r()*256,r()*256,1+r()*2,1+r()*2)}for(let i=0;i<14;i++){g.fillStyle='rgba(0,0,0,.035)';g.beginPath();g.arc(r()*256,r()*256,12+r()*30,0,7);g.fill()}}),
@@ -2065,7 +2065,7 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
  let m=cyFpsMeter(),lowN=0,hiN=0,cool=0;
- setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,1);if(cool>0)cool--;
+ setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,1.25);if(cool>0)cool--;
   if(fps<30){hiN=0;if(++lowN>=2){if(Q&&composer){Q=false;lowN=0;cool=4;toast('✨ Glow effect temporary off — smooth FPS-ku',3500)}else if(cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}else if(gfx=='high'){setGfx('low',true);lowN=0;cool=6;toast('⚡ Auto Low graphics — smooth FPS-ku',3500)}}}
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
