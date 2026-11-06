@@ -2,7 +2,9 @@
 <html lang="en"><head><meta charset="utf-8"><title>Cheyyar 3D Town</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script>window.MOB=(function(){try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||/[?&]mobile=1/.test(location.search)}catch(e){return false}})();
-window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx')}catch(e){}return(s=='low'||s=='high')?s:(window.MOB?'low':'high')})();
+window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return(ios||m>=4||c>=6)?'high':'low'})();
+/* pixel ratio per quality tier: phones in HIGH render up to 2x (adaptive scaling lowers it only if FPS drops) */
+window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.35:2):Math.min(d,lo?1:2)};
 /* phones: backdrop-filter blur over a live WebGL canvas is very costly - turn it off */
 if(window.MOB){var _st=document.createElement('style');_st.textContent='*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';(document.head||document.documentElement).appendChild(_st)}
 if(window.MOB)document.documentElement.className+=' mob';</script>
@@ -565,13 +567,13 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>if(!window.THREE)document.write('<script src="lib/three.min.js"><\/script>')</script>
 <script src="images.js?v=shiva5" onerror="void 0"></script>
-<script>if(!window.MOB){var _b='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';['shaders/CopyShader','shaders/LuminosityHighPassShader','postprocessing/EffectComposer','postprocessing/MaskPass','postprocessing/ShaderPass','postprocessing/RenderPass','postprocessing/UnrealBloomPass'].forEach(function(f){document.write('<script src="'+_b+f+'.js"><\/script>')})}</script>
+<script>if(!window.MOB||window.GFX0=='high'){var _b='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';['shaders/CopyShader','shaders/LuminosityHighPassShader','postprocessing/EffectComposer','postprocessing/MaskPass','postprocessing/ShaderPass','postprocessing/RenderPass','postprocessing/UnrealBloomPass'].forEach(function(f){document.write('<script src="'+_b+f+'.js"><\/script>')})}</script>
 <script src="glb-character.js"></script>
 <script>if(!window.THREE){document.write('<div style="padding:40px;font:18px system-ui;color:#fff;background:#0b0d12;height:100vh">⚠ Internet connection venum — three.js load aagala. Connect pannitu refresh pannunga.</div>')}</script>
 <script>
 (function(){let cur=null;const w={};Object.defineProperty(window,'vehTick',{configurable:true,get(){return cur},set(f){if(typeof f!=='function'){cur=f;return}const fn=f;cur=function(dt){try{return fn(dt)}catch(e){const k=String(e&&e.message);if(!w[k]){w[k]=1;console.warn('[vehTick layer]',e)}}}}})})();
 const $=id=>document.getElementById(id);
-const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(window.MOB?Math.min(devicePixelRatio||1,GFX0=='low'?1.6:2):Math.min(devicePixelRatio||1,GFX0=='low'?1:2));
+const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB||GFX0=='high',powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
 /* Keep the WebGL canvas pixel-aligned on mobile; adaptive scaling below can lower this if FPS drops. */
 R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;document.body.prepend(R.domElement);window.R=R;
 const S=new THREE.Scene();S.background=new THREE.Color(0x10142a);S.fog=new THREE.Fog(0x10142a,60,220);window.S=S;
@@ -580,8 +582,8 @@ const C=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,400);C.rotation
 function fitCam(){const a=innerWidth/innerHeight;C.aspect=a;C.fov=a<1?Math.min(90,70+(1-a)*40):70;C.updateProjectionMatrix()}fitCam();
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam()});
 S.add(new THREE.HemisphereLight(0x8899cc,0x333344,.85));
-const sun=new THREE.DirectionalLight(0xaab8ff,.5);sun.position.set(30,60,20);S.add(sun);S.add(sun.target);sun.castShadow=GFX0!='low';sun.shadow.mapSize.set(window.MOB?512:2048,window.MOB?512:2048);{const c2=sun.shadow.camera;c2.left=-100;c2.right=100;c2.top=100;c2.bottom=-100;c2.near=1;c2.far=250}sun.shadow.bias=-.0004;window.sun=sun;
-let composer=null;try{if(window.MOB)throw 'skip post-fx on phones';composer=new THREE.EffectComposer(R);composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
+const sun=new THREE.DirectionalLight(0xaab8ff,.5);sun.position.set(30,60,20);S.add(sun);S.add(sun.target);sun.castShadow=GFX0!='low';sun.shadow.mapSize.set(window.MOB?(GFX0=='high'?1024:512):2048,window.MOB?(GFX0=='high'?1024:512):2048);{const c2=sun.shadow.camera;c2.left=-100;c2.right=100;c2.top=100;c2.bottom=-100;c2.near=1;c2.far=250}sun.shadow.bias=-.0004;window.sun=sun;
+let composer=null;try{if(window.MOB&&GFX0!='high')throw 'skip post-fx on weak phones';composer=new THREE.EffectComposer(R);composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
 /* ---- realism pass: procedural surface textures + soft shadows ---- */
 const TXF=(fn)=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),r=Math.random;fn(g,r);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=window.MOB?Math.min(4,R.capabilities.getMaxAnisotropy()):Math.min(8,R.capabilities.getMaxAnisotropy());return t};
 const TX={fine:TXF((g,r)=>{g.fillStyle='#f0f0f0';g.fillRect(0,0,256,256);for(let i=0;i<3500;i++){g.fillStyle=r()<.7?'rgba(0,0,0,.07)':'rgba(255,255,255,.35)';g.fillRect(r()*256,r()*256,1+r()*2,1+r()*2)}for(let i=0;i<14;i++){g.fillStyle='rgba(0,0,0,.035)';g.beginPath();g.arc(r()*256,r()*256,12+r()*30,0,7);g.fill()}}),
@@ -636,8 +638,8 @@ const cyl=(a,b,h,s,c,x,y,z,p,sz=1)=>{const k=a+'_'+b+'_'+h+'_'+s,m=new THREE.Mes
 const sph=(r,c,x,y,z,p,sx=1,sy=1,sz=1)=>{const m=new THREE.Mesh(SGC[r]||(SGC[r]=new THREE.SphereGeometry(r,10,8)),fm(c));m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;p.add(m);return m};
 /* ===== character realism: smooth hi-res geometry + sheen materials (only used by person()) ===== */
 const HQG={},HQM={},HQB={};
-const hqS=r=>{const d=window.MOB?0:1,k='s'+r+'_'+d;return HQG[k]||(HQG[k]=r<.03?new THREE.SphereGeometry(r,10,8):r<.07?new THREE.SphereGeometry(r,d?16:10,d?12:8):new THREE.SphereGeometry(r,d?24:14,d?16:10))};
-const hqC=(a,b,h,s)=>{const d=window.MOB?0:1,m=Math.max(a,b),sg=m<.03?Math.max(s,8):Math.max(s,d?20:12),k='c'+a+'_'+b+'_'+h+'_'+sg;return HQG[k]||(HQG[k]=new THREE.CylinderGeometry(a,b,h,sg))};
+const hqS=r=>{const d=(window.MOB&&window.GFX0!='high')?0:1,k='s'+r+'_'+d;return HQG[k]||(HQG[k]=r<.03?new THREE.SphereGeometry(r,10,8):r<.07?new THREE.SphereGeometry(r,d?16:10,d?12:8):new THREE.SphereGeometry(r,d?24:14,d?16:10))};
+const hqC=(a,b,h,s)=>{const d=(window.MOB&&window.GFX0!='high')?0:1,m=Math.max(a,b),sg=m<.03?Math.max(s,8):Math.max(s,d?20:12),k='c'+a+'_'+b+'_'+h+'_'+sg;return HQG[k]||(HQG[k]=new THREE.CylinderGeometry(a,b,h,sg))};
 const hqMat=(c,skin,hair)=>{
  const k=c+(c===skin?'s':c===hair?'h':'');
  return HQM[k]||(HQM[k]=
@@ -1672,8 +1674,8 @@ function goto(z){
   sanctumAmb(z=='garbha');if(z=='aud'){setAudDim(true);if(typeof hemi!=='undefined'&&hemi)hemi.intensity=0.35;}else if(typeof hemi!=='undefined'&&hemi&&z!='out'){hemi.intensity=0.85;}
   S.background=new THREE.Color(z=='out'?0x10142a:z=='garbha'?0x070404:z=='aud'?0x020205:0x08080c);
   S.fog.color=S.background;
-  S.fog.near=z=='out'?60:z=='garbha'?16:z=='aud'?15:20;
-  S.fog.far=z=='out'?220:z=='garbha'?50:z=='aud'?110:90;
+  S.fog.near=z=='out'?(window.MOB?40:60):z=='garbha'?16:z=='aud'?15:20;
+  S.fog.far=z=='out'?(window.MOB?115:220):z=='garbha'?50:z=='aud'?110:90;
   P.set(Z[z].sp[0],1.6,Z[z].sp[1]);
   yaw=Z[z].y||0;pitch=0;
   $('zone').innerHTML='<b>'+{out:'📍 Cheyyar Bus Stand',lobby:'🎬 Cheyyar I-MAX Lobby',aud:'🍿 Screen 1',rest:'🚻 Restroom',garbha:'🕉️ மூலவர் ஸ்ரீ வேதபுரீஸ்வரர் கருவறை (Lord Shiva Sanctum)'}[z]+'</b>';
@@ -2053,7 +2055,7 @@ function busBoard(){
  setTimeout(()=>{const l=$('ttList'),f=l&&l.querySelector('.tt-r:not(.past)');if(f)l.scrollTop=Math.max(0,f.offsetTop-40)},30)}
 /* ---------- GRAPHICS: HIGH / LOW ---------- */
 let gfx=window.GFX0;
-function setGfx(m,quiet){gfx=m;const lo=m=='low',pr=window.MOB?Math.min(devicePixelRatio||1,lo?1.6:2):(lo?1:Math.min(devicePixelRatio||1,2));Q=!lo;R.setPixelRatio(pr);composer&&composer.setPixelRatio&&composer.setPixelRatio(pr);R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam();C.updateProjectionMatrix();R.shadowMap.enabled=!lo;sun.castShadow=!lo;window.cyTrimLights&&cyTrimLights();SEATDET.forEach(o=>o.visible=!lo);S.traverse(o=>{const m2=o.material;if(m2)(Array.isArray(m2)?m2:[m2]).forEach(x=>x.needsUpdate=true)});const gb=document.getElementById('gfxBtn');if(gb){gb.textContent=lo?'⚡':'✨';gb.title=lo?'Graphics: Low (tap for High)':'Graphics: High (tap for Low)'}try{localStorage.setItem('cyr3d_gfx',m)}catch(e){}if(typeof vidTick==='function'&&zone==='aud')vidTick();if(!quiet)toast(lo?'⚡ Low graphics ON — smooth & fast':'✨ High graphics ON — shadows, glow, premium seats',2500)}
+function setGfx(m,quiet){gfx=m;const lo=m=='low',pr=cyPR(lo);Q=!lo;R.setPixelRatio(pr);composer&&composer.setPixelRatio&&composer.setPixelRatio(pr);R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam();C.updateProjectionMatrix();R.shadowMap.enabled=!lo;sun.castShadow=!lo;window.cyTrimLights&&cyTrimLights();SEATDET.forEach(o=>o.visible=!lo);S.traverse(o=>{const m2=o.material;if(m2)(Array.isArray(m2)?m2:[m2]).forEach(x=>x.needsUpdate=true)});const gb=document.getElementById('gfxBtn');if(gb){gb.textContent=lo?'⚡':'✨';gb.title=lo?'Graphics: Low (tap for High)':'Graphics: High (tap for Low)'}if(!quiet)try{localStorage.setItem('cyr3d_gfx2',m)}catch(e){}if(typeof vidTick==='function'&&zone==='aud')vidTick();if(!quiet)toast(lo?'⚡ Low graphics ON — smooth & fast':'✨ High graphics ON — shadows, glow, premium seats',2500)}
 setTimeout(()=>{if(gfx=='low'){if(window.MOB){SEATDET.forEach(o=>o.visible=false);Q=false}else setGfx('low',true)}},0);
 window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.addEventListener('visibilitychange',()=>{h=true});return()=>{const n=performance.now(),k=window.__fc|0,f=(k-c)*1000/Math.max(1,n-t);c=k;t=n;if(document.hidden){h=true;return null}if(h){h=false;return null}return f}};
 {let m=cyFpsMeter(),slow=0,told=false;setInterval(()=>{const fps=m();if(fps===null)return;if(started&&gfx=='high'&&!told&&fps<22){if(++slow>=6){told=true;toast('🐢 Game slow-aa irukku — left la ✨ button click panni Low graphics try pannunga',6000)}}else slow=0},1000)}
@@ -2063,8 +2065,8 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
  let m=cyFpsMeter(),lowN=0,hiN=0,cool=0;
- setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=Math.min(devicePixelRatio||1,gfx=='low'?1.6:2),floor=Math.min(base,1);if(cool>0)cool--;
-  if(fps<30){hiN=0;if(++lowN>=2&&cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}}
+ setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,gfx=='low'?.8:1);if(cool>0)cool--;
+  if(fps<30){hiN=0;if(++lowN>=2){if(Q&&composer){Q=false;lowN=0;cool=4;toast('✨ Glow effect temporary off — smooth FPS-ku',3500)}else if(cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}}}
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
  if(/[?&]perf=1/.test(location.search)){const d=document.createElement('div');d.style.cssText='position:fixed;left:6px;bottom:6px;z-index:99999;background:#000b;color:#7dffa0;font:11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(d);let pm=cyFpsMeter();
@@ -6399,7 +6401,8 @@ window.vehTick=function(dt){prev&&prev(dt);const now=performance.now(),show=zone
  const N=low?90:180,pos=new Float32Array(N*3),col=new Float32Array(N*3),vel=new Float32Array(N*3),life=new Float32Array(N);
  for(let i=0;i<N;i++)pos[i*3+1]=-999;
  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));
- const pm=new THREE.PointsMaterial({size:.55,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),pp=new THREE.Points(geo,pm);pp.frustumCulled=false;pp.userData.noCull=1;OUT.add(pp);
+ const rt=document.createElement('canvas');rt.width=rt.height=32;{const g2=rt.getContext('2d'),q2=g2.createRadialGradient(16,16,0,16,16,16);q2.addColorStop(0,'rgba(255,255,255,1)');q2.addColorStop(.4,'rgba(255,255,255,.6)');q2.addColorStop(1,'rgba(255,255,255,0)');g2.fillStyle=q2;g2.fillRect(0,0,32,32)}
+ const pm=new THREE.PointsMaterial({map:new THREE.CanvasTexture(rt),size:.5,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),pp=new THREE.Points(geo,pm);pp.frustumCulled=false;pp.userData.noCull=1;OUT.add(pp);
  const pal=[[1,.25,.2],[1,.8,.25],[.3,.9,.5],[1,.45,.85],[.4,.75,1]];let cur=0;
  function burst(x,y,z,n,sp,up){const c0=pal[Math.random()*5|0],c1=pal[Math.random()*5|0];for(let k=0;k<n;k++){const i=cur;cur=(cur+1)%N;const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1),v=sp*(.5+Math.random()*.7);
    pos[i*3]=x;pos[i*3+1]=y;pos[i*3+2]=z;vel[i*3]=Math.sin(b)*Math.cos(a)*v;vel[i*3+1]=Math.cos(b)*v*.8+up;vel[i*3+2]=Math.sin(b)*Math.sin(a)*v;life[i]=.9+Math.random()*.7;const c=k%2?c0:c1;col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2]}}
@@ -6419,7 +6422,7 @@ window.vehTick=function(dt){prev&&prev(dt);const now=performance.now(),show=zone
 
 /* ===== SIVAKASI PATTASU KADAI: buy with points -> place anywhere -> light with oothuvathi -> realistic fire (eye view) ===== */
 (function(){
-const low=!!window.MOB||window.GFX0=='low',R2=Math.random,rr=(a,b)=>a+(b-a)*R2(),lerp=(a,b,u)=>a+(b-a)*u,TAU=Math.PI*2;
+const low=window.GFX0=='low',R2=Math.random,rr=(a,b)=>a+(b-a)*R2(),lerp=(a,b,u)=>a+(b-a)*u,TAU=Math.PI*2;
 const PR=[
  ['oothu','🪔','Oothuvathi (Unlimited)','ஊதுவத்தி',5,'Oru thadava vaangina pothum · ella pattasukum use pannalam ♾️'],
  ['sparkler','✨','Kambi Mathappu (Sparkler)','கம்பி மத்தாப்பு',8,'Nattu vechu kolutha · 11s sparkle'],
@@ -6815,8 +6818,12 @@ function run(uid,guest){
   const oIdx=typeof d.o==='number'?(d.o%list.length):(hash(id)%list.length);
   const ot=list[oIdx]||list[0];
   const lk=d.lk,g=person(0,0,lk?lk.c:ot.col,0,OUT,0,lk&&lk.sk!=null?lk.sk:(fem?0x9a6a48:0x8a5a3a),lk?lk.l:ot.leg,lk&&lk.hr!=null?lk.hr:0x100a06,fem,lk?lk.b:ot.bdr,lk?lk.t:ot.type,lk||null);
+  /* GLB skin: other players must wear THEIR real colours (the NPC hook / world scan would give random ones) */
+  g.userData.fem=fem;g.userData.__cyNpcScanned=true;
+  try{if(window.CY_GLB&&CY_GLB.npc){g.userData.__cyNpc=true;
+   CY_GLB.npc(g,fem,{sk:lk&&lk.sk!=null?lk.sk:(fem?0x9a6a48:0x8a5a3a),top:lk?lk.c:ot.col,bot:lk?lk.l:ot.leg,hair:lk&&lk.hr!=null?lk.hr:0x100a06,beard:lk&&lk.br!=null?lk.br:0x100a06,shoe:lk&&lk.sh!=null?lk.sh:0x111111})}}catch(e){console.warn('[glb] remote look',e)}
   tag(g,d.n||'Player');g.userData.nameTag=g.children[g.children.length-1];g.userData.noCull=1;
-  return{id,g,px:d.x,pz:d.z,buf:[{t:performance.now(),x:d.x,y:d.y||0,z:d.z,r:d.r||0}],rd:'',veh:null,vt:'',zn:'',x:d.x,y:d.y||0,z:d.z,r:d.r||0,tx:d.x,ty:d.y||0,tz:d.z,tr:d.r||0,ph:0,s:0,seen:performance.now(),n:d.n,gd:d.g,o:d.o,em:'',emT:0,et:d.et||0,bub:null}}
+  return{id,g,px:d.x,pz:d.z,buf:[{t:performance.now(),x:d.x,y:d.y||0,z:d.z,r:d.r||0}],rd:'',veh:null,vt:'',zn:'',x:d.x,y:d.y||0,z:d.z,r:d.r||0,tx:d.x,ty:d.y||0,tz:d.z,tr:d.r||0,ph:0,s:0,seen:performance.now(),n:d.n,gd:d.g,o:d.o,lkj:JSON.stringify(d.lk||null),em:'',emT:0,et:d.et||0,bub:null}}
  function drop(e){if(e.wk){try{releaseWorld(e.wk,e)}catch(x){}e.wk=null}if(e.bub)clearTimeout(e.bub.tm);if(e.g.parent)e.g.parent.remove(e.g);if(e.veh&&e.veh.parent)e.veh.parent.remove(e.veh);R.delete(e.id);count()}
  const holder=e=>HID[e.vt]&&e.veh?[e.veh,TY[e.vt]+.5]:[e.g,3.15];
  /* ---- shared world vehicles: a taken car disappears for everybody, a parked car stays where it was left ---- */
@@ -6852,7 +6859,7 @@ function run(uid,guest){
  function apply(id,d){
   if(id===uid||!d||typeof d.x!=='number'||typeof d.z!=='number')return;
   let e=R.get(id);
-  if(e&&(e.n!==d.n||e.gd!==d.g||e.o!==d.o)){drop(e);e=null}
+  if(e&&(e.n!==d.n||e.gd!==d.g||e.o!==d.o||e.lkj!==JSON.stringify(d.lk||null))){drop(e);e=null}
   if(!e){e=mk(id,d);R.set(id,e);count()}
   const _n=performance.now(),_L=e.buf[e.buf.length-1];
   if(_L&&Math.hypot(d.x-_L.x,d.z-_L.z)>25)e.buf.length=0;
@@ -7356,7 +7363,7 @@ function run(uid,guest){
   }
  };
 
- {let m=cyFpsMeter(),lo=0;setInterval(()=>{const f=m();if(f===null)return;lo=(started&&f<38)?lo+1:0;if(lo>=2&&typeof gfx!=='undefined'&&gfx!=='low'){lo=0;try{setGfx('low',true);toast('⚡ Lag irundhadhu — Low graphics auto ON (✨ button-la High pannalaam)',4500)}catch(e){}}},3000)}
+ {let m=cyFpsMeter(),lo=0;setInterval(()=>{const f=m();if(f===null)return;const _th=window.MOB?26:38,_nd=window.MOB?3:2,_pr=!window.MOB||R.getPixelRatio()<=1.02;lo=(started&&f<_th&&_pr)?lo+1:0;if(lo>=_nd&&typeof gfx!=='undefined'&&gfx!=='low'){lo=0;try{setGfx('low',true);toast('⚡ Lag irundhadhu — Low graphics temporary ON (✨ button-la High pannalaam)',4500)}catch(e){}}},3000)}
 {const LG={},lump=r=>LG[r]||(LG[r]=(()=>{const g=new THREE.IcosahedronGeometry(r,2),pa=g.attributes.position;for(let i=0;i<pa.count;i++){const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i),n=1+.16*Math.sin(x*2.1+y*1.3)*Math.cos(z*1.9-y*.7)+.08*Math.sin(x*5+z*4);pa.setXYZ(i,x*n*1.08,y*n*(y<0?.7:.95),z*n*1.08)}g.computeVertexNormals();return g})());
  OUT.traverse(m=>{if(m.isMesh&&m.geometry.type==='SphereGeometry'&&m.material&&m.material.color&&[0x2e7d32,0x2b8a3a].includes(m.material.color.getHex())&&m.geometry.parameters.radius>=1.5){m.geometry=lump(m.geometry.parameters.radius);m.rotation.y=Math.random()*6.28;const k=.9+Math.random()*.25;m.scale.set(k,k*(.9+Math.random()*.2),k)}})}
  console.info('[NAMMA CHEYYAR] Advanced systems (Radio, Weather, Camera, Temple, River) active.');
@@ -8418,9 +8425,9 @@ const warned={};const warn=(k,e)=>{if(!warned[k]){warned[k]=1;console.warn('[pat
 /* ---------- A. DISTANCE STREAMING : near-ah irukkura objects mattum render ---------- */
 try{
  if(/[?&]nostream/.test(location.search))throw 'disabled';
- const NEAR=MOB?50:65;      /* small props / people / poles : indha distance-ku ulla mattum */
- const MID=MOB?105:135;     /* buildings / shops : indha distance-ku ulla mattum */
- const BIG=45,HYS=14,BUD=MOB?30:60;  /* BIG: periya objects (road, ground) eppavum visible */
+ const NEAR=MOB?(GFX0=='high'?55:48):65;      /* small props / people / poles : indha distance-ku ulla mattum */
+ const MID=MOB?(GFX0=='high'?100:85):135;     /* buildings / shops : indha distance-ku ulla mattum */
+ const BEHN=MOB?36:55,BEHM=MOB?60:90,BIG=45,HYS=14,BUD=MOB?(GFX0=='high'?45:30):60;  /* BIG: periya objects (road, ground) eppavum visible */
  const items=[],seen=new WeakSet(),bx=new THREE.Box3(),sp=new THREE.Sphere();
  let done=false,lastLen=-1,lx=1e9,lz=1e9,pendFull=true,tPrune=performance.now();
  const ppos=()=>{try{if(typeof started!=='undefined'&&started)return[P.x,P.z];const s=Z.out.sp;return[s[0],s[1]]}catch(e){return[0,0]}};
@@ -8447,10 +8454,12 @@ try{
    const [px,pz]=ppos();
    let bud=(pendFull||H(px-lx,pz-lz)>35)?1e9:BUD;pendFull=false;lx=px;lz=pz;
    let shown=0;
+   const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
    for(let i=0;i<items.length;i++){const it=items[i],o=it.o;if(!o.parent)continue;
-    const d=H(o.position.x+it.dx-px,o.position.z+it.dz-pz)-it.r;
-    if(it.hid){if(d<it.R&&shown<bud){o.visible=true;it.hid=false;shown++}}
-    else if(d>it.R+HYS){o.visible=false;it.hid=true}}
+    const ddx=o.position.x+it.dx-px,ddz=o.position.z+it.dz-pz,dd=H(ddx,ddz),d=dd-it.r,
+     bk=dd>2&&(ddx*fx+ddz*fz)/dd<-.3,RR=bk?Math.min(it.R,it.r<4?BEHN:BEHM):it.R;
+    if(it.hid){if(d<RR&&shown<bud){o.visible=true;it.hid=false;shown++}}
+    else if(d>RR+HYS){o.visible=false;it.hid=true}}
    const t=performance.now();if(t-tPrune>30000){tPrune=t;for(let i=items.length-1;i>=0;i--)if(!items[i].o.parent)items.splice(i,1)}
   }catch(e){warn('stream',e)}}
  setInterval(tick,120);tick();
