@@ -571,7 +571,7 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <script>
 (function(){let cur=null;const w={};Object.defineProperty(window,'vehTick',{configurable:true,get(){return cur},set(f){if(typeof f!=='function'){cur=f;return}const fn=f;cur=function(dt){try{return fn(dt)}catch(e){const k=String(e&&e.message);if(!w[k]){w[k]=1;console.warn('[vehTick layer]',e)}}}}})})();
 const $=id=>document.getElementById(id);
-const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(window.MOB?Math.min(devicePixelRatio||1,GFX0=='low'?1.25:1.5):Math.min(devicePixelRatio||1,GFX0=='low'?1:2));
+const R=new THREE.WebGLRenderer({alpha:true,antialias:!window.MOB,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(window.MOB?Math.min(devicePixelRatio||1,GFX0=='low'?1.6:2):Math.min(devicePixelRatio||1,GFX0=='low'?1:2));
 /* Keep the WebGL canvas pixel-aligned on mobile; adaptive scaling below can lower this if FPS drops. */
 R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;document.body.prepend(R.domElement);window.R=R;
 const S=new THREE.Scene();S.background=new THREE.Color(0x10142a);S.fog=new THREE.Fog(0x10142a,60,220);window.S=S;
@@ -2053,7 +2053,7 @@ function busBoard(){
  setTimeout(()=>{const l=$('ttList'),f=l&&l.querySelector('.tt-r:not(.past)');if(f)l.scrollTop=Math.max(0,f.offsetTop-40)},30)}
 /* ---------- GRAPHICS: HIGH / LOW ---------- */
 let gfx=window.GFX0;
-function setGfx(m,quiet){gfx=m;const lo=m=='low',pr=window.MOB?Math.min(devicePixelRatio||1,lo?1.25:1.5):(lo?1:Math.min(devicePixelRatio||1,2));Q=!lo;R.setPixelRatio(pr);composer&&composer.setPixelRatio&&composer.setPixelRatio(pr);R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam();C.updateProjectionMatrix();R.shadowMap.enabled=!lo;sun.castShadow=!lo;window.cyTrimLights&&cyTrimLights();SEATDET.forEach(o=>o.visible=!lo);S.traverse(o=>{const m2=o.material;if(m2)(Array.isArray(m2)?m2:[m2]).forEach(x=>x.needsUpdate=true)});const gb=document.getElementById('gfxBtn');if(gb){gb.textContent=lo?'⚡':'✨';gb.title=lo?'Graphics: Low (tap for High)':'Graphics: High (tap for Low)'}try{localStorage.setItem('cyr3d_gfx',m)}catch(e){}if(typeof vidTick==='function'&&zone==='aud')vidTick();if(!quiet)toast(lo?'⚡ Low graphics ON — smooth & fast':'✨ High graphics ON — shadows, glow, premium seats',2500)}
+function setGfx(m,quiet){gfx=m;const lo=m=='low',pr=window.MOB?Math.min(devicePixelRatio||1,lo?1.6:2):(lo?1:Math.min(devicePixelRatio||1,2));Q=!lo;R.setPixelRatio(pr);composer&&composer.setPixelRatio&&composer.setPixelRatio(pr);R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam();C.updateProjectionMatrix();R.shadowMap.enabled=!lo;sun.castShadow=!lo;window.cyTrimLights&&cyTrimLights();SEATDET.forEach(o=>o.visible=!lo);S.traverse(o=>{const m2=o.material;if(m2)(Array.isArray(m2)?m2:[m2]).forEach(x=>x.needsUpdate=true)});const gb=document.getElementById('gfxBtn');if(gb){gb.textContent=lo?'⚡':'✨';gb.title=lo?'Graphics: Low (tap for High)':'Graphics: High (tap for Low)'}try{localStorage.setItem('cyr3d_gfx',m)}catch(e){}if(typeof vidTick==='function'&&zone==='aud')vidTick();if(!quiet)toast(lo?'⚡ Low graphics ON — smooth & fast':'✨ High graphics ON — shadows, glow, premium seats',2500)}
 setTimeout(()=>{if(gfx=='low'){if(window.MOB){SEATDET.forEach(o=>o.visible=false);Q=false}else setGfx('low',true)}},0);
 window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.addEventListener('visibilitychange',()=>{h=true});return()=>{const n=performance.now(),k=window.__fc|0,f=(k-c)*1000/Math.max(1,n-t);c=k;t=n;if(document.hidden){h=true;return null}if(h){h=false;return null}return f}};
 {let m=cyFpsMeter(),slow=0,told=false;setInterval(()=>{const fps=m();if(fps===null)return;if(started&&gfx=='high'&&!told&&fps<22){if(++slow>=6){told=true;toast('🐢 Game slow-aa irukku — left la ✨ button click panni Low graphics try pannunga',6000)}}else slow=0},1000)}
@@ -2063,7 +2063,7 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
  let m=cyFpsMeter(),lowN=0,hiN=0,cool=0;
- setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=Math.min(devicePixelRatio||1,gfx=='low'?1.25:1.5),floor=Math.min(base,.8);if(cool>0)cool--;
+ setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=Math.min(devicePixelRatio||1,gfx=='low'?1.6:2),floor=Math.min(base,1);if(cool>0)cool--;
   if(fps<30){hiN=0;if(++lowN>=2&&cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}}
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
