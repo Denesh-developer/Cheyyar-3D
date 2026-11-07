@@ -4,7 +4,7 @@
 <script>window.MOB=(function(){try{return matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||/[?&]mobile=1/.test(location.search)}catch(e){return false}})();
 window.GFX0=(function(){var s=null;try{s=localStorage.getItem('cyr3d_gfx2')}catch(e){}if(s=='low'||s=='high')return s;if(!window.MOB)return'high';var m=navigator.deviceMemory||0,c=navigator.hardwareConcurrency||0,ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);return ios?'high':'low'})();
 /* pixel ratio per quality tier: phones in HIGH render up to 2x (adaptive scaling lowers it only if FPS drops) */
-window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:2):Math.min(d,lo?1:2)};
+window.cyPR=function(lo){var d=window.devicePixelRatio||1;return window.MOB?Math.min(d,lo?1.5:2):Math.min(d,lo?1:1.5)};
 /* phones: backdrop-filter blur over a live WebGL canvas is very costly - turn it off */
 if(window.MOB){var _st=document.createElement('style');_st.textContent='*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';(document.head||document.documentElement).appendChild(_st)}
 if(window.MOB)document.documentElement.className+=' mob';</script>
@@ -561,8 +561,22 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 <small class="cmrow" style="opacity:.6">💬 Public chat · theatre-la irukkura ellarum paarkkalaam</small></div>
 <div id="splash2"><div class="sp-glow"></div><div class="sp-logo"><i></i><span>🛕</span></div><h1>NAMMA <b>CHEYYAR</b></h1><div class="sp-ta">செய்யாறு · 3D நகரம்</div><div class="sp-bar"><i></i></div><small>Town-a ready pannitu irukkom…</small></div>
 <script>(function(){var sp=document.getElementById('splash2'),d=0;function h(){if(d||!sp)return;d=1;sp.classList.add('out');setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp)},800)}setTimeout(h,2600);setTimeout(h,6000);addEventListener('load',function(){setTimeout(h,300)});addEventListener('DOMContentLoaded',function(){setTimeout(h,2200)});sp.addEventListener('click',h)})()</script>
-<div id="intro" data-st="wait"><div class="pgl"></div><div class="gp"></div><div id="ptc"></div><div class="stars"></div><div class="moon"></div><div class="skl"></div><div class="bus"></div><div class="wrap lx"><section class="lx-hero"><div class="pbrand"><div class="pmark"><i></i><span>🛕</span></div><div><small>NAMMA OORU · 3D TOWN</small><em>Cheyyar</em></div></div><div class="lx-mid"><h2>Play in Cheyyar</h2><div class="ta">செய்யாறில் விளையாடுங்கள்</div><p class="ds">Walk the bus stand, watch a film in the theatre, drive around town and meet other players. Collect points and climb the leaderboard.</p><div class="pfeat"><span>🚌 Live buses</span><span>🎬 I-MAX theatre</span><span>🛺 Drive &amp; ride</span><span>🌧️ Day · night · rain</span><span>👥 Multiplayer</span></div></div><div class="lx-stage s-in"><canvas id="lxCv"></canvas><div class="lx-hint">Drag to rotate</div></div><aside class="lx-cards"><div class="sc"><h3>Leaderboard</h3><p>Every point you collect counts towards your rank. Sign in to appear on the board.</p></div><div class="sc"><h3>How to play</h3><p>Walk with WASD or drag to look around. Press E near people, doors and vehicles. Shift runs, Space jumps, H blows the horn.</p></div></aside></section><div class="cd lx-panel"><div class="s-top lx-h"><small>WELCOME</small><h3>Choose how to play</h3></div><div class="s-in lx-h"><small>ALMOST THERE</small><h3>Create your player</h3></div><div class="s-top"><div class="tabs"><button id="gSign" type="button" class="tb g"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.800 2.400 30.300 0 24 0 14.600 0 6.500 5.400 2.600 13.200l7.900 6.100C12.400 13.600 17.700 9.500 24 9.500z"/><path fill="#4285F4" d="M46.500 24.500c0-1.600-.1-3.100-.4-4.500H24v9h12.700c-.6 3-2.300 5.500-4.800 7.200l7.600 5.900c4.400-4.100 7-10.100 7-17.600z"/><path fill="#FBBC05" d="M10.500 28.700A14.500 14.500 0 0 1 9.500 24c0-1.600.3-3.200.8-4.700l-7.900-6.100A24 24 0 0 0 0 24c0 3.900.9 7.500 2.600 10.800l7.900-6.100z"/><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg><span id="gTxt">Sign in with Google</span></button><div class="lx-or"><i></i><span>or</span><i></i></div><button id="inOff" type="button" class="tb">⚡ Play anonymously</button></div><p class="why">Anonymous = instant 3D multiplayer with other players, chat, drive and theatre sync! Sign in with Google anytime to keep your points on every device.</p><div id="acErr" role="alert"></div></div><div class="s-in"><div class="chip"><img id="acP" alt=""><div><b id="acN"></b><small id="acE"></small></div><button id="acSw" class="lnk" type="button">Switch</button></div><label for="inName">Your name</label><input id="inName" maxlength="14" placeholder="e.g. Denesh" autocomplete="off"><label>Character</label><div class="gd"><button id="gM" type="button"><span class="av">👨</span>Male<small>Aan</small></button><button id="gF" type="button"><span class="av">👩</span>Female<small>Pen</small></button></div><div id="lxCr" class="lx-cr"><div class="lx-tabs"><span class="lx-lbl">CUSTOMIZE APPEARANCE</span><button type="button" id="lxRnd" title="Random look">Randomize</button></div>
-<div class="lx-pane" data-pane="appearance"><div class="lx-lbl">Hoodie colour</div><div class="lx-sws" data-k="c"></div><div class="lx-lbl">Pant colour</div><div class="lx-sws" data-k="l"></div><div class="lx-lbl">Shoe colour</div><div class="lx-sws" data-k="sh"></div><div class="lx-lbl">Skin tone</div><div class="lx-sws" data-k="sk"></div><div class="lx-lbl">Hair colour</div><div class="lx-sws" data-k="hr"></div><div class="lx-lbl" id="lxBeardLabel">Beard colour</div><div class="lx-sws" data-k="br" id="lxBeardSwatches"></div></div></div>
+<div id="intro" data-st="wait"><div class="pgl"></div><div class="gp"></div><div id="ptc"></div><div class="stars"></div><div class="moon"></div><div class="skl"></div><div class="bus"></div><div class="wrap lx"><section class="lx-hero"><div class="pbrand"><div class="pmark"><i></i><span>🛕</span></div><div><small>NAMMA OORU · 3D TOWN</small><em>Cheyyar</em></div></div><div class="lx-mid"><h2>Play in Cheyyar</h2><div class="ta">செய்யாறில் விளையாடுங்கள்</div><p class="ds">Walk the bus stand, watch a film in the theatre, drive around town and meet other players. Collect points and climb the leaderboard.</p><div class="pfeat"><span>🚌 Live buses</span><span>🎬 I-MAX theatre</span><span>🛺 Drive &amp; ride</span><span>🌧️ Day · night · rain</span><span>👥 Multiplayer</span></div></div><div class="lx-stage s-in"><canvas id="lxCv"></canvas><div class="lx-hint">Drag to rotate</div></div><aside class="lx-cards"><div class="sc"><h3>Leaderboard</h3><p>Every point you collect counts towards your rank. Sign in to appear on the board.</p></div><div class="sc"><h3>How to play</h3><p>Walk with WASD or drag to look around. Press E near people, doors and vehicles. Shift runs, Space jumps, H blows the horn.</p></div></aside></section><div class="cd lx-panel"><div class="s-top lx-h"><small>WELCOME</small><h3>Choose how to play</h3></div><div class="s-in lx-h"><small>ALMOST THERE</small><h3>Create your player</h3></div><div class="s-top"><div class="tabs"><button id="gSign" type="button" class="tb g"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.800 2.400 30.300 0 24 0 14.600 0 6.500 5.400 2.600 13.200l7.900 6.100C12.400 13.600 17.700 9.500 24 9.500z"/><path fill="#4285F4" d="M46.500 24.500c0-1.600-.1-3.100-.4-4.500H24v9h12.700c-.6 3-2.300 5.500-4.800 7.200l7.600 5.900c4.400-4.100 7-10.100 7-17.600z"/><path fill="#FBBC05" d="M10.500 28.700A14.500 14.500 0 0 1 9.500 24c0-1.600.3-3.200.8-4.700l-7.900-6.100A24 24 0 0 0 0 24c0 3.900.9 7.500 2.600 10.800l7.900-6.100z"/><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg><span id="gTxt">Sign in with Google</span></button><div class="lx-or"><i></i><span>or</span><i></i></div><button id="inOff" type="button" class="tb">⚡ Play anonymously</button></div><p class="why">Anonymous = instant 3D multiplayer with other players, chat, drive and theatre sync! Sign in with Google anytime to keep your points on every device.</p><div id="acErr" role="alert"></div></div><div class="s-in"><div class="chip"><img id="acP" alt=""><div><b id="acN"></b><small id="acE"></small></div><button id="acSw" class="lnk" type="button">Switch</button></div><div class="lx-np"><label for="inName">Your name</label><input id="inName" maxlength="14" placeholder="e.g. Denesh" autocomplete="off"><div id="lxNameMsg" class="lx-nm"></div><label>Character</label><div class="gd"><button id="gM" type="button"><span class="av">👨</span>Male<small>Aan</small></button><button id="gF" type="button"><span class="av">👩</span>Female<small>Pen</small></button></div></div><div id="lxCr" class="lx-cr">
+<div class="lx-bar"><span class="lx-lbl">Customise</span><div class="lx-acts"><button type="button" id="lxRnd" title="Random look">🎲 Random</button><button type="button" id="lxRst" title="Reset look">↺ Reset</button></div></div>
+<div class="lx-tabs" id="lxTabs">
+<button type="button" class="on" data-tab="body"><i>👤</i><span>Body</span></button>
+<button type="button" data-tab="hair"><i>💇</i><span>Hair</span></button>
+<button type="button" data-tab="outfit"><i>👕</i><span>Outfit</span></button>
+<button type="button" data-tab="title"><i>🏷️</i><span>Title</span></button>
+<button type="button" data-tab="saved"><i>💾</i><span>Saved</span></button>
+</div>
+<div class="lx-pane" data-pane="body"><div class="lx-lbl">Skin tone</div><div class="lx-sws" data-k="sk"></div></div>
+<div class="lx-pane" data-pane="hair" hidden><div class="lx-lbl">Hair colour</div><div class="lx-sws" data-k="hr"></div><div class="lx-lbl" id="lxBeardLabel">Beard colour</div><div class="lx-sws" data-k="br" id="lxBeardSwatches"></div></div>
+<div class="lx-pane" data-pane="outfit" hidden><div class="lx-lbl">Hoodie colour</div><div class="lx-sws" data-k="c"></div><div class="lx-lbl">Pant colour</div><div class="lx-sws" data-k="l"></div><div class="lx-lbl">Shoe colour</div><div class="lx-sws" data-k="sh"></div></div>
+<div class="lx-pane" data-pane="title" hidden><div class="lx-lbl">Title shown next to your name</div><div class="lx-chips" id="lxTitles">
+<button type="button" class="lx-chip" data-ti="">None</button><button type="button" class="lx-chip" data-ti="Cheyyar Hero">🛕 Cheyyar Hero</button><button type="button" class="lx-chip" data-ti="Auto Driver">🛺 Auto Driver</button><button type="button" class="lx-chip" data-ti="Mass Fan">🎬 Mass Fan</button><button type="button" class="lx-chip" data-ti="Bus Stand Boss">🚌 Bus Stand Boss</button><button type="button" class="lx-chip" data-ti="Chai Lover">☕ Chai Lover</button></div></div>
+<div class="lx-pane" data-pane="saved" hidden><div class="lx-lbl">Save up to 3 looks · tap a slot to load, 💾 to save here</div><div id="lxSlots" class="lx-slots"></div></div>
+</div>
 <button class="go" id="inGo" type="button">Enter Cheyyar</button><button id="toG" class="lnk" type="button">Sign in with Google instead</button></div></div></div></div><div id="fade"></div>
 <div id="modal" onclick="if(event.target===this)closeModal()"><div id="box"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -576,15 +590,15 @@ html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px #e6c37388;transform
 const $=id=>document.getElementById(id);
 const R=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});R.setSize(innerWidth,innerHeight);R.setPixelRatio(cyPR(GFX0=='low'));
 /* Keep the WebGL canvas pixel-aligned on mobile; adaptive scaling below can lower this if FPS drops. */
-R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;document.body.prepend(R.domElement);window.R=R;
+R.domElement.style.width='100vw';R.domElement.style.height='100vh';R.domElement.style.imageRendering='auto';R.shadowMap.enabled=GFX0!='low';R.shadowMap.autoUpdate=false;{let _sf=0;const _or=R.render.bind(R);R.render=function(a,b){if(a===S)R.shadowMap.needsUpdate=((++_sf)%2===0);return _or(a,b)}}R.shadowMap.type=THREE.PCFShadowMap;document.body.prepend(R.domElement);window.R=R;
 const S=new THREE.Scene();S.background=new THREE.Color(0x10142a);S.fog=new THREE.Fog(0x10142a,60,220);window.S=S;
 const C=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,400);C.rotation.order='YXZ';window.C=C;
 /* phone portrait = very narrow horizontal view, so widen FOV there */
 function fitCam(){const a=innerWidth/innerHeight;C.aspect=a;C.fov=a<1?Math.min(90,70+(1-a)*40):70;C.updateProjectionMatrix()}fitCam();
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);composer&&composer.setSize(innerWidth,innerHeight);fitCam()});
 S.add(new THREE.HemisphereLight(0x8899cc,0x333344,.85));
-const sun=new THREE.DirectionalLight(0xaab8ff,.5);sun.position.set(30,60,20);S.add(sun);S.add(sun.target);sun.castShadow=GFX0!='low';sun.shadow.mapSize.set(window.MOB?(GFX0=='high'?1024:512):2048,window.MOB?(GFX0=='high'?1024:512):2048);{const c2=sun.shadow.camera;c2.left=-100;c2.right=100;c2.top=100;c2.bottom=-100;c2.near=1;c2.far=250}sun.shadow.bias=-.0004;window.sun=sun;
-let composer=null;try{if(window.MOB&&GFX0!='high')throw 'skip post-fx on weak phones';let _rt;try{if(R.capabilities.isWebGL2){_rt=new THREE.WebGLMultisampleRenderTarget(innerWidth,innerHeight,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat});_rt.samples=window.MOB?2:4}}catch(e){_rt=undefined}composer=new THREE.EffectComposer(R,_rt);if(_rt){composer.setPixelRatio(R.getPixelRatio());composer.setSize(innerWidth,innerHeight)}composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
+const sun=new THREE.DirectionalLight(0xaab8ff,.5);sun.position.set(30,60,20);S.add(sun);S.add(sun.target);sun.castShadow=GFX0!='low';sun.shadow.mapSize.set(window.MOB?(GFX0=='high'?1024:512):1024,window.MOB?(GFX0=='high'?1024:512):1024);{const c2=sun.shadow.camera;c2.left=-100;c2.right=100;c2.top=100;c2.bottom=-100;c2.near=1;c2.far=250}sun.shadow.bias=-.0004;window.sun=sun;
+let composer=null;try{if(window.MOB&&GFX0!='high')throw 'skip post-fx on weak phones';let _rt;try{if(R.capabilities.isWebGL2){_rt=new THREE.WebGLMultisampleRenderTarget(innerWidth,innerHeight,{minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,format:THREE.RGBAFormat});_rt.samples=2}}catch(e){_rt=undefined}composer=new THREE.EffectComposer(R,_rt);if(_rt){composer.setPixelRatio(R.getPixelRatio());composer.setSize(innerWidth,innerHeight)}composer.addPass(new THREE.RenderPass(S,C));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.3,.5,.92));composer.addPass(new THREE.ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D tDiffuse;varying vec2 v;void main(){vec4 c=texture2D(tDiffuse,v);float d=distance(v,vec2(.5));c.rgb*=smoothstep(.85,.35,d)*.45+.55;gl_FragColor=c;}'}))}catch(e){console.warn('post-processing off',e);composer=null}
 /* ---- realism pass: procedural surface textures + soft shadows ---- */
 const TXF=(fn)=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d'),r=Math.random;fn(g,r);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=window.MOB?Math.min(4,R.capabilities.getMaxAnisotropy()):Math.min(8,R.capabilities.getMaxAnisotropy());return t};
 const TX={fine:TXF((g,r)=>{g.fillStyle='#f0f0f0';g.fillRect(0,0,256,256);for(let i=0;i<3500;i++){g.fillStyle=r()<.7?'rgba(0,0,0,.07)':'rgba(255,255,255,.35)';g.fillRect(r()*256,r()*256,1+r()*2,1+r()*2)}for(let i=0;i<14;i++){g.fillStyle='rgba(0,0,0,.035)';g.beginPath();g.arc(r()*256,r()*256,12+r()*30,0,7);g.fill()}}),
@@ -593,7 +607,7 @@ const TX={fine:TXF((g,r)=>{g.fillStyle='#f0f0f0';g.fillRect(0,0,256,256);for(let
  bark:TXF((g,r)=>{g.fillStyle='#d2d2d2';g.fillRect(0,0,256,256);for(let i=0;i<260;i++){g.strokeStyle=r()<.6?'rgba(0,0,0,.28)':'rgba(255,255,255,.2)';g.lineWidth=1+r()*2.5;const x=r()*256,y=r()*256;g.beginPath();g.moveTo(x,y);g.lineTo(x+r()*4-2,y+20+r()*50);g.stroke()}})};
 const TXA=[0x333338,0x3a3a40,0x2a2a30],TXG=[0x6b9a52,0x2e7d32,0x2b8a3a,0x1f6a2a,0x1f6a2a,0x4a8a3a],TXB=[0x5a3b1e,0x2a2018,0x4a2a14,0x7a4a2a];
 const M={};const mat=c=>M[c]||(M[c]=new THREE.MeshLambertMaterial({color:c,map:TXA.includes(c)?TX.asph:TXG.includes(c)?TX.grass:TXB.includes(c)?TX.bark:TX.fine}));
-R.shadowMap.type=window.MOB?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+R.shadowMap.type=THREE.PCFShadowMap;
 const BG={};function box(w,h,d,c,x,y,z,p){const k=w+'_'+h+'_'+d,m=new THREE.Mesh(BG[k]||(BG[k]=(()=>{const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes.uv,f=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];for(let i=0;i<24;i++){const q=f[i>>2];uv.setXY(i,uv.getX(i)*q[0]/5,uv.getY(i)*q[1]/5)}return g})()),mat(c));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(p||S).add(m);return m}
 
 /* ===== CM photo boards + Thalapathy posters =====
@@ -2066,7 +2080,7 @@ window.cyFpsMeter=()=>{let c=window.__fc|0,t=performance.now(),h=false;document.
  window.cyTrimLights=trimLights;
  setTimeout(trimLights,1500);setTimeout(trimLights,6000);
  let m=cyFpsMeter(),lowN=0,hiN=0,cool=0;
- setInterval(()=>{const fps=m();if(fps===null||!window.MOB||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,1.25);if(cool>0)cool--;
+ setInterval(()=>{const fps=m();if(fps===null||!started)return;const cur=R.getPixelRatio(),base=cyPR(gfx=='low'),floor=Math.min(base,window.MOB?1.25:1);if(cool>0)cool--;
   if(fps<30){hiN=0;if(++lowN>=2){if(Q&&composer){Q=false;lowN=0;cool=4;toast('✨ Glow effect temporary off — smooth FPS-ku',3500)}else if(cur>floor){const n=Math.max(floor,+(cur-.15).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);lowN=0;cool=8}else if(gfx=='high'){setGfx('low',true);lowN=0;cool=6;toast('⚡ Auto Low graphics — smooth FPS-ku',3500)}}}
   else if(fps>=48){lowN=0;if(++hiN>=6&&cool==0&&cur<base){const n=Math.min(base,+(cur+.1).toFixed(3));R.setPixelRatio(n);composer&&composer.setPixelRatio&&composer.setPixelRatio(n);hiN=0}}
   else{lowN=0;hiN=0}},1000);
@@ -2540,13 +2554,20 @@ function afterTicket(){
  const hex=n=>'#'+('000000'+n.toString(16)).slice(-6),pick=a=>a[Math.random()*a.length|0];
  const base=()=>({c:0x263238,l:0x212121,sh:0x111111,sk:g==='female'?0x9a6a48:0x8a5a3a,hr:0x100a06,br:0x100a06});
  look=base();
+ const CAMS={body:{y:1.12,z:5.4,ly:1.0},hair:{y:1.62,z:2.7,ly:1.56},outfit:{y:1.1,z:4.7,ly:.95},title:{y:1.12,z:5.4,ly:1.0},saved:{y:1.12,z:5.4,ly:1.0}};
+ let camT=CAMS.body,camL=1.0;
+ const LK=['c','l','sh','sk','hr','br'];
+ const slots=()=>{try{const a=JSON.parse(localStorage.getItem('cyr3d_slots')||'[]');return[a[0]||null,a[1]||null,a[2]||null]}catch(e){return[null,null,null]}};
+ const saveSlots=a=>{try{localStorage.setItem('cyr3d_slots',JSON.stringify(a))}catch(e){}};
+ function slotsUI(){const el=$('lxSlots');if(!el)return;const a=slots();el.innerHTML=a.map((o,i)=>'<div class="lx-slot'+(o?' full':'')+'"><button type="button" class="lx-sl" data-sld="'+i+'">'+(o?'<span class="dots"><b style="background:'+hex(o.c)+'"></b><b style="background:'+hex(o.l)+'"></b><b style="background:'+hex(o.sk)+'"></b><b style="background:'+hex(o.hr)+'"></b></span>':'<span class="dots e">+</span>')+'<em>Slot '+(i+1)+'</em><small>'+(o?'Tap to load':'Empty · tap to save')+'</small></button><button type="button" class="lx-sv" data-ssv="'+i+'" title="Save current look here">💾</button></div>').join('')}
+ function titlesUI(){let t='';try{t=localStorage.getItem('cyr3d_title')||''}catch(e){}box.querySelectorAll('[data-ti]').forEach(b=>b.classList.toggle('on',b.dataset.ti===t))}
  function ui(){
   box.querySelectorAll('.lx-sws').forEach(d=>{const k=d.dataset.k;d.innerHTML=PAL[k].map(v=>'<button type="button" class="lx-sw'+(look[k]===v?' on':'')+'" data-k="'+k+'" data-v="'+v+'" style="background:'+hex(v)+'" aria-label="'+k+' colour"></button>').join('')});
-  const beard=g==='male';$('lxBeardLabel').style.display=beard?'':'none';$('lxBeardSwatches').style.display=beard?'':'none';
+  const beard=g==='male';$('lxBeardLabel').style.display=beard?'':'none';$('lxBeardSwatches').style.display=beard?'':'none';slotsUI();titlesUI();
  }
  function ensureGL(){
   if(R2)return;
-  R2=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});R2.setClearColor(0,0);R2.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  R2=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});R2.setClearColor(0,0);R2.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
   PS=new THREE.Scene();PC=new THREE.PerspectiveCamera(30,1,.1,60);PC.position.set(0,1.12,5.4);PC.lookAt(0,1.0,0);
   PS.add(new THREE.AmbientLight(0xffffff,.55));PS.add(new THREE.HemisphereLight(0xdbe8ff,0x4a3426,.45));const d=new THREE.DirectionalLight(0xfff1d6,.95);d.position.set(2,4,4);PS.add(d);const rim=new THREE.DirectionalLight(0xffc98a,.8);rim.position.set(-3,3,-4);PS.add(rim);
   const r=new THREE.PointLight(0xe6c373,.8,12);r.position.set(-3,2,-3);PS.add(r);
@@ -2556,7 +2577,7 @@ function afterTicket(){
  }
  function rebuild(){try{ensureGL();if(mdl)PS.remove(mdl);mdl=person(0,0,look.c,0,PS,0,look.sk,look.l,look.hr,g==='female',look.sh,look.t,look);mdl.rotation.y=rot;if(window.CY_GLB&&CY_GLB.preview){CY_GLB.hook(R2);CY_GLB.preview(mdl,g==='female',{sk:look.sk,c:look.c,l:look.l,hr:look.hr,br:look.br,sh:look.sh})}}catch(e){console.warn('[creator]',e)}}
  function size(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;const pr=R2.getPixelRatio();if(cv.width!==Math.round(w*pr)||cv.height!==Math.round(h*pr)){R2.setSize(w,h,false);PC.aspect=w/h;PC.updateProjectionMatrix()}}
- function tick(){raf=requestAnimationFrame(tick);if(it.style.display==='none'){stop(true);return}if(document.hidden||!R2)return;if(!drag)rot+=.006;if(mdl)mdl.rotation.y=rot;size();R2.render(PS,PC)}
+ function tick(){raf=requestAnimationFrame(tick);if(it.style.display==='none'){stop(true);return}if(document.hidden||!R2)return;if(!drag)rot+=.006;if(mdl)mdl.rotation.y=rot;size();PC.position.y+=(camT.y-PC.position.y)*.12;PC.position.z+=(camT.z-PC.position.z)*.12;camL+=(camT.ly-camL)*.12;PC.lookAt(0,camL,0);R2.render(PS,PC)}
  function start(){if(raf)return;try{ensureGL();if(!mdl)rebuild();tick()}catch(e){console.warn('[creator]',e)}}
  function stop(dispose){cancelAnimationFrame(raf);raf=0;if(dispose&&R2){try{R2.dispose();R2.forceContextLoss()}catch(e){}R2=null;mdl=null}}
  function syncGender(gen){
@@ -2574,8 +2595,13 @@ function afterTicket(){
  const up=()=>{drag=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
  box.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
-  if(t.dataset.tab){box.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b===t));box.querySelectorAll('.lx-pane').forEach(p=>p.hidden=p.dataset.pane!==t.dataset.tab);return}
+  if(t.dataset.tab){box.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b===t));box.querySelectorAll('.lx-pane').forEach(p=>p.hidden=p.dataset.pane!==t.dataset.tab);camT=CAMS[t.dataset.tab]||CAMS.body;return}
   if(t.id==='lxRnd'){look.c=pick(CLOTH);look.l=pick(PANTS);look.sh=pick(SHOES);look.sk=pick(SKIN);look.hr=pick(HAIR);look.br=pick(HAIR)}
+  else if(t.id==='lxRst'){look=base()}
+  else if(t.dataset.ti!==undefined){const v=t.dataset.ti;try{v?localStorage.setItem('cyr3d_title',v):localStorage.removeItem('cyr3d_title')}catch(_){}titlesUI();return}
+  else if(t.dataset.ssv!==undefined||t.dataset.sld!==undefined){const sv=t.dataset.ssv!==undefined,i=+(sv?t.dataset.ssv:t.dataset.sld),a=slots();
+   if(sv||!a[i]){const o={};LK.forEach(k=>o[k]=look[k]);a[i]=o;saveSlots(a);slotsUI();touched=true;try{toast('💾 Look saved in slot '+(i+1),1600)}catch(_){}return}
+   look=Object.assign(base(),a[i])}
   else if(t.dataset.k){look[t.dataset.k]=+t.dataset.v}
   else return;
   touched=true;ui();rebuild();
@@ -2610,7 +2636,7 @@ function afterTicket(){
  $('acSw').onclick=()=>window.CY_SIGNOUT&&CY_SIGNOUT();
  const go=()=>{const v=nm.value.trim().replace(/\s+/g,' ');if(!v){nm.classList.add('bad');nm.focus();setTimeout(()=>nm.classList.remove('bad'),700);return}
   myName=v.slice(0,14);myGender=g;try{localStorage.setItem('cyr3d_player',JSON.stringify({n:myName,g}))}catch(e){}try{window.cyApplyCreator&&cyApplyCreator(g)}catch(e){console.warn(e)}
-  makeMe();$('pnm').textContent=myName;if($('plAvatar'))$('plAvatar').textContent=myName.trim().charAt(0).toUpperCase()||'D';if($('rail-player'))$('rail-player').textContent=myName;$('plName').style.display='inline-flex';$('intro').style.display='none';started=true;
+  makeMe();$('pnm').textContent=myName;if($('plAvatar'))$('plAvatar').textContent=myName.trim().charAt(0).toUpperCase()||'D';if($('rail-player'))$('rail-player').textContent=myName;$('plName').style.display='inline-flex';try{const tt=localStorage.getItem('cyr3d_title')||'';let sp=$('pTitle');if(!sp){sp=document.createElement('small');sp.id='pTitle';sp.style.cssText='color:var(--turmeric-2);font-size:10px;font-weight:600;margin-left:2px';$('pnm').after(sp)}sp.textContent=tt?'· '+tt:''}catch(e){}$('intro').style.display='none';started=true;
   try{window.CY_SAVEPROF&&CY_SAVEPROF()}catch(e){}
   toast('🙏 Vanakkam '+myName+'! Namma Ooru Cheyyar-ku welcome',4500);
   if(window.CY_GUEST){const kb=$('keyBtn');if(kb)kb.style.display='block';setTimeout(()=>toast('👀 Guest mode: town-a suthi paarkalaam · chat, rank, points save-ku Google login venum (🔑 button)',6500),4800)}else if(window.CY_USER){const ob=$('outBtn');if(ob)ob.style.display='block'}};
@@ -2755,6 +2781,7 @@ if(window.camMode===1&&!dv&&!seated){
   C.rotation.set(pitch,yaw,0);
 }
  if(zone=='aud'){paintScreen(t);if(window.__screenLight&&window.__audDimmed!==false){const flk=Math.sin(t*0.0031)*0.08+Math.cos(t*0.0073)*0.05;window.__screenLight.intensity=Math.max(0.4,0.70+flk);}}if(zone=='out')animOut(t);window.vidTick&&vidTick();
+ if(!started){window.__ir=(window.__ir|0)+1;if(window.__ir%30)return}
  Q&&composer&&(zone!='aud')?composer.render():R.render(S,C)})(0);
 </script><script>
 /* ===== VEHICLES + BIGGER TOWN (south Cheyyar) ===== */
@@ -10304,4 +10331,152 @@ html .zoom-btn{width:34px;height:28px;font-size:16px}
  },true);
 })();
 </script>
+
+<style id="cy-creator-ui">
+html #intro .lx-stage{background:radial-gradient(ellipse 60% 45% at 50% 88%,rgba(230,195,115,.30),transparent 70%),radial-gradient(ellipse 50% 60% at 50% 25%,rgba(130,110,220,.20),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.25));border:1px solid rgba(230,195,115,.22);border-radius:20px;box-shadow:inset 0 0 60px rgba(0,0,0,.45),0 18px 50px rgba(0,0,0,.4);overflow:hidden}
+html #intro .lx-stage::after{content:"CHARACTER PREVIEW";position:absolute;top:12px;left:16px;font:600 9.5px/1 var(--font);letter-spacing:.3em;color:rgba(230,195,115,.75);pointer-events:none}
+html #intro .lx-cr{margin-top:14px;padding:12px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(230,195,115,.16)}
+html #intro .lx-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+html #intro .lx-bar .lx-lbl{margin:0}
+html #intro .lx-acts{display:flex;gap:6px}
+html #intro .lx-acts button{height:30px;padding:0 11px;border-radius:9px;border:1px solid rgba(230,195,115,.3);background:rgba(230,195,115,.08);color:#f4e6bf;font:600 11.5px var(--font);cursor:pointer;transition:background .15s,transform .1s}
+html #intro .lx-acts button:hover{background:rgba(230,195,115,.2)}html #intro .lx-acts button:active{transform:scale(.95)}
+html #intro .lx-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:12px;padding:4px;border-radius:14px;background:rgba(0,0,0,.28)}
+html #intro .lx-tabs button{height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:10px;border:1px solid transparent;background:transparent;color:#bfae86;cursor:pointer;padding:0;transition:all .15s}
+html #intro .lx-tabs button i{font-style:normal;font-size:17px;line-height:1}
+html #intro .lx-tabs button span{font:600 10px/1 var(--font);letter-spacing:.04em}
+html #intro .lx-tabs button:hover{color:#fff;background:rgba(255,255,255,.05)}
+html #intro .lx-tabs button.on{color:#1a1206;background:linear-gradient(160deg,#f0d28a,#d9a94a);border-color:#ffe2a0;box-shadow:0 4px 14px rgba(217,169,74,.35)}
+html #intro .lx-pane{max-height:min(30vh,260px)}
+html #intro .lx-sws{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:8px}
+html #intro .lx-sw{width:100%;height:38px;border-radius:11px;border:2px solid rgba(255,255,255,.14)}
+html #intro .lx-sw.on{border-color:#fff;box-shadow:0 0 0 3px rgba(230,195,115,.55),0 4px 12px rgba(0,0,0,.4);transform:scale(1.06)}
+html #intro .lx-chip.on{color:#1a1206}
+html #intro .lx-slots{display:flex;flex-direction:column;gap:8px}
+html #intro .lx-slot{display:flex;gap:6px;align-items:stretch}
+html #intro .lx-sl{flex:1;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;padding:8px 10px;border-radius:12px;border:1px dashed rgba(230,195,115,.3);background:rgba(255,255,255,.04);color:#f4e6bf;cursor:pointer}
+html #intro .lx-slot.full .lx-sl{border-style:solid;background:rgba(230,195,115,.09)}
+html #intro .lx-sl .dots{grid-row:1/3;display:flex;gap:3px}
+html #intro .lx-sl .dots b{width:14px;height:30px;border-radius:5px;border:1px solid rgba(255,255,255,.25)}
+html #intro .lx-sl .dots.e{width:38px;height:30px;align-items:center;justify-content:center;font-size:20px;color:#c9b17a}
+html #intro .lx-sl em{font:700 12.5px var(--font);font-style:normal}
+html #intro .lx-sl small{font-size:10.5px;color:#a89a76}
+html #intro .lx-sv{flex:0 0 44px;border-radius:12px;border:1px solid rgba(230,195,115,.3);background:rgba(230,195,115,.1);font-size:17px;cursor:pointer}
+html #intro .lx-nm{min-height:16px;margin:5px 2px 0;font-size:11.5px;color:#a89a76}
+html #intro .lx-nm.ok{color:#7be39a}html #intro .lx-nm.bad{color:#ff8a7a}
+@media(max-width:900px){html #intro .lx-tabs button{height:46px}}
+</style>
+<script>
+(function(){var i=document.getElementById('inName'),m=document.getElementById('lxNameMsg'),it=document.getElementById('intro');if(!i||!m)return;
+function v(){var t=i.value.trim();if(!t){m.className='lx-nm';m.textContent='Enter a name (2–14 characters)'}else if(t.length<2){m.className='lx-nm bad';m.textContent='Too short — minimum 2 letters'}else{m.className='lx-nm ok';m.textContent='✓ Looks good'}}
+i.addEventListener('input',v);v();var iv=setInterval(function(){if(it.style.display==='none'){clearInterval(iv);return}v()},800);
+})();
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style id="cy-ff-creator">
+/* ===== Free Fire / PUBG style character screen (only for the create-player states) ===== */
+html body #intro:is([data-st=in],[data-st=off]){--ff:#ffb02e;--ff2:#ffd34d;--ffd:#ff8a1a;font-family:'Rajdhani','Noto Sans Tamil',system-ui,sans-serif;
+ background:linear-gradient(115deg,transparent 0 36%,rgba(255,176,46,.07) 36% 50%,transparent 50% 100%),linear-gradient(115deg,transparent 0 58%,rgba(255,176,46,.05) 58% 63%,transparent 63% 100%),radial-gradient(55% 70% at 42% 62%,rgba(255,122,26,.20),transparent 70%),radial-gradient(45% 50% at 100% 100%,rgba(255,176,46,.16),transparent),#090b11!important}
+html body #intro:is([data-st=in],[data-st=off]) :is(.pgl,.gp,#ptc,.stars,.moon,.skl,.bus){display:none!important}
+html body #intro:is([data-st=in],[data-st=off]) .wrap.lx{display:grid!important;grid-template-columns:96px minmax(0,1fr) minmax(330px,400px);grid-template-rows:64px auto minmax(0,1fr) auto;column-gap:clamp(10px,2vw,28px);row-gap:10px;padding:0 clamp(14px,3vw,40px) clamp(14px,2.5vh,26px)!important;align-items:stretch;justify-content:stretch;overflow:hidden}
+html body #intro:is([data-st=in],[data-st=off]) :is(.lx-hero,.lx-panel,.lx-panel>.s-in:not(.lx-h),.lx-cr){display:contents!important}
+html body #intro:is([data-st=in],[data-st=off]) :is(.lx-mid,.lx-cards,.lx-panel>.s-top,.lx-panel>.s-in.lx-h,.pbrand>div:last-child){display:none!important}
+html body #intro:is([data-st=in],[data-st=off]) .pbrand{grid-area:1/1;align-self:center;justify-self:start;margin:0}
+/* top title tag */
+html body #intro:is([data-st=in],[data-st=off]) .wrap.lx::before{content:"CHARACTER";grid-area:1/2;justify-self:center;align-self:center;padding:6px 38px;font:800 italic 22px/1.1 'Rajdhani',sans-serif;letter-spacing:.2em;color:#14100a;background:linear-gradient(90deg,var(--ff),var(--ff2));clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+/* right item panel backing */
+html body #intro:is([data-st=in],[data-st=off]) .wrap.lx::after{content:"";grid-area:2/3/4/4;z-index:0;background:linear-gradient(180deg,rgba(20,23,33,.94),rgba(9,11,17,.96));border-top:3px solid var(--ff);clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px)}
+/* stage */
+html body #intro:is([data-st=in],[data-st=off]) .lx-stage{grid-area:2/2/4/3;position:relative;isolation:isolate;min-height:0!important;height:auto!important;display:block!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important;margin:0}
+html body #intro:is([data-st=in],[data-st=off]) .lx-stage::before{content:"";position:absolute;left:50%;bottom:4%;width:68%;height:14%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,176,46,.5),rgba(255,122,26,.14) 55%,transparent 72%);border:2px solid rgba(255,176,46,.75);box-shadow:0 0 50px rgba(255,138,26,.55);z-index:-1}
+html body #intro:is([data-st=in],[data-st=off]) .lx-stage::after{content:"CHEYYAR";position:absolute;left:0;right:0;top:10%;top:max(8%,24px);text-align:center;font:800 italic clamp(70px,13vw,200px)/1 'Rajdhani',sans-serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;color:transparent;-webkit-text-stroke:2px rgba(255,176,46,.17);z-index:-1;pointer-events:none}
+html body #intro:is([data-st=in],[data-st=off]) .lx-hint{color:#8d93a3;font:600 11px 'Rajdhani',sans-serif;letter-spacing:.3em}
+/* left tab rail */
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs{grid-area:2/1/5/2;display:flex!important;flex-direction:column;gap:8px;padding:0!important;margin:0!important;background:none!important;align-self:start;position:relative;z-index:1}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button{width:100%;height:78px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;background:rgba(255,255,255,.055);border:0;border-left:4px solid transparent;border-radius:0;color:#98a1b4;cursor:pointer;clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);transition:background .15s,color .15s}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button i{font-style:normal;font-size:26px;line-height:1}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button span{font:700 12px/1 'Rajdhani',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button:hover{background:rgba(255,255,255,.1);color:#fff}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button.on{background:linear-gradient(90deg,rgba(255,176,46,.40),rgba(255,176,46,.05));border-left-color:var(--ff);color:#fff}
+html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button.on i{filter:drop-shadow(0 0 8px rgba(255,176,46,.9))}
+/* right panel */
+html body #intro:is([data-st=in],[data-st=off]) .lx-bar{grid-area:2/3;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0;padding:16px 18px 0}
+html body #intro:is([data-st=in],[data-st=off]) .lx-acts{display:flex;gap:8px}
+html body #intro:is([data-st=in],[data-st=off]) .lx-acts button{height:32px;padding:0 14px;border:0;border-radius:0;background:rgba(255,255,255,.09);color:#e9edf5;font:700 12.5px 'Rajdhani',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-acts button:hover{background:var(--ff);color:#14100a}
+html body #intro:is([data-st=in],[data-st=off]) .lx-pane{grid-area:3/3;position:relative;z-index:1;min-height:0;max-height:none!important;overflow-y:auto;padding:4px 18px 18px;scrollbar-width:thin;scrollbar-color:var(--ff) transparent}
+html body #intro:is([data-st=in],[data-st=off]) .lx-lbl{margin:12px 0 9px;font:700 14px/1 'Rajdhani',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--ff)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-lbl::before{content:"";display:inline-block;width:4px;height:14px;margin-right:8px;vertical-align:-2px;background:var(--ff);transform:skewX(-16deg)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sws{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sw{position:relative;width:100%;height:auto;aspect-ratio:1;border-radius:4px;border:2px solid rgba(255,255,255,.12);box-shadow:inset 0 -24px 22px rgba(0,0,0,.38),inset 0 10px 14px rgba(255,255,255,.14);transform:none;transition:border-color .12s,box-shadow .12s}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sw:hover{border-color:rgba(255,255,255,.55)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sw.on{border-color:var(--ff);transform:none;box-shadow:inset 0 -24px 22px rgba(0,0,0,.38),0 0 0 2px rgba(255,176,46,.35),0 0 18px rgba(255,176,46,.55)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sw.on::after{content:"✓";position:absolute;top:0;right:0;width:22px;height:22px;background:var(--ff);color:#14100a;font:800 13px/22px sans-serif;clip-path:polygon(0 0,100% 0,100% 100%)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-chips{display:flex;flex-wrap:wrap;gap:8px}
+html body #intro:is([data-st=in],[data-st=off]) .lx-chip{padding:9px 14px;border-radius:0;border:1px solid rgba(255,176,46,.28);background:rgba(255,255,255,.06);color:#dfe4ee;font:700 14px 'Rajdhani','Noto Sans Tamil',sans-serif;letter-spacing:.04em;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-chip.on{background:linear-gradient(160deg,var(--ff2),var(--ffd));color:#14100a;border-color:var(--ff2)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sl{border-radius:4px;font-family:'Rajdhani',sans-serif}
+html body #intro:is([data-st=in],[data-st=off]) .lx-sv{border-radius:4px}
+/* name plate */
+html body #intro:is([data-st=in],[data-st=off]) .lx-np{grid-area:4/2;position:relative;z-index:1;display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:end}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>label:first-child{grid-column:1;margin:0 0 4px;font:700 12px 'Rajdhani',sans-serif!important;letter-spacing:.24em!important;color:var(--ff)!important;text-transform:uppercase}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>label:nth-of-type(2){display:none}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>input{grid-column:1;height:52px!important;padding:0 18px!important;border:0!important;border-bottom:3px solid var(--ff)!important;border-radius:0!important;background:rgba(0,0,0,.6)!important;color:#fff;font:700 24px 'Rajdhani','Noto Sans Tamil',sans-serif!important;letter-spacing:.08em;text-transform:uppercase;box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 100%,0 100%)}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>input:focus{background:rgba(255,176,46,.1)!important}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>.lx-nm{grid-column:1;margin:4px 0 0;min-height:16px;font:600 13px 'Rajdhani',sans-serif;letter-spacing:.05em}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np>.gd{grid-column:2;grid-row:1/4;align-self:stretch;display:flex;gap:8px}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button{width:84px;min-height:72px;padding:6px 4px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0!important;border-radius:0!important;background:rgba(255,255,255,.08)!important;color:#cfd5e2;font:700 13px 'Rajdhani',sans-serif;letter-spacing:.1em;text-transform:uppercase;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);transform:none!important;box-shadow:none!important;backdrop-filter:none}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button .av{font-size:26px;line-height:1;filter:none;transform:none}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button small{display:none}
+html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button.on{background:linear-gradient(160deg,var(--ff2),var(--ffd))!important;color:#14100a}
+/* enter button */
+html body #intro:is([data-st=in],[data-st=off]) .go{grid-area:4/3;position:relative;z-index:1;overflow:hidden;width:100%;height:60px!important;margin:0!important;padding:0 20px;border:0;border-radius:0!important;background:linear-gradient(180deg,var(--ff2),var(--ffd))!important;color:#1a0d00!important;font:800 italic 25px/1 'Rajdhani',sans-serif!important;letter-spacing:.1em;text-transform:uppercase;clip-path:polygon(16px 0,100% 0,calc(100% - 16px) 100%,0 100%);animation:none!important;box-shadow:none!important}
+html body #intro:is([data-st=in],[data-st=off]) .go::before{content:"▶";margin-right:10px;font-style:normal}
+/* account chip + guest link in the top-right */
+html body #intro:is([data-st=in],[data-st=off]) .chip{grid-area:1/3;justify-self:end;align-self:center;margin:0!important;padding:5px 12px 5px 6px!important;border-radius:0!important;background:rgba(255,255,255,.07)!important;border:0!important;color:#e9edf5;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+html body #intro[data-st=in] #toG{display:none}
+html body #intro[data-st=off] #toG{grid-area:1/3;justify-self:end;align-self:center;margin:0;color:var(--ff);font:700 13px 'Rajdhani',sans-serif;letter-spacing:.06em}
+/* ---------- phone portrait ---------- */
+@media(max-width:900px) and (orientation:portrait){
+ html body #intro:is([data-st=in],[data-st=off]) .wrap.lx{grid-template-columns:minmax(0,1fr);grid-template-rows:46px minmax(220px,37vh) auto auto auto minmax(150px,1fr) auto;padding:0 12px 12px!important;row-gap:8px;overflow-y:auto}
+ html body #intro:is([data-st=in],[data-st=off]) .wrap.lx::before{grid-area:1/1;font-size:18px;padding:5px 30px}
+ html body #intro:is([data-st=in],[data-st=off]) .wrap.lx::after{grid-area:5/1/7/2}
+ html body #intro:is([data-st=in],[data-st=off]) :is(.pbrand,.chip){display:none!important}
+ html body #intro[data-st=off] #toG{grid-area:1/1;justify-self:end}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-stage{grid-area:2/1}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-stage::after{font-size:clamp(54px,20vw,120px)}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np{grid-area:3/1}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np>input{font-size:20px!important;height:46px!important}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button{width:66px;min-height:62px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs{grid-area:4/1;flex-direction:row;align-self:auto;gap:6px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button{height:56px;flex:1;border-left:0;border-bottom:3px solid transparent}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button.on{border-bottom-color:var(--ff);background:linear-gradient(180deg,rgba(255,176,46,.35),rgba(255,176,46,.05))}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button i{font-size:20px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-bar{grid-area:5/1;padding:12px 14px 0}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-pane{grid-area:6/1;padding:4px 14px 14px;max-height:34vh!important}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-sws{grid-template-columns:repeat(6,1fr);gap:8px}
+ html body #intro:is([data-st=in],[data-st=off]) .go{grid-area:7/1;position:sticky;bottom:0;height:54px!important;font-size:22px!important}
+}
+/* ---------- phone landscape ---------- */
+@media(max-height:540px) and (orientation:landscape){
+ html body #intro:is([data-st=in],[data-st=off]) .wrap.lx{grid-template-columns:62px minmax(0,1fr) minmax(250px,320px);grid-template-rows:36px auto minmax(0,1fr) auto;column-gap:8px;row-gap:4px;padding:0 max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left))!important}
+ html body #intro:is([data-st=in],[data-st=off]) .wrap.lx::before{font-size:15px;padding:3px 24px}
+ html body #intro:is([data-st=in],[data-st=off]) :is(.pbrand,.chip,#toG){display:none!important}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs{gap:4px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button{height:52px;gap:2px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button i{font-size:19px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-tabs button span{font-size:10px;letter-spacing:.08em}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-stage::after{display:none}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np>label:first-child,html body #intro:is([data-st=in],[data-st=off]) .lx-np>.lx-nm{display:none}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np>.gd{grid-row:1/2}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np>input{height:38px!important;font-size:18px!important}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button{width:56px;min-height:40px;flex-direction:row;font-size:11px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-np .gd button .av{font-size:18px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-bar{padding:8px 12px 0}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-pane{padding:2px 12px 10px}
+ html body #intro:is([data-st=in],[data-st=off]) .lx-sws{gap:7px}
+ html body #intro:is([data-st=in],[data-st=off]) .go{height:44px!important;font-size:19px!important}
+}
+</style>
 </body></html>
